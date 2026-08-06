@@ -75,21 +75,30 @@ neutralny nośnik treści; w wersalikach z dużym trackingiem daje efekt „luxu
 |---|---|---|
 | `--fs-display` | `clamp(3rem, 9vw, 8.5rem)` | imię w hero |
 | `--fs-h1` | `clamp(2.5rem, 6vw, 5rem)` | rezerwa |
-| `--fs-h2` | `clamp(2rem, 4.2vw, 3.5rem)` | nagłówki sekcji |
-| `--fs-h3` | `clamp(1.375rem, 2.1vw, 1.75rem)` | tytuły usług |
-| `--fs-lead` | `clamp(1.0625rem, 1.35vw, 1.3125rem)` | leady |
-| `--fs-body` | `clamp(.9375rem, 1.05vw, 1.0625rem)` | tekst |
+| `--fs-h2` | `clamp(2rem, 3.4vw, 3.25rem)` | nagłówki sekcji |
+| `--fs-h3` | `clamp(1.25rem, 1.4vw, 1.5rem)` | tytuły usług |
+| `--fs-lead` | `clamp(1.125rem, .6vw + 1rem, 1.375rem)` | leady |
+| `--fs-body` | `clamp(1rem, .35vw + .9rem, 1.125rem)` | tekst |
 | `--fs-small` | `.875rem` | meta, stopka |
-| `--fs-eyebrow` | `.6875rem` | wersaliki nad nagłówkiem |
+| `--fs-eyebrow` | `.75rem` | wersaliki nad nagłówkiem |
+
+**Podłogi skali są w px, nie w `vh`.** Wcześniejsza wersja wiązała stopień pisma
+z wysokością okna, żeby sekcja mieściła się w jednym ekranie — na 900 px wysokości
+dawało to 14,4 px akapitu, czyli poniżej progu czytelności. Zasada jest odwrotna:
+**luz oddają zdjęcia i odstępy, nigdy tekst**. Zmierzone po zmianie na 1440×900:
+akapit 18 px / 72 znaki w wierszu, lead 22 px / 59 znaków, na 375 px — 16 px / 42 znaki.
 
 ### Interlinia i tracking
 
 | Token | Wartość |
 |---|---|
-| `--lh-tight` | `1.02` (display) |
-| `--lh-heading` | `1.14` |
+| `--lh-tight` | `1.1` (display) |
+| `--lh-heading` | `1.2` |
 | `--lh-lead` | `1.55` |
-| `--lh-body` | `1.72` |
+| `--lh-body` | `1.7` |
+
+Interlinia nagłówków wzrosła z `1.14` na `1.2`, bo Cormorant przy tej ciasnocie obcinał
+ogonki „ą/ę" i zejścia „j/y" — polski tekst potrzebuje tu więcej powietrza niż angielski.
 | `--ls-display` | `-0.02em` |
 | `--ls-heading` | `-0.01em` |
 | `--ls-eyebrow` | `0.22em` |
@@ -97,6 +106,14 @@ neutralny nośnik treści; w wersalikach z dużym trackingiem daje efekt „luxu
 
 Zasady: nagłówki zawsze waga 300; wersaliki tylko dla eyebrow/labelek/przycisków;
 długość wiersza tekstu ograniczona do `--maxw-text` = `62ch`.
+
+### Cele dotykowe
+
+Każdy `<a>` i `<button>` ma co najmniej **44 px** wysokości — łącznie z linkami
+`tel:`/`mailto:`, które jako sam wiersz tekstu miały 25 px. Zapewnia to
+`display: inline-flex; align-items: center; min-height: 44px`, więc wiersz nie rośnie
+optycznie, a obszar kliknięcia tak. `--nav-h` to `52px` = 44 px celu + 4 px paddingu
+płytki po obu stronach.
 
 ## Przestrzeń
 

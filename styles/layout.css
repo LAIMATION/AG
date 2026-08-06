@@ -16,7 +16,8 @@
   min-height: 100svh;
   display: grid;
   justify-items: center;
-  padding: var(--slide-pad) var(--gutter);
+  /* góra musi minąć pływający pasek, dół nie ma czego omijać */
+  padding: var(--slide-pad) var(--gutter) clamp(2.5rem, 5vh, 4.5rem);
   background: var(--c-bg);
 }
 
@@ -31,11 +32,11 @@
 .ag-section__wrap {
   width: 100%;
   max-width: var(--maxw);
-  height: 100%;
-  min-height: 0;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  gap: clamp(2rem, 4vh, 3.5rem);
 }
 
 /* obszar pod nagłówkiem — to on oddaje wysokość, gdy ekran jest niski */
@@ -44,30 +45,13 @@
   min-height: 0;
 }
 
-/* Skala typografii w sekcji wiąże się z wysokością ekranu (`vh`), nie z jego
-   szerokością — na ekranie 16:9 to wysokość decyduje, czy treść się mieści. */
-.ag-section {
-  font-size: clamp(0.8125rem, 1.6vh, 1rem);
-  line-height: 1.6;
-}
-
-.ag-section .ag-h2 {
-  font-size: clamp(1.5rem, 4.4vh, 3rem);
-}
-
-.ag-section .ag-h3 {
-  font-size: clamp(1rem, 2.2vh, 1.375rem);
-}
-
-.ag-section .ag-lead {
-  font-size: clamp(0.875rem, 1.9vh, 1.125rem);
-  line-height: 1.5;
-}
+/* Sekcja startuje z wysokości ekranu, ale przy dłuższej treści rośnie. Luz oddają
+   zdjęcia i ramki, nigdy tekst — dlatego typografia jest tu wspólna z resztą strony,
+   a nie skalowana wysokością okna. */
 
 .ag-section__head {
   display: grid;
-  gap: var(--s-2);
-  margin-bottom: clamp(1.25rem, 2.6vh, 2.5rem);
+  gap: var(--s-3);
   max-width: var(--maxw-text);
 }
 
@@ -148,11 +132,15 @@
   gap: var(--s-1);
 }
 
+/* 44 px to minimalny cel dotykowy — pasek nie może być niższy tylko dlatego,
+   że etykiety są drobne */
 .ag-nav__link {
-  display: block;
-  padding: 0.6875rem clamp(0.75rem, 1.4vw, 1.125rem);
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  padding: 0 clamp(0.875rem, 1.4vw, 1.25rem);
   border-radius: calc(var(--radius-nav) - var(--s-1));
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   line-height: 1;
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
@@ -165,9 +153,7 @@
 
 /* przycisk powrotu na początek — oddzielony od zakładek cienką kreską */
 .ag-nav__link--icon {
-  display: grid;
-  place-items: center;
-  padding-inline: var(--s-3);
+  padding-inline: var(--s-4);
   color: var(--c-ink-soft);
 }
 
@@ -236,10 +222,9 @@
 
   .ag-nav__link {
     width: 100%;
-    text-align: center;
     padding-inline: var(--s-2);
-    font-size: 0.6875rem;
-    letter-spacing: 0.1em;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
   }
 }
 
@@ -410,17 +395,16 @@
 
 .ag-about__grid {
   display: grid;
-  grid-template-columns: minmax(0, 4fr) minmax(0, 6fr);
-  grid-template-rows: minmax(0, 1fr);
-  gap: clamp(1.5rem, 3.5vw, 3.5rem);
-  align-items: stretch;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 5fr);
+  gap: clamp(1.5rem, 3.5vw, 4rem);
+  align-items: center;
 }
 
-/* w karcie o stałej proporcji portret oddaje wysokość, nie własny aspect-ratio */
+/* portret trzyma własną, portretową proporcję — rozciągany do wysokości kolumny
+   tekstu robił się prawie kwadratowy */
 .ag-about__portrait {
   position: relative;
-  height: 100%;
-  min-height: 0;
+  aspect-ratio: 4 / 5;
   background: var(--c-stone);
   overflow: hidden;
   border-radius: var(--radius-media);
@@ -490,7 +474,6 @@
 
   .ag-about__portrait {
     aspect-ratio: 3 / 4;
-    height: auto;
     max-width: 22rem;
   }
 
@@ -519,10 +502,10 @@
 
 .ag-service {
   background: var(--c-surface);
-  padding: clamp(1rem, 2.4vh, 2rem) clamp(1.25rem, 2.4vw, 2.25rem);
+  padding: clamp(1.5rem, 2.4vw, 2.5rem);
   display: grid;
-  gap: var(--s-2);
-  align-content: center;
+  gap: var(--s-3);
+  align-content: start;
   min-height: 0;
   transition: background-color var(--dur) var(--ease);
 }
@@ -583,22 +566,20 @@
 .ag-projects__grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-  gap: clamp(0.75rem, 1.6vw, 1.5rem);
+  gap: clamp(1rem, 1.8vw, 1.75rem) clamp(1rem, 1.6vw, 1.5rem);
 }
 
-/* kafel oddaje wysokość siatce — proporcje ramek wynikają z karty, nie odwrotnie */
 .ag-project {
   display: flex;
   flex-direction: column;
-  gap: var(--s-2);
-  min-height: 0;
+  gap: var(--s-3);
 }
 
+/* stała proporcja kadru — rozciąganie ramek do resztki wysokości ekranu
+   spłaszczało je do panoram 2:1, co dla architektury wygląda źle */
 .ag-project__frame {
   position: relative;
-  flex: 1;
-  min-height: 0;
+  aspect-ratio: 3 / 2;
   overflow: hidden;
   border-radius: var(--radius-media);
   background: var(--c-stone);
@@ -611,8 +592,8 @@
 
 .ag-project__title {
   font-family: var(--f-display);
-  font-size: clamp(1rem, 2vh, 1.25rem);
-  line-height: 1.2;
+  font-size: clamp(1.125rem, 1.1vw, 1.375rem);
+  line-height: 1.25;
   color: var(--c-ink);
 }
 
@@ -677,6 +658,9 @@
 }
 
 .ag-cta__phone-value {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   font-family: var(--f-display);
   font-size: clamp(1.25rem, 2vw, 1.625rem);
   color: var(--c-inverse-ink);
@@ -706,7 +690,7 @@
 
 .ag-contact__direct {
   display: grid;
-  gap: clamp(0.75rem, 2vh, 1.5rem);
+  gap: var(--s-3);
   border-top: var(--border);
   padding-top: var(--s-4);
 }
@@ -723,9 +707,15 @@
   color: var(--c-muted);
 }
 
+/* inline-flex + min-height, bo telefon i mail to na dotyku realne cele kliknięcia,
+   a sam wiersz tekstu ma tu ~25 px */
 .ag-contact__value {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   font-family: var(--f-display);
-  font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+  font-size: clamp(1.25rem, 1.6vw, 1.625rem);
+  line-height: 1.25;
   color: var(--c-ink);
   transition: color var(--dur-fast) var(--ease);
 }
@@ -777,11 +767,9 @@ a.ag-contact__value:hover {
 
   .ag-projects__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: auto;
   }
 
   .ag-project__frame {
-    flex: none;
     aspect-ratio: 4 / 3;
   }
 
