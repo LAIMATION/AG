@@ -41,15 +41,75 @@ export function ScrollVideoScene({ id, src, length, fps = 24, veil = 'default', 
     const mm = gsap.matchMedia();
 
     // przewijanie klatek scrollem — każda szerokość okna, także dotyk
-    mm.add('(prefers-reduced-motion: no-preference)', () => {
-      video.loop = false;
-      // rozgrzewka dekodera: bez jednego play() Safari potrafi nie wyrenderować
-      // pierwszej klatki i wideo stoi mimo poprawnych seeków
-      const primed = video.play();
-      if (primed) primed.then(() => video.pause()).catch(() => {});
-      else video.pause();
+    mm.add(
+      {
+        motion: '(prefers-reduced-motion: no-preference)',
+        coarse: '(pointer: coarse)',
+      },
+      (ctx) => {
+      const { motion, coarse } = ctx.conditions as { motion: boolean; coarse: boolean };
+      if (!motion) return;
 
+      video.loop = false;
+
+      /* iOS nie dekoduje wideo, którego nigdy nie odtworzono, a samo `play()`
+         przy montowaniu bywa odrzucane bez gestu użytkownika (Low Power Mode,
+         Safari → Auto-Play: Never). Dlatego rozgrzewkę ponawiamy przy pierwszym
+         dotknięciu ekranu — bez tego telefon pokazuje zamrożony kadr. */
+      let unlocked = false;
+      const unlock = () => {
+        if (unlocked) return;
+        const started = video.play();
+        if (!started) {
+          unlocked = true;
+          video.pause();
+          return;
+        }
+        started
+          .then(() => {
+            unlocked = true;
+            video.pause();
+            applySeek();
+          })
+          .catch(() => {});
+      };
+
+      let fellBack = false;
       const proxy = { p: 0 };
+
+      const applySeek = () => {
+        if (fellBack) return;
+        const d = video.duration;
+        if (!d || !Number.isFinite(d) || video.readyState < 1) return;
+
+        // przyciągnij do granicy klatki — bez tego lecą seeki w obrębie tej samej
+        const step = 1 / fps;
+        const target = Math.round(Math.min(proxy.p * d, d - step) / step) * step;
+        if (Math.abs(video.currentTime - target) < step / 2) return;
+
+        /* Kluczowe dla telefonu: gdy seek trwa, NIE porzucamy pozycji. Wcześniej
+           taka klatka przepadała, a po wyhamowaniu scrolla nie było już żadnego
+           `onUpdate`, żeby ją nadgonić — wideo zostawało na starym kadrze. */
+        if (video.seeking) return;
+        video.currentTime = target;
+      };
+
+      // po każdym zakończonym seeku dociągamy do aktualnej pozycji scrolla
+      const onSeeked = () => applySeek();
+      video.addEventListener('seeked', onSeeked);
+
+      unlock();
+      window.addEventListener('pointerdown', unlock, { passive: true });
+      window.addEventListener('touchstart', unlock, { passive: true });
+
+      /* Gdyby dekoder mimo wszystko nie ruszył, lepiej pokazać zwykłe odtwarzanie
+         niż martwy prostokąt. */
+      const guard = window.setTimeout(() => {
+        if (video.readyState >= 2) return;
+        fellBack = true;
+        video.loop = true;
+        video.play().catch(() => {});
+      }, 3000);
 
       const tween = gsap.to(proxy, {
         p: 1,
@@ -58,25 +118,23 @@ export function ScrollVideoScene({ id, src, length, fps = 24, veil = 'default', 
           trigger: root,
           start: 'top top',
           end: 'bottom bottom',
-          scrub: 1.1,
+          // na dotyku krótszy scrub — 1.1 s opóźnienia na telefonie czyta się jak awaria
+          scrub: coarse ? 0.35 : 1.1,
           invalidateOnRefresh: true,
         },
-        onUpdate: () => {
-          const d = video.duration;
-          if (!d || !Number.isFinite(d) || video.readyState < 1 || video.seeking) return;
-          // przyciągnij do granicy klatki — bez tego lecą seeki w obrębie tej samej klatki
-          const step = 1 / fps;
-          const raw = Math.min(proxy.p * d, d - step);
-          const t = Math.round(raw / step) * step;
-          if (Math.abs(video.currentTime - t) >= step / 2) video.currentTime = t;
-        },
+        onUpdate: applySeek,
       });
 
       return () => {
+        window.clearTimeout(guard);
+        window.removeEventListener('pointerdown', unlock);
+        window.removeEventListener('touchstart', unlock);
+        video.removeEventListener('seeked', onSeeked);
         tween.scrollTrigger?.kill();
         tween.kill();
       };
-    });
+      },
+    );
 
     // ograniczony ruch — statyczna klatka
     mm.add('(prefers-reduced-motion: reduce)', () => {

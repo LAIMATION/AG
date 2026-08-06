@@ -179,10 +179,25 @@ zachowywały się tak samo jak desktop (pliki są all-intra 720p, więc seek jes
 | Warunek | Zachowanie |
 |---|---|
 | `prefers-reduced-motion: no-preference` | scrub klatek scrollem, każda szerokość okna |
+| `pointer: coarse` | `scrub: 0.35` zamiast `1.1` — na telefonie sekunda opóźnienia czyta się jak awaria |
 | `prefers-reduced-motion: reduce` | wideo zatrzymane na pierwszej klatce |
 
-Przy starcie leci jedno `play()` → `pause()` — bez tej rozgrzewki Safari potrafi nie
-wyrenderować pierwszej klatki i wideo stoi mimo poprawnych seeków.
+### Co musi być spełnione, żeby scrub działał na telefonie
+
+1. **Odblokowanie dekodera gestem.** iOS nie dekoduje wideo, którego nigdy nie odtworzono,
+   a `play()` przy montowaniu bywa odrzucane bez gestu (Low Power Mode, Safari →
+   Auto-Play: Never). Rozgrzewka `play()` → `pause()` leci więc również przy pierwszym
+   `pointerdown`/`touchstart`, a po jej powodzeniu od razu dociągamy klatkę.
+2. **Seek w locie nie może gubić pozycji.** Wcześniej `onUpdate` przerywał działanie przy
+   `video.seeking`, a że po wyhamowaniu scrolla nie ma już kolejnych `onUpdate`, wideo
+   zostawało na starym kadrze — na desktopie seek trwa milisekundy i było to niewidoczne,
+   na telefonie zawieszało obraz. Teraz nasłuchujemy `seeked` i po każdym zakończonym
+   seeku dociągamy do bieżącej pozycji scrolla.
+3. **Bezpiecznik.** Jeśli po 3 s `readyState < 2`, scena przechodzi na zwykłe odtwarzanie
+   w pętli — lepszy ruch niż martwy prostokąt.
+
+Zmierzone na profilu dotykowym (375×812, `pointer: coarse`): pozycje 0/25/50/75/100 %
+scrolla dają klatki 0/48/96/144/191 z 192, w obie strony.
 
 ### Wyjście ze sceny: zatrzymana klatka pod wjeżdżającą sekcją
 
