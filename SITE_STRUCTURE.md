@@ -220,6 +220,26 @@ krawędzi ekranu, kadr jedzie razem z nią od dołu.
 Zmierzone na obu scenach: od momentu wyczerpania scrolla wideo stoi na klatce 191/192
 i pozostaje przypięte (`top: 0`), a następna sekcja zakrywa je 0 → 22 → 50 → 78 → 100 %.
 
+### Jednostki wysokości: `lvh` dla kadru, `svh` dla układu
+
+To rozróżnienie jest celowe i nie wolno go ujednolicić:
+
+| Element | Jednostka | Dlaczego |
+|---|---|---|
+| `.ag-scene__frame` (wideo) | **`100lvh`** | kryje ekran z **schowanym** paskiem adresu |
+| `.ag-scene`, `.ag-scene__panel`, scrim | **`100svh`** | liczą się do ekranu z **rozwiniętym** paskiem |
+| cokolwiek | ~~`dvh`~~ | zmienia się w trakcie chowania paska → tekst skakałby, a ScrollTrigger przeliczał długość sceny w locie |
+
+Przy `100svh` na kadrze wideo miało wysokość ekranu z rozwiniętym paskiem adresu —
+gdy pasek chował się przy scrollu, widoczny obszar rósł i pod wideo wychodził ciemny
+pas (zgłoszone na Samsung Internet, gdzie pasek stoi u dołu). `100vh` zostaje przed
+`100lvh` jako zapas dla starszych silników, gdzie i tak znaczy to samo.
+
+Treść dosunięta do dołu (`.ag-scene__panel--bottom`) zostaje na `svh`, więc wracający
+pasek adresu nigdy jej nie zasłania. Dochodzi do tego `--bottom-ui` — miejsce zajęte
+przez **nasz** dolny pasek i przycisk powrotu: `0` na desktopie, `fab-bottom + 44px`
+poniżej 768 px. Bez tego wskaźnik scrolla w hero wchodził pod oba (zmierzone).
+
 Ważne: `overflow-x` siedzi na `html` jako `clip`, nie `hidden` na `body` — `hidden` robi
 z `body` kontener scrolla i psuje `position: sticky`.
 

@@ -281,12 +281,17 @@
   height: 0;
 }
 
+/* Kadr kryje DUŻY viewport (`lvh`), a nie mały. Przy `100svh` wideo miało wysokość
+   ekranu z rozwiniętym paskiem adresu przeglądarki — gdy pasek chował się przy
+   scrollu, widoczny obszar rósł i pod wideo wychodził ciemny pas. `vh` zostaje jako
+   zapas dla starszych silników, gdzie i tak znaczy tyle co `lvh`. */
 .ag-scene__frame {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100svh;
+  height: 100vh;
+  height: 100lvh;
   overflow: hidden;
   background: var(--c-inverse);
 }
@@ -341,9 +346,13 @@
   padding-block: var(--s-8);
 }
 
+/* Panele zostają na `svh` — czyli na wysokości ekranu z ROZWINIĘTYM paskiem adresu.
+   Dzięki temu treść dosunięta do dołu nigdy nie wpada pod pasek, gdy ten wraca przy
+   scrollu w górę; przy `dvh` skakałaby w trakcie chowania paska. Do tego dochodzi
+   `--bottom-ui`, czyli miejsce zajęte przez nasz własny pasek i przycisk powrotu. */
 .ag-scene__panel--bottom {
   align-items: flex-end;
-  padding-bottom: clamp(3rem, 8vh, 7rem);
+  padding-bottom: calc(var(--bottom-ui) + clamp(3rem, 8vh, 7rem));
 }
 
 /* --- Hero ------------------------------------------------------------ */

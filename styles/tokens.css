@@ -108,6 +108,9 @@
   --nav-h: 52px; /* 44 px celu dotykowego + 4 px paddingu płytki po obu stronach */
   --nav-offset: clamp(0.75rem, 2vh, 1.5rem);
   --fab-bottom: var(--nav-offset);
+  /* Ile miejsca u dołu ekranu zajmuje nasz własny interfejs. Treść dosunięta do dołu
+     musi to ominąć. Na desktopie pasek stoi u góry, więc dół jest wolny. */
+  --bottom-ui: 0px;
 
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   --dur-fast: 180ms;
@@ -125,5 +128,7 @@
     --fab-bottom: calc(
       var(--nav-offset) * 2 + var(--nav-h) + env(safe-area-inset-bottom, 0px)
     );
+    /* pasek nawigacji + przycisk powrotu nad nim */
+    --bottom-ui: calc(var(--fab-bottom) + 44px);
   }
 }
