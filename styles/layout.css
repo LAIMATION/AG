@@ -1,0 +1,807 @@
+/* Siatka strony i układy sekcji */
+
+.ag-shell {
+  width: 100%;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding-inline: var(--gutter);
+}
+
+/* Każda sekcja zajmuje dokładnie jeden ekran — po przejściu z menu w kadrze zostaje
+   wyłącznie ona. Nieprzezroczyste tło jest wymagane: sekcje wjeżdżają na przypięte,
+   zatrzymane wideo poprzedniej sceny i muszą je zasłonić. */
+.ag-section {
+  position: relative;
+  z-index: 1;
+  min-height: 100svh;
+  display: grid;
+  justify-items: center;
+  padding: var(--slide-pad) var(--gutter);
+  background: var(--c-bg);
+}
+
+/* Sąsiadujące sekcje rozdziela zmiana tonu tła, nie kreska — linia 1 px na pełną
+   szerokość czytała się jak przypadkowy podział, a nie jak granica rozdziału. */
+.ag-section--alt {
+  background: var(--c-bg-alt);
+}
+
+/* Treść sekcji rozpięta na całej dostępnej wysokości ekranu — bez ramki, bez tła.
+   To układ ma się mieścić w kadrze, nie prostokąt narysowany wokół niego. */
+.ag-section__wrap {
+  width: 100%;
+  max-width: var(--maxw);
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* obszar pod nagłówkiem — to on oddaje wysokość, gdy ekran jest niski */
+.ag-section__body {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Skala typografii w sekcji wiąże się z wysokością ekranu (`vh`), nie z jego
+   szerokością — na ekranie 16:9 to wysokość decyduje, czy treść się mieści. */
+.ag-section {
+  font-size: clamp(0.8125rem, 1.6vh, 1rem);
+  line-height: 1.6;
+}
+
+.ag-section .ag-h2 {
+  font-size: clamp(1.5rem, 4.4vh, 3rem);
+}
+
+.ag-section .ag-h3 {
+  font-size: clamp(1rem, 2.2vh, 1.375rem);
+}
+
+.ag-section .ag-lead {
+  font-size: clamp(0.875rem, 1.9vh, 1.125rem);
+  line-height: 1.5;
+}
+
+.ag-section__head {
+  display: grid;
+  gap: var(--s-2);
+  margin-bottom: clamp(1.25rem, 2.6vh, 2.5rem);
+  max-width: var(--maxw-text);
+}
+
+/* --- Mleczne szkło (pasek + przycisk powrotu) ------------------------- */
+
+/* Wspólna płytka: rozmycie tła, wewnętrzne rozjaśnienie u góry i cień pod spodem
+   dają wrażenie unoszącego się, lekko wypukłego szkła. Obie warstwy nawigacji
+   korzystają z tej samej klasy, więc nie mogą się rozjechać wizualnie. */
+.ag-glass {
+  position: relative;
+  pointer-events: auto;
+  border: 1px solid var(--c-glass-edge);
+  background-color: var(--c-glass);
+  backdrop-filter: blur(28px) saturate(1.6);
+  -webkit-backdrop-filter: blur(28px) saturate(1.6);
+  box-shadow: var(--shadow-glass);
+  /* Transform siedzi na płytce, nie na warstwie pozycjonującej — dzięki temu
+     JS może zmierzyć nieprzesuniętą pozycję i poprawnie ustalić tonację.
+     `opacity` jest tu zakazana: robi z przodka backdrop root, przez co
+     `backdrop-filter` traci tło do próbkowania i szkło gaśnie na czas animacji. */
+  transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+  will-change: transform;
+}
+
+/* połysk — stały w obu tonacjach, więc przełączanie tonu nic tu nie przeskakuje */
+.ag-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0) 46%,
+    rgba(255, 255, 255, 0.07) 100%
+  );
+}
+
+/* nad scenami wideo i pasem CTA szkło przechodzi w ciemne, z jasnym tekstem */
+[data-tone='dark'] .ag-glass {
+  border-color: var(--c-glass-dark-edge);
+  background-color: var(--c-glass-dark);
+  box-shadow: var(--shadow-glass-dark);
+}
+
+/* --- Nawigacja ------------------------------------------------------- */
+
+/* Warstwa pozycjonująca łapie całą szerokość, ale nie przechwytuje kliknięć
+   — klikalny jest tylko sam kafelek. */
+.ag-nav {
+  position: fixed;
+  top: var(--nav-offset);
+  left: 0;
+  right: 0;
+  z-index: var(--z-nav);
+  display: flex;
+  justify-content: center;
+  padding-inline: var(--s-4);
+  pointer-events: none;
+}
+
+.ag-nav__bar {
+  max-width: 100%;
+  padding: var(--s-1);
+  border-radius: var(--radius-nav);
+}
+
+.ag-nav[data-hidden='true'] .ag-nav__bar {
+  transform: translateY(calc(-100% - var(--nav-offset)));
+}
+
+.ag-nav__links {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+}
+
+.ag-nav__link {
+  display: block;
+  padding: 0.6875rem clamp(0.75rem, 1.4vw, 1.125rem);
+  border-radius: calc(var(--radius-nav) - var(--s-1));
+  font-size: 0.6875rem;
+  line-height: 1;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--c-ink);
+  /* ten sam czas co tło paska — inaczej tekst i szkło rozjeżdżają się przy zmianie tonu */
+  transition: color var(--dur) var(--ease), background-color var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease);
+}
+
+/* przycisk powrotu na początek — oddzielony od zakładek cienką kreską */
+.ag-nav__link--icon {
+  display: grid;
+  place-items: center;
+  padding-inline: var(--s-3);
+  color: var(--c-ink-soft);
+}
+
+.ag-nav__home {
+  margin-right: var(--s-1);
+  padding-right: var(--s-1);
+  border-right: 1px solid var(--c-glass-edge);
+}
+
+.ag-nav[data-tone='dark'] .ag-nav__home {
+  border-right-color: var(--c-glass-dark-edge);
+}
+
+.ag-nav__link:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.ag-nav__link[aria-current='true'] {
+  background: var(--c-glass-active);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 1px 2px rgba(20, 18, 15, 0.08);
+}
+
+.ag-nav[data-tone='dark'] .ag-nav__link {
+  color: rgba(246, 243, 238, 0.92);
+}
+
+.ag-nav[data-tone='dark'] .ag-nav__link:hover {
+  color: var(--c-inverse-ink);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.ag-nav[data-tone='dark'] .ag-nav__link[aria-current='true'] {
+  color: var(--c-inverse-ink);
+  background: var(--c-glass-dark-active);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24), 0 1px 2px rgba(10, 9, 8, 0.2);
+}
+
+/* mobile: ten sam kafelek, tyle że u dołu */
+@media (max-width: 767px) {
+  .ag-nav {
+    top: auto;
+    bottom: calc(var(--nav-offset) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .ag-nav[data-hidden='true'] .ag-nav__bar {
+    transform: translateY(calc(100% + var(--nav-offset) + env(safe-area-inset-bottom, 0px)));
+  }
+
+  .ag-nav__bar {
+    width: 100%;
+  }
+
+  .ag-nav__links {
+    gap: 0;
+  }
+
+  .ag-nav__links > li {
+    flex: 1;
+  }
+
+  /* Na mobile pasek stoi u dołu, a przycisk powrotu unosi się tuż nad nim — druga
+     ikona w pasku byłaby duplikatem i rozjeżdżała równe szerokości zakładek. */
+  .ag-nav__home {
+    display: none;
+  }
+
+  .ag-nav__link {
+    width: 100%;
+    text-align: center;
+    padding-inline: var(--s-2);
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+  }
+}
+
+/* --- Pływający przycisk powrotu -------------------------------------- */
+
+.ag-fab {
+  position: fixed;
+  right: var(--nav-offset);
+  bottom: var(--fab-bottom);
+  z-index: var(--z-nav);
+  pointer-events: none;
+}
+
+.ag-fab__btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: var(--c-ink);
+}
+
+.ag-fab[data-tone='dark'] .ag-fab__btn {
+  color: var(--c-inverse-ink);
+}
+
+/* chowa się w dół, aż wyjdzie poza ekran — `100%` to własna wysokość,
+   `--fab-bottom` to odstęp od dolnej krawędzi */
+.ag-fab[data-hidden='true'] .ag-fab__btn {
+  transform: translateY(calc(100% + var(--fab-bottom)));
+}
+
+@media (max-width: 767px) {
+  .ag-fab {
+    right: var(--s-4);
+  }
+}
+
+/* --- Sceny wideo (sticky + scrub) ------------------------------------ */
+
+.ag-scene {
+  position: relative;
+  height: calc(var(--scene-len, 3) * 100svh);
+  color: var(--c-inverse-ink);
+}
+
+/* Zerowa wysokość jest tu celowa: sticky odkleja się dopiero wtedy, gdy jego dolna
+   krawędź dotknie dna kontenera — przy wysokości 0 nie następuje to nigdy przed końcem
+   sceny. Wideo zostaje więc przypięte na ostatniej klatce, a kolejna sekcja po prostu
+   na nie wjeżdża (jest później w DOM i ma nieprzezroczyste tło). */
+.ag-scene__media {
+  position: sticky;
+  top: 0;
+  height: 0;
+}
+
+.ag-scene__frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100svh;
+  overflow: hidden;
+  background: var(--c-inverse);
+}
+
+.ag-scene__frame video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ag-scene__veil {
+  position: absolute;
+  inset: 0;
+  background: var(--c-overlay);
+}
+
+.ag-scene__veil[data-veil='soft'] {
+  background: rgba(20, 18, 15, 0.58);
+}
+
+.ag-scene__content {
+  position: relative;
+  z-index: 1;
+  /* wideo bywa jasne i ruchome — cień trzyma litery czytelne niezależnie od klatki */
+  text-shadow: 0 1px 22px rgba(16, 14, 12, 0.55);
+}
+
+/* Jeden ciągły scrim na całą scenę zamiast maski pod każdym panelem — przyciemnienie
+   przechodzi przez granice paneli bez widocznego cięcia i gaśnie dopiero na końcu sekcji.
+   Stopy w svh, bo panele też mają wysokość ekranu. */
+.ag-scene__content::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(20, 18, 15, 0) 0,
+    rgba(20, 18, 15, 0.5) 60svh,
+    rgba(20, 18, 15, 0.62) 100svh,
+    rgba(20, 18, 15, 0.5) 140svh,
+    rgba(20, 18, 15, 0.5) 175svh,
+    rgba(20, 18, 15, 0) 100%
+  );
+}
+
+.ag-scene__panel {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  padding-block: var(--s-8);
+}
+
+.ag-scene__panel--bottom {
+  align-items: flex-end;
+  padding-bottom: clamp(3rem, 8vh, 7rem);
+}
+
+/* --- Hero ------------------------------------------------------------ */
+
+.ag-hero__inner {
+  width: 100%;
+  display: grid;
+  gap: var(--s-6);
+}
+
+.ag-hero__eyebrow {
+  color: var(--c-inverse-muted);
+}
+
+.ag-hero__title {
+  font-size: var(--fs-display);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-display);
+  color: var(--c-inverse-ink);
+  max-width: 14ch;
+}
+
+.ag-hero__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s-6);
+  border-top: 1px solid var(--c-inverse-line);
+  padding-top: var(--s-5);
+}
+
+.ag-hero__lead {
+  max-width: 46ch;
+  color: var(--c-inverse-muted);
+  font-size: var(--fs-lead);
+  line-height: var(--lh-lead);
+}
+
+.ag-hero__scroll {
+  font-size: var(--fs-eyebrow);
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--c-inverse-muted);
+  writing-mode: horizontal-tb;
+}
+
+/* --- O mnie ---------------------------------------------------------- */
+
+.ag-about__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 6fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: clamp(1.5rem, 3.5vw, 3.5rem);
+  align-items: stretch;
+}
+
+/* w karcie o stałej proporcji portret oddaje wysokość, nie własny aspect-ratio */
+.ag-about__portrait {
+  position: relative;
+  height: 100%;
+  min-height: 0;
+  background: var(--c-stone);
+  overflow: hidden;
+  border-radius: var(--radius-media);
+}
+
+/* absolutnie, bo inaczej własna wysokość zdjęcia dyktowałaby wysokość wiersza
+   siatki i sekcja przestawałaby mieścić się w ekranie */
+.ag-about__portrait img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+}
+
+.ag-about__body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--s-4);
+  min-height: 0;
+}
+
+.ag-about__text {
+  display: grid;
+  gap: var(--s-3);
+  max-width: var(--maxw-text);
+}
+
+.ag-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-4);
+  border-top: var(--border);
+  padding-top: var(--s-4);
+}
+
+.ag-fact__value {
+  font-family: var(--f-display);
+  font-size: 1.125rem;
+  color: var(--c-ink);
+  line-height: 1.3;
+}
+
+.ag-fact__label {
+  display: block;
+  margin-top: var(--s-1);
+  font-size: 0.6875rem;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-muted);
+}
+
+/* Poniżej 900 px ekran jest pionowy — upychanie tej samej treści w jedną wysokość
+   zjechałoby z krojem poniżej czytelności. Sekcja może więc urosnąć ponad ekran,
+   a układy rozkładają się w kolumnę. Czytelność wygrywa z regułą „jedna sekcja =
+   jeden ekran". */
+@media (max-width: 899px) {
+  .ag-section__wrap {
+    height: auto;
+  }
+
+  .ag-about__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ag-about__portrait {
+    aspect-ratio: 3 / 4;
+    height: auto;
+    max-width: 22rem;
+  }
+
+  .ag-about__body {
+    justify-content: start;
+  }
+
+  .ag-facts {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-3);
+  }
+}
+
+/* --- Usługi ---------------------------------------------------------- */
+
+.ag-services__list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--c-line);
+  border: var(--border);
+  border-radius: var(--radius-media);
+  overflow: hidden;
+}
+
+.ag-service {
+  background: var(--c-surface);
+  padding: clamp(1rem, 2.4vh, 2rem) clamp(1.25rem, 2.4vw, 2.25rem);
+  display: grid;
+  gap: var(--s-2);
+  align-content: center;
+  min-height: 0;
+  transition: background-color var(--dur) var(--ease);
+}
+
+.ag-service:hover {
+  background: #fff;
+}
+
+.ag-service__no {
+  font-size: var(--fs-eyebrow);
+  letter-spacing: var(--ls-eyebrow);
+  color: var(--c-accent);
+}
+
+.ag-service__desc {
+  color: var(--c-ink-soft);
+  max-width: 46ch;
+}
+
+
+/* --- Manifest na wideo ----------------------------------------------- */
+
+.ag-manifesto__inner {
+  width: 100%;
+  display: grid;
+  gap: var(--s-5);
+  justify-items: center;
+  text-align: center;
+}
+
+.ag-manifesto__note {
+  max-width: 34ch;
+  font-size: var(--fs-lead);
+  line-height: var(--lh-lead);
+  color: var(--c-inverse-muted);
+}
+
+.ag-manifesto__quote {
+  font-family: var(--f-display);
+  font-weight: 300;
+  font-size: clamp(1.625rem, 3.6vw, 3rem);
+  line-height: 1.28;
+  letter-spacing: var(--ls-heading);
+  color: var(--c-inverse-ink);
+  max-width: 22ch;
+  margin: 0;
+}
+
+.ag-manifesto__by {
+  font-size: var(--fs-eyebrow);
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--c-inverse-muted);
+}
+
+/* --- Realizacje ------------------------------------------------------ */
+
+.ag-projects__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.75rem, 1.6vw, 1.5rem);
+}
+
+/* kafel oddaje wysokość siatce — proporcje ramek wynikają z karty, nie odwrotnie */
+.ag-project {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  min-height: 0;
+}
+
+.ag-project__frame {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: var(--radius-media);
+  background: var(--c-stone);
+}
+
+.ag-project__meta {
+  display: grid;
+  gap: 1px;
+}
+
+.ag-project__title {
+  font-family: var(--f-display);
+  font-size: clamp(1rem, 2vh, 1.25rem);
+  line-height: 1.2;
+  color: var(--c-ink);
+}
+
+.ag-project__sub {
+  font-size: var(--fs-small);
+  color: var(--c-muted);
+}
+
+@media (max-width: 599px) {
+  .ag-projects__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* --- Pas CTA przed kontaktem ----------------------------------------- */
+
+/* Jedyny pas w akcentującym kolorze na całej stronie. Odcina sekcję kontaktu od
+   realizacji i domyka narrację — bez niego obie sekcje zlewały się w jeden blok. */
+.ag-cta {
+  position: relative;
+  z-index: 1;
+  background: var(--c-accent-deep);
+  color: var(--c-inverse-ink);
+  padding-block: clamp(3.5rem, 7vw, 6rem);
+}
+
+.ag-cta__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(1.5rem, 4vw, 4rem);
+}
+
+.ag-cta__title {
+  font-family: var(--f-display);
+  font-weight: 300;
+  font-size: clamp(1.75rem, 3.2vw, 2.75rem);
+  line-height: 1.2;
+  letter-spacing: var(--ls-heading);
+  color: var(--c-inverse-ink);
+  max-width: 18ch;
+  margin: 0;
+}
+
+.ag-cta__side {
+  display: grid;
+  gap: var(--s-4);
+  justify-items: start;
+}
+
+.ag-cta__phone {
+  display: grid;
+  gap: 2px;
+}
+
+.ag-cta__phone-label {
+  font-size: var(--fs-eyebrow);
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: rgba(246, 243, 238, 0.82);
+}
+
+.ag-cta__phone-value {
+  font-family: var(--f-display);
+  font-size: clamp(1.25rem, 2vw, 1.625rem);
+  color: var(--c-inverse-ink);
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.ag-cta__phone-value:hover {
+  color: var(--c-accent-soft);
+}
+
+/* --- Kontakt --------------------------------------------------------- */
+
+.ag-contact__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 6fr);
+  gap: clamp(1.5rem, 3.5vw, 3.5rem);
+  align-items: stretch;
+}
+
+.ag-contact__aside {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--s-4);
+  min-height: 0;
+}
+
+.ag-contact__direct {
+  display: grid;
+  gap: clamp(0.75rem, 2vh, 1.5rem);
+  border-top: var(--border);
+  padding-top: var(--s-4);
+}
+
+.ag-contact__item {
+  display: grid;
+  gap: 2px;
+}
+
+.ag-contact__label {
+  font-size: 0.6875rem;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-muted);
+}
+
+.ag-contact__value {
+  font-family: var(--f-display);
+  font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+  color: var(--c-ink);
+  transition: color var(--dur-fast) var(--ease);
+}
+
+a.ag-contact__value:hover {
+  color: var(--c-accent);
+}
+
+@media (max-width: 899px) {
+  .ag-contact__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* --- Stopka ---------------------------------------------------------- */
+
+.ag-footer {
+  position: relative;
+  z-index: 1;
+  background: var(--c-bg);
+  border-top: var(--border);
+  padding-block: var(--s-6);
+}
+
+.ag-footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-4);
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--fs-small);
+  color: var(--c-muted);
+}
+
+/* --- Rozkład na wąskim ekranie --------------------------------------- */
+
+/* Blok stoi na końcu pliku celowo: nadpisuje bazowe siatki sekcji, które są
+   zdefiniowane wyżej i mają tę samą specyficzność. */
+@media (max-width: 899px) {
+  .ag-services__list {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+  }
+
+  .ag-service {
+    align-content: start;
+    padding: clamp(1.25rem, 4vw, 2rem);
+  }
+
+  .ag-projects__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto;
+  }
+
+  .ag-project__frame {
+    flex: none;
+    aspect-ratio: 4 / 3;
+  }
+
+  .ag-contact__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ag-contact__aside {
+    justify-content: start;
+  }
+
+  .ag-form {
+    height: auto;
+    gap: var(--s-4);
+    padding: clamp(1.25rem, 4vw, 2rem);
+  }
+
+  .ag-textarea {
+    flex: none;
+    min-height: 7rem;
+    resize: vertical;
+  }
+}

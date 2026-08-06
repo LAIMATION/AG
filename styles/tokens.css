@@ -1,0 +1,125 @@
+/* Design tokens — pełny opis w DESIGN_SYSTEM.md */
+
+:root {
+  /* --- Kolor --------------------------------------------------------- */
+  --c-bg: #f6f3ee; /* alabaster — tło strony */
+  --c-bg-alt: #ece5da; /* ciemniejszy pas — rozdziela sąsiadujące sekcje bez linii */
+  --c-surface: #fdfbf8; /* karty, formularz */
+  --c-stone: #ebe5db; /* placeholdery, wypełnienia */
+  --c-line: #ddd6ca; /* linie, obrysy */
+  --c-line-soft: #e8e2d8;
+
+  --c-ink: #1c1a17; /* nagłówki, tekst główny */
+  --c-ink-soft: #4a453e; /* akapity */
+  --c-muted: #6f675d; /* podpisy, meta — ciemniejsze niż taupe, żeby wersaliki
+                         trzymały kontrast także na ciemniejszym pasie `--c-bg-alt` */
+
+  --c-accent: #8a7358; /* brąz/taupe — akcent */
+  --c-accent-soft: #b9a88f;
+  --c-accent-deep: #6b563f; /* pas CTA — jasny tekst wymaga ciemniejszego brązu */
+
+  --c-inverse: #14120f; /* sekcje na wideo */
+  --c-inverse-ink: #f6f3ee;
+  --c-inverse-muted: rgba(246, 243, 238, 0.82);
+  --c-inverse-line: rgba(246, 243, 238, 0.3);
+
+  /* bazowe przyciemnienie wideo — resztę kontrastu robią scrimy pod panelami */
+  --c-overlay: linear-gradient(
+    180deg,
+    rgba(20, 18, 15, 0.62) 0%,
+    rgba(20, 18, 15, 0.44) 45%,
+    rgba(20, 18, 15, 0.72) 100%
+  );
+
+  /* --- Typografia ---------------------------------------------------- */
+  --f-display: var(--font-display), 'Cormorant Garamond', Georgia, serif;
+  --f-sans: var(--font-sans), 'Jost', 'Helvetica Neue', Arial, sans-serif;
+
+  --fs-display: clamp(3rem, 9vw, 8.5rem);
+  --fs-h1: clamp(2.5rem, 6vw, 5rem);
+  --fs-h2: clamp(2rem, 4.2vw, 3.5rem);
+  --fs-h3: clamp(1.375rem, 2.1vw, 1.75rem);
+  --fs-lead: clamp(1.0625rem, 1.35vw, 1.3125rem);
+  --fs-body: clamp(0.9375rem, 1.05vw, 1.0625rem);
+  --fs-small: 0.875rem;
+  --fs-eyebrow: 0.6875rem;
+
+  --lh-tight: 1.02;
+  --lh-heading: 1.14;
+  --lh-lead: 1.55;
+  --lh-body: 1.72;
+
+  --ls-display: -0.02em;
+  --ls-heading: -0.01em;
+  --ls-body: 0;
+  --ls-eyebrow: 0.22em;
+  --ls-label: 0.14em;
+
+  /* --- Przestrzeń ---------------------------------------------------- */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: 4rem;
+  --s-9: 6rem;
+  --s-10: 8rem;
+  --s-11: 10rem;
+
+  --section-y: clamp(5rem, 11vw, 10rem);
+  /* góra mniejsza niż dół — tytuł ma siadać blisko początku pasa, nie w jego środku */
+  --section-y-top: clamp(3rem, 6.5vw, 6rem);
+
+  /* Odstęp treści sekcji od krawędzi ekranu. Musi zmieścić pływający pasek, żeby
+     nagłówek nigdy nie wchodził pod szkło. */
+  --slide-pad: max(2rem, calc(var(--nav-h) + var(--nav-offset) * 2));
+  --gutter: clamp(1.25rem, 5vw, 5rem);
+  --maxw: 1440px;
+  --maxw-text: 62ch;
+
+  /* --- Detal --------------------------------------------------------- */
+  --radius: 2px;
+  --radius-media: 12px;
+  --radius-nav: 20px;
+  --border: 1px solid var(--c-line);
+
+  /* Mleczne szkło pod nawigacją. Ton musi być płaskim `background-color`, a nie
+     gradientem — `background-image` się nie interpoluje, więc przy przełączaniu
+     tonacji tło przeskakiwało, gdy obrys i tekst jeszcze płynęły. Wypukłość robi
+     stała warstwa połysku `.ag-nav__bar::before`, identyczna w obu tonacjach. */
+  --c-glass: rgba(250, 247, 242, 0.32);
+  --c-glass-edge: rgba(255, 255, 255, 0.5);
+  --c-glass-active: rgba(255, 255, 255, 0.44);
+  --shadow-glass: 0 14px 30px -18px rgba(20, 18, 15, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+
+  --c-glass-dark: rgba(26, 23, 19, 0.28);
+  --c-glass-dark-edge: rgba(255, 255, 255, 0.22);
+  --c-glass-dark-active: rgba(255, 255, 255, 0.16);
+  --shadow-glass-dark: 0 14px 30px -18px rgba(10, 9, 8, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
+
+  --nav-h: 46px;
+  --nav-offset: clamp(0.75rem, 2vh, 1.5rem);
+  --fab-bottom: var(--nav-offset);
+
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur-fast: 180ms;
+  --dur: 320ms;
+  --dur-slow: 620ms;
+
+  --z-nav: 100;
+  --z-overlay: 50;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --section-y: clamp(4rem, 14vw, 6rem);
+    /* na mobile pasek stoi u dołu — przycisk powrotu musi siedzieć nad nim */
+    --fab-bottom: calc(
+      var(--nav-offset) * 2 + var(--nav-h) + env(safe-area-inset-bottom, 0px)
+    );
+  }
+}

@@ -1,0 +1,172 @@
+/* Elementy powtarzalne: przyciski, pola, placeholdery */
+
+.ag-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-4) var(--s-6);
+  border: 1px solid var(--c-ink);
+  border-radius: var(--radius);
+  background: var(--c-ink);
+  color: var(--c-inverse-ink);
+  font-size: 0.75rem;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color var(--dur) var(--ease), color var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
+}
+
+.ag-btn:hover {
+  background: transparent;
+  color: var(--c-ink);
+}
+
+.ag-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.ag-btn--ghost {
+  background: transparent;
+  color: var(--c-inverse-ink);
+  border-color: var(--c-inverse-line);
+}
+
+.ag-btn--ghost:hover {
+  background: var(--c-inverse-ink);
+  color: var(--c-ink);
+  border-color: var(--c-inverse-ink);
+}
+
+/* --- Formularz -------------------------------------------------------- */
+
+.ag-form {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(0.5rem, 1.5vh, 1.25rem);
+  background: var(--c-surface);
+  border: var(--border);
+  /* akcentująca krawędź u góry — formularz ma być wyraźnie polem do wypełnienia,
+     a nie kolejnym prostokątem w tonie tła */
+  border-top: 2px solid var(--c-accent);
+  border-radius: var(--radius);
+  padding: clamp(1rem, 2.4vh, 1.75rem) clamp(1.125rem, 2.2vw, 2rem);
+}
+
+.ag-form__row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+}
+
+/* pole wiadomości zjada resztę wysokości karty */
+.ag-field--grow {
+  flex: 1;
+  min-height: 0;
+}
+
+@media (max-width: 599px) {
+  .ag-form__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.ag-field {
+  display: grid;
+  gap: clamp(0.125rem, 0.7vh, 0.5rem);
+  min-height: 0;
+}
+
+.ag-field__label {
+  font-size: 0.6875rem;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-muted);
+}
+
+.ag-input,
+.ag-textarea {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--c-line);
+  border-radius: 0;
+  padding: var(--s-3) 0;
+  font-size: var(--fs-body);
+  font-weight: 300;
+  color: var(--c-ink);
+  transition: border-color var(--dur) var(--ease);
+}
+
+.ag-input::placeholder,
+.ag-textarea::placeholder {
+  color: var(--c-muted);
+  opacity: 0.7;
+}
+
+.ag-input:focus,
+.ag-textarea:focus {
+  outline: none;
+  border-bottom-color: var(--c-accent);
+}
+
+.ag-textarea {
+  resize: none;
+  flex: 1;
+  min-height: 2rem;
+}
+
+.ag-form__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-4);
+  justify-content: space-between;
+}
+
+.ag-form__status {
+  font-size: var(--fs-small);
+  color: var(--c-muted);
+}
+
+.ag-form__status[data-tone='ok'] {
+  color: var(--c-accent);
+}
+
+.ag-form__status[data-tone='error'] {
+  color: #9c4a35;
+}
+
+.ag-form__note {
+  font-size: 0.75rem;
+  color: var(--c-muted);
+  max-width: 46ch;
+}
+
+/* --- Placeholder realizacji ------------------------------------------- */
+
+.ag-placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, var(--c-stone) 0%, #e3dcd1 100%);
+  color: var(--c-muted);
+}
+
+.ag-placeholder::before {
+  content: '';
+  position: absolute;
+  inset: var(--s-4);
+  border: 1px solid rgba(138, 115, 88, 0.22);
+}
+
+.ag-placeholder span {
+  position: relative;
+  font-size: var(--fs-eyebrow);
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+}
