@@ -184,6 +184,13 @@ zachowywały się tak samo jak desktop (pliki są all-intra 720p, więc seek jes
 
 ### Co musi być spełnione, żeby scrub działał na telefonie
 
+0. **Plakat pierwszej klatki.** `<video poster="/img/poster-N.jpg">` — element `<video>`
+   jest pusty, dopóki nie zdekodowano ani jednej klatki, więc przy 15 MB pliku widać było
+   samo tło sceny aż do pierwszego scrolla (dopiero seek wymuszał dekodowanie). Plakaty
+   (52 KB i 92 KB) wyciągnięte ffmpegiem z klatki 0, hero dodatkowo z `<link rel="preload">`.
+   Pauza po rozgrzewce leci dopiero po pierwszej **wyrysowanej** klatce
+   (`requestVideoFrameCallback`), z bezpiecznikiem 300 ms — bez niego w karcie, która nie
+   kompozytuje, callback nie odpala i wideo dogrywa do końca.
 1. **Odblokowanie dekodera gestem.** iOS nie dekoduje wideo, którego nigdy nie odtworzono,
    a `play()` przy montowaniu bywa odrzucane bez gestu (Low Power Mode, Safari →
    Auto-Play: Never). Rozgrzewka `play()` → `pause()` leci więc również przy pierwszym

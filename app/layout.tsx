@@ -43,6 +43,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pl" className={`${display.variable} ${sans.variable}`}>
       <body>
+        {/* plakat hero to pierwsza rzecz, jaką widać — React 19 wynosi ten link do <head> */}
+        <link rel="preload" as="image" href="/img/poster-1.jpg" />
         <a className="ag-skip" href="#tresc">
           Przejdź do treści
         </a>

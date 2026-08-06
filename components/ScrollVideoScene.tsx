@@ -18,6 +18,8 @@ gsap.registerPlugin(ScrollTrigger);
 type Props = {
   id?: string;
   src: string;
+  /** pierwsza klatka jako JPEG — widoczna natychmiast, zanim dojdzie wideo */
+  poster: string;
   /** długość sekcji w wysokościach ekranu — ostatni ekran zostaje na samo wideo */
   length: number;
   /** klatki na sekundę pliku — służy do kwantyzacji seeków */
@@ -26,7 +28,15 @@ type Props = {
   children: React.ReactNode;
 };
 
-export function ScrollVideoScene({ id, src, length, fps = 24, veil = 'default', children }: Props) {
+export function ScrollVideoScene({
+  id,
+  src,
+  poster,
+  length,
+  fps = 24,
+  veil = 'default',
+  children,
+}: Props) {
   const rootRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -56,23 +66,56 @@ export function ScrollVideoScene({ id, src, length, fps = 24, veil = 'default', 
          przy montowaniu bywa odrzucane bez gestu użytkownika (Low Power Mode,
          Safari → Auto-Play: Never). Dlatego rozgrzewkę ponawiamy przy pierwszym
          dotknięciu ekranu — bez tego telefon pokazuje zamrożony kadr. */
+      /* Element `<video>` jest pusty, dopóki nie zdekodowano ani jednej klatki —
+         do tego momentu widać `poster`. Pauzujemy więc dopiero po pierwszej
+         WYRYSOWANEJ klatce, inaczej przy wolnym łączu zatrzymywaliśmy odtwarzanie,
+         zanim cokolwiek trafiło na ekran, i kadr zostawał pusty aż do scrolla. */
+      const frameGuards: number[] = [];
+
+      const pauseOnFirstFrame = () => {
+        const withRvfc = video as HTMLVideoElement & {
+          requestVideoFrameCallback?: (cb: () => void) => number;
+        };
+        const stop = () => {
+          if (video.paused) return;
+          video.pause();
+          applySeek();
+        };
+
+        if (typeof withRvfc.requestVideoFrameCallback === 'function') {
+          withRvfc.requestVideoFrameCallback(stop);
+          /* Bezpiecznik: `requestVideoFrameCallback` nie odpala się, gdy karta nie
+             kompozytuje (np. jest w tle). Bez tego wideo grałoby dalej aż do końca
+             i scrub startowałby od ostatniej klatki. */
+          frameGuards.push(window.setTimeout(stop, 300));
+          return;
+        }
+        stop();
+      };
+
       let unlocked = false;
       const unlock = () => {
         if (unlocked) return;
         const started = video.play();
         if (!started) {
           unlocked = true;
-          video.pause();
+          pauseOnFirstFrame();
           return;
         }
         started
           .then(() => {
             unlocked = true;
-            video.pause();
-            applySeek();
+            pauseOnFirstFrame();
           })
           .catch(() => {});
       };
+
+      /* Gdyby `play()` nie ruszył (polityka autoplay, oszczędzanie danych), samo
+         dojście danych nie zawsze wymusza wyrysowanie klatki — drobny seek to robi. */
+      const onLoadedData = () => {
+        if (video.paused && video.currentTime === 0) video.currentTime = 1 / fps;
+      };
+      video.addEventListener('loadeddata', onLoadedData);
 
       let fellBack = false;
       const proxy = { p: 0 };
@@ -126,10 +169,12 @@ export function ScrollVideoScene({ id, src, length, fps = 24, veil = 'default', 
       });
 
       return () => {
+        frameGuards.forEach(window.clearTimeout);
         window.clearTimeout(guard);
         window.removeEventListener('pointerdown', unlock);
         window.removeEventListener('touchstart', unlock);
         video.removeEventListener('seeked', onSeeked);
+        video.removeEventListener('loadeddata', onLoadedData);
         tween.scrollTrigger?.kill();
         tween.kill();
       };
@@ -159,7 +204,7 @@ export function ScrollVideoScene({ id, src, length, fps = 24, veil = 'default', 
           dzięki czemu wideo zostaje przypięte aż do końca sceny */}
       <div className="ag-scene__media" aria-hidden="true">
         <div className="ag-scene__frame">
-          <video ref={videoRef} src={src} muted playsInline preload="auto" />
+          <video ref={videoRef} src={src} poster={poster} muted playsInline preload="auto" />
           <div className="ag-scene__veil" data-veil={veil} />
         </div>
       </div>

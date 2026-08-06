@@ -7,7 +7,7 @@ import { about, contact, cta, hero, manifesto, projects, services, site } from '
 
 export function Hero() {
   return (
-    <ScrollVideoScene id="top" src="/video/wideo-1.mp4" length={3}>
+    <ScrollVideoScene id="top" src="/video/wideo-1.mp4" poster="/img/poster-1.jpg" length={3}>
       <div className="ag-scene__panel ag-scene__panel--bottom">
         <div className="ag-shell ag-hero__inner">
           <p className="ag-eyebrow ag-hero__eyebrow">{hero.eyebrow}</p>
@@ -99,7 +99,12 @@ export function Services() {
 
 export function Manifesto() {
   return (
-    <ScrollVideoScene src="/video/wideo-2.mp4" length={3} veil="soft">
+    <ScrollVideoScene
+      src="/video/wideo-2.mp4"
+      poster="/img/poster-2.jpg"
+      length={3}
+      veil="soft"
+    >
       <div className="ag-scene__panel">
         <div className="ag-shell ag-manifesto__inner">
           <blockquote className="ag-manifesto__quote">{manifesto.quote}</blockquote>
