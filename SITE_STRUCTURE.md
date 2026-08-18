@@ -81,7 +81,39 @@ Druga scena wideo (`length={3}`, przyciemnienie `soft`) na **Wideo 2**: panel z 
 i panel z krótką notą. Oddziela ofertę od portfolio i utrzymuje balans
 „architektka ↔ architektura".
 
-### 5. Realizacje
+### 5. Realizacje — karuzela (`components/ProjectRail.tsx`)
+
+Kafelek środkowy jest aktywny, sąsiednie cofają się w tło, pod spodem pojawia się
+opis aktywnej realizacji. Sterowanie: przyciski, przeciąganie i klawiatura.
+
+Podział pracy — **natywny scroll robi mechanikę, GSAP robi głębię**:
+
+| Zadanie | Kto |
+|---|---|
+| centrowanie kafelka | `scroll-snap-align: center` |
+| przeciąganie palcem, pęd, klawiatura, czytniki | natywny scroll |
+| przeciąganie myszą | ~20 linii `pointerdown/move/up` na `scrollLeft` |
+| skala + przezroczystość wg odległości od środka | `gsap.quickSetter` |
+| przenikanie opisu przy zmianie | `gsap.fromTo` |
+
+Nie przeniosłem karuzeli na `Flip` + `Observer` ze starego repo (230 linii, rotujące
+okno pięciu slotów, blokady `busy`, bezpiecznik `delayedCall` i udokumentowana pułapka
+z `overwrite`). Sześć realizacji to lista skończona — przyciski gasną na końcach,
+zamiast udawać nieskończoną pętlę.
+
+Dwie rzeczy, które trzeba wiedzieć przy modyfikacji:
+
+- **`.ag-rail__viewport` musi mieć `position: relative`.** Bez tego `offsetLeft`
+  kafelków liczy się od `.ag-section` (ona jest pozycjonowana), a JS porównuje je
+  ze `scrollLeft` kadru — środek wychodzi przesunięty i aktywny kafelek nigdy nie
+  dochodzi do skali 1.
+- **Przeciąganie wyłącza `scroll-snap-type` na czas trzymania.** Przy `mandatory`
+  każda pozycja pośrednia jest natychmiast cofana do punktu snapu, więc `scrollLeft`
+  nie drgnie. Po puszczeniu snap wraca i dociąga do najbliższego kafelka.
+
+`data-lenis-prevent` na kadrze — inaczej Lenis przechwytywałby kółko nad karuzelą.
+
+### 5a. Realizacje — dane
 Siatka 3 kolumn (1023 px → 2, 599 px → 1). Każdy kafel: ramka o proporcji `3/4` lub `4/3`
 z placeholderem („Wkrótce") + tytuł i meta. Podmiana na prawdziwe zdjęcia = zamiana
 `.ag-placeholder` na `next/image` w `components/sections.tsx` i uzupełnienie

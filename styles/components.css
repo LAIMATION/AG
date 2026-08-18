@@ -161,27 +161,3 @@
   max-width: 46ch;
 }
 
-/* --- Placeholder realizacji ------------------------------------------- */
-
-/* Tekstura rysunku technicznego zamiast szarego prostokąta — ten sam motyw
-   blueprint, którym system oznacza „u podstaw usługi stoi projekt". */
-.ag-placeholder {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background-color: var(--c-bg);
-  background-image: repeating-linear-gradient(48deg, var(--c-line) 0 1px, transparent 1px 34px),
-    repeating-linear-gradient(-42deg, var(--c-line) 0 1px, transparent 1px 46px);
-  color: var(--c-muted);
-}
-
-.ag-placeholder span {
-  position: relative;
-  padding: var(--s-2) var(--s-3);
-  background: var(--c-bg);
-  font-size: var(--fs-eyebrow);
-  font-weight: 600;
-  letter-spacing: var(--ls-eyebrow);
-  text-transform: uppercase;
-}

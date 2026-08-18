@@ -98,12 +98,36 @@ export const projects = {
   title: 'Wybrane projekty',
   lead: 'Galeria w przygotowaniu — poniżej układ, w którym pojawią się zdjęcia zrealizowanych obiektów.',
   items: [
-    { title: 'Dom pod lasem', meta: 'Podlaskie · 2024 · projekt i nadzór' },
-    { title: 'Obora wolnostanowiskowa', meta: 'Zambrów · 2024 · projekt budowlany' },
-    { title: 'Budynek wielorodzinny', meta: 'Białystok · 2023 · koncepcja' },
-    { title: 'Hala magazynowa', meta: 'Podlaskie · 2023 · projekt i koordynacja' },
-    { title: 'Rozbudowa siedliska', meta: 'Łomża · 2022 · projekt budowlany' },
-    { title: 'Dom minimalny', meta: 'Podlaskie · 2022 · koncepcja' },
+    {
+      title: 'Dom pod lasem',
+      meta: 'Podlaskie · 2024 · projekt i nadzór',
+      desc: 'Dom dla rodziny, która chciała mieszkać blisko lasu, ale nie w cieniu. Bryła odsunięta od granicy drzew, salon otwarty na południe.',
+    },
+    {
+      title: 'Obora wolnostanowiskowa',
+      meta: 'Zambrów · 2024 · projekt budowlany',
+      desc: 'Sto stanowisk, wentylacja kalenicowa, ciągi komunikacyjne policzone pod realną obsługę stada. Projekt liczony kosztem eksploatacji, nie efektem.',
+    },
+    {
+      title: 'Budynek wielorodzinny',
+      meta: 'Białystok · 2023 · koncepcja',
+      desc: 'Osiemnaście mieszkań na działce, na której miało się zmieścić dwanaście. Rozwiązane układem klatki i doświetleniem od dwóch stron.',
+    },
+    {
+      title: 'Hala magazynowa',
+      meta: 'Podlaskie · 2023 · projekt i koordynacja',
+      desc: 'Konstrukcja stalowa z zapasem na przyszłą rozbudowę o dwa pola. Wjazd i plac manewrowy ustawione pod naczepy, nie pod rysunek.',
+    },
+    {
+      title: 'Rozbudowa siedliska',
+      meta: 'Łomża · 2022 · projekt budowlany',
+      desc: 'Stary budynek gospodarczy podpięty do nowej części mieszkalnej. Zachowana bryła i mur, zmieniona funkcja.',
+    },
+    {
+      title: 'Dom minimalny',
+      meta: 'Podlaskie · 2022 · koncepcja',
+      desc: 'Osiemdziesiąt metrów, w których nie ma ani jednego metra korytarza. Budżet był sztywny, więc metraż pracował na każdy złoty.',
+    },
   ],
 } as const;
 

@@ -562,49 +562,167 @@
 
 /* --- Realizacje ------------------------------------------------------ */
 
-.ag-projects__grid {
+/* Karuzela: przewijaniem zajmuje się natywny scroll ze snapem, głębią GSAP.
+   Kafelek trafia na środek kadru, sąsiednie zostają widoczne po bokach. */
+.ag-rail {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(1rem, 1.8vw, 1.75rem) clamp(1rem, 1.6vw, 1.5rem);
+  gap: clamp(1.5rem, 3vh, 2.5rem);
 }
 
-.ag-project {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-3);
-}
-
-/* stała proporcja kadru — rozciąganie ramek do resztki wysokości ekranu
-   spłaszczało je do panoram 2:1, co dla architektury wygląda źle */
-.ag-project__frame {
+.ag-rail__viewport {
+  /* MUSI być pozycjonowany: bez tego `offsetLeft` kafelków liczy się od
+     `.ag-section`, a JS porównuje je ze `scrollLeft` tego kadru — środek
+     wychodził przesunięty i aktywny kafelek nigdy nie dochodził do skali 1. */
   position: relative;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  cursor: grab;
+  /* pasek przewijania byłby tu tylko szumem — sterowanie niosą przyciski i przeciąganie */
+  scrollbar-width: none;
+}
+
+.ag-rail__viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.ag-rail__viewport[data-dragging] {
+  cursor: grabbing;
+  user-select: none;
+}
+
+/* padding boczny = połowa kadru minus połowa kafelka, żeby pierwszy i ostatni
+   też dały się ustawić centralnie */
+.ag-rail__track {
+  --card-w: clamp(15rem, 34vw, 27rem);
+
+  display: flex;
+  gap: clamp(0.75rem, 1.6vw, 1.5rem);
+  padding-inline: max(0px, calc(50% - var(--card-w) / 2));
+}
+
+.ag-rail__card {
+  flex: 0 0 var(--card-w);
+  scroll-snap-align: center;
+  /* skalę i przezroczystość ustawia GSAP — CSS tylko domyka wygląd */
+  will-change: transform, opacity;
+}
+
+.ag-rail__frame {
+  position: relative;
+  display: block;
+  width: 100%;
   aspect-ratio: 3 / 2;
-  overflow: hidden;
-  border-radius: var(--radius-media);
-  background: var(--c-line-soft);
+  padding: 0;
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius);
+  cursor: pointer;
+  background-color: var(--c-bg);
+  background-image: repeating-linear-gradient(48deg, var(--c-line) 0 1px, transparent 1px 34px),
+    repeating-linear-gradient(-42deg, var(--c-line) 0 1px, transparent 1px 46px);
+  transition: border-color var(--dur) var(--ease);
 }
 
-.ag-project__meta {
-  display: grid;
-  gap: 1px;
+.ag-rail__card[data-active='true'] .ag-rail__frame {
+  border-color: var(--c-accent);
 }
 
-.ag-project__title {
-  font-weight: 500;
-  font-size: clamp(1rem, 1vw, 1.1875rem);
-  line-height: 1.25;
-  color: var(--c-ink);
+.ag-rail__no {
+  position: absolute;
+  top: var(--s-4);
+  left: var(--s-4);
+  font-size: var(--fs-eyebrow);
+  font-weight: 600;
+  letter-spacing: var(--ls-eyebrow);
+  color: var(--c-accent-ink);
 }
 
-.ag-project__sub {
-  font-size: var(--fs-small);
+.ag-rail__label {
+  position: absolute;
+  left: var(--s-4);
+  bottom: var(--s-4);
+  padding: var(--s-2) var(--s-3);
+  background: var(--c-bg);
+  font-size: var(--fs-eyebrow);
+  font-weight: 600;
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
   color: var(--c-muted);
 }
 
-@media (max-width: 599px) {
-  .ag-projects__grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
+/* --- Opis aktywnej realizacji ---------------------------------------- */
+
+.ag-rail__detail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--s-5);
+  border-top: var(--border);
+  padding-top: var(--s-5);
+}
+
+.ag-rail__text {
+  display: grid;
+  gap: var(--s-2);
+  max-width: 52ch;
+}
+
+.ag-rail__title {
+  font-size: var(--fs-h3);
+}
+
+.ag-rail__desc {
+  color: var(--c-ink-soft);
+}
+
+.ag-rail__meta {
+  font-size: var(--fs-eyebrow);
+  font-weight: 600;
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--c-muted);
+}
+
+.ag-rail__controls {
+  display: flex;
+  align-items: center;
+  gap: var(--s-4);
+}
+
+.ag-rail__btn {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--c-ink);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease);
+}
+
+.ag-rail__btn:hover:not(:disabled) {
+  background: var(--c-accent);
+  border-color: var(--c-accent);
+  color: var(--c-inverse);
+}
+
+.ag-rail__btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.ag-rail__count {
+  font-size: var(--fs-eyebrow);
+  font-weight: 600;
+  letter-spacing: var(--ls-label);
+  color: var(--c-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 /* --- Pas CTA przed kontaktem ----------------------------------------- */
@@ -788,12 +906,9 @@ a.ag-contact__value:hover {
     padding: clamp(1.25rem, 4vw, 2rem);
   }
 
-  .ag-projects__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .ag-project__frame {
-    aspect-ratio: 4 / 3;
+  .ag-rail__detail {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .ag-contact__grid {

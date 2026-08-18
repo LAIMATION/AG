@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { ContactForm } from '@/components/ContactForm';
+import { ProjectRail } from '@/components/ProjectRail';
 import { ScrollVideoScene } from '@/components/ScrollVideoScene';
 import { about, contact, cta, hero, manifesto, projects, services, site } from '@/lib/config';
 
@@ -133,21 +134,9 @@ export function Projects() {
           <p className="ag-lead">{projects.lead}</p>
         </div>
 
-        <ul className="ag-section__body ag-projects__grid">
-          {projects.items.map((item) => (
-            <li className="ag-project" key={item.title}>
-              <div className="ag-project__frame">
-                <div className="ag-placeholder">
-                  <span>Wkrótce</span>
-                </div>
-              </div>
-              <div className="ag-project__meta">
-                <h3 className="ag-project__title">{item.title}</h3>
-                <p className="ag-project__sub">{item.meta}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <div className="ag-section__body">
+          <ProjectRail />
+        </div>
       </div>
     </section>
   );
