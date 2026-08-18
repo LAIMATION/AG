@@ -641,11 +641,12 @@
   padding-inline: max(0px, calc(50% - var(--card-w) / 2));
 }
 
+/* Bez `will-change` — kafelków jest 18 (potrojona lista), a każdy promowany do
+   własnej warstwy kompozytora kosztuje pamięć i sam potrafi wywołać zacinanie.
+   Skalę i przezroczystość ustawia GSAP bezpośrednio. */
 .ag-rail__card {
   flex: 0 0 var(--card-w);
   scroll-snap-align: center;
-  /* skalę i przezroczystość ustawia GSAP — CSS tylko domyka wygląd */
-  will-change: transform, opacity;
 }
 
 .ag-rail__frame {

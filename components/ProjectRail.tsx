@@ -55,15 +55,26 @@ export function ProjectRail() {
 
     const flat = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const set = els.map((el) => gsap.quickSetter(el, 'css') as (v: object) => void);
-    const setWidth = () => els[N].offsetLeft - els[0].offsetLeft;
+
+    /* Geometria kafelków nie zmienia się przy przewijaniu, więc czytamy ją raz.
+       Bez tego każde zdarzenie `scroll` wymuszało 18 odczytów layoutu. */
+    let geo = els.map((el) => ({ mid: el.offsetLeft + el.offsetWidth / 2, w: el.offsetWidth }));
+    let setWidth = geo[N].mid - geo[0].mid;
+    let clientW = viewport.clientWidth;
+
+    const measure = () => {
+      geo = els.map((el) => ({ mid: el.offsetLeft + el.offsetWidth / 2, w: el.offsetWidth }));
+      setWidth = geo[N].mid - geo[0].mid;
+      clientW = viewport.clientWidth;
+    };
 
     const paint = () => {
-      const mid = viewport.scrollLeft + viewport.clientWidth / 2;
+      const mid = viewport.scrollLeft + clientW / 2;
       let nearest = 0;
       let best = Infinity;
 
-      els.forEach((el, i) => {
-        const d = (el.offsetLeft + el.offsetWidth / 2 - mid) / el.offsetWidth;
+      geo.forEach((g, i) => {
+        const d = (g.mid - mid) / g.w;
         const abs = Math.min(Math.abs(d), MAX);
         if (Math.abs(d) < best) {
           best = Math.abs(d);
@@ -85,9 +96,8 @@ export function ProjectRail() {
     let idle: ReturnType<typeof setTimeout>;
     const recenter = () => {
       const i = nearestRef.current;
-      const w = setWidth();
-      if (i < N) viewport.scrollLeft += w;
-      else if (i >= 2 * N) viewport.scrollLeft -= w;
+      if (i < N) viewport.scrollLeft += setWidth;
+      else if (i >= 2 * N) viewport.scrollLeft -= setWidth;
     };
 
     const onScroll = () => {
@@ -97,15 +107,20 @@ export function ProjectRail() {
     };
 
     // start na pierwszym kafelku środkowej kopii
-    viewport.scrollLeft = els[N].offsetLeft + els[N].offsetWidth / 2 - viewport.clientWidth / 2;
+    viewport.scrollLeft = geo[N].mid - clientW / 2;
     paint();
 
+    const onResize = () => {
+      measure();
+      paint();
+    };
+
     viewport.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', paint);
+    window.addEventListener('resize', onResize);
     return () => {
       clearTimeout(idle);
       viewport.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', paint);
+      window.removeEventListener('resize', onResize);
     };
   }, [cards]);
 
@@ -176,10 +191,13 @@ export function ProjectRail() {
   return (
     <div className="ag-rail">
       <div className="ag-rail__stage">
+        {/* Bez `data-lenis-prevent`. Karuzela nie przewija się w pionie
+            (`overflow-y: hidden`), więc ten atrybut tylko odbierał Lenisowi koło:
+            przeglądarka przewijała stronę natywnie i skokowo, a Lenis animował
+            dalej ze swojej nieaktualnej pozycji — stąd szarpanie nad tą sekcją. */}
         <div
           className="ag-rail__viewport"
           ref={viewportRef}
-          data-lenis-prevent
           role="group"
           aria-roledescription="karuzela"
           aria-label="Realizacje"

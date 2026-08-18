@@ -130,7 +130,22 @@ Cztery rzeczy, które trzeba wiedzieć przy modyfikacji:
   każda pozycja pośrednia jest natychmiast cofana do punktu snapu, więc `scrollLeft`
   nie drgnie. Po puszczeniu snap wraca i dociąga do najbliższego kafelka.
 
-`data-lenis-prevent` na kadrze — inaczej Lenis przechwytywałby kółko nad karuzelą.
+**Kadr NIE ma `data-lenis-prevent` — i nie wolno go dodać z powrotem.** Ten atrybut
+jest dla elementów z własnym przewijaniem **w pionie**; karuzela ma `overflow-y: hidden`,
+więc oddawał tylko koło przeglądarce: strona przewijała się natywnie i skokowo, a Lenis
+animował dalej ze swojej nieaktualnej pozycji. Objaw — zacinanie scrolla, gdy kursor stał
+nad sekcją Realizacje. Test rozstrzygający: zdarzenie `wheel` nad kadrem musi mieć
+`defaultPrevented === true`, tak samo jak nad zwykłą sekcją.
+
+Kosztem jest poziome przewijanie gładzikiem nad karuzelą — Lenis przechwytuje całe
+zdarzenie `wheel`. Sterowanie niosą przyciski, przeciąganie i swipe.
+
+Dwie rzeczy zrobione pod płynność samej karuzeli:
+
+- **Bez `will-change` na kafelkach.** Jest ich 18 (potrojona lista), a każdy promowany
+  do własnej warstwy kompozytora kosztuje pamięć i sam potrafi wywołać zacinanie.
+- **Geometria kafelków czytana raz**, nie przy każdym zdarzeniu `scroll` — wcześniej
+  każde przewinięcie wymuszało 18 odczytów layoutu. Przeliczana ponownie na `resize`.
 
 ### 5a. Realizacje — dane
 Siatka 3 kolumn (1023 px → 2, 599 px → 1). Każdy kafel: ramka o proporcji `3/4` lub `4/3`
