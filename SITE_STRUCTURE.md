@@ -101,7 +101,26 @@ okno pięciu slotów, blokady `busy`, bezpiecznik `delayedCall` i udokumentowana
 z `overwrite`). Sześć realizacji to lista skończona — przyciski gasną na końcach,
 zamiast udawać nieskończoną pętlę.
 
-Dwie rzeczy, które trzeba wiedzieć przy modyfikacji:
+**Zapętlenie:** lista renderuje się trzy razy, start na środkowej kopii. Gdy aktywny
+kafelek wyjdzie poza nią, `scrollLeft` przeskakuje o szerokość jednej kopii — treść jest
+identyczna, więc skok jest niewidoczny. Przeskok idzie dopiero po 140 ms ciszy, żeby nie
+przerwać trwającej animacji `scrollBy`. Licznik pokazuje `indeks % 6`.
+
+**Strzałki** leżą nakładką na kadrze (`.ag-rail__nav`, `position: absolute`), przy jego
+skrajach i wyśrodkowane w pionie — wcześniej siedziały pod opisem i przy niskim oknie
+schodziły poniżej krawędzi ekranu. Poniżej 900 px przechodzą pod karuzelę (`position: static`),
+bo nakładka zabierałaby zbyt dużo z i tak małego kafelka.
+
+Cztery rzeczy, które trzeba wiedzieć przy modyfikacji:
+
+- **`.ag-rail__track` musi mieć `width: max-content`.** Bez tego tor ma szerokość kadru,
+  kafelki wystają poza jego border-box, a `padding-right` ląduje POD nimi zamiast za
+  ostatnim — ostatni kafelek nie daje się dosunąć do środka i przewijanie „zatrzymuje się"
+  przed końcem listy (zgłoszone jako „nie działa przejście z 5 na 6").
+- **Cały łańcuch potrzebuje `min-width: 0`** (`.ag-section__body`, `.ag-rail`
+  z `grid-template-columns: minmax(0, 1fr)`, `.ag-rail__stage`, `.ag-rail__viewport`).
+  Domyślne `min-width: auto` przepuszcza `max-content` toru w górę drzewa i rozpycha
+  sekcję na 8000 px zamiast włączyć przewijanie.
 
 - **`.ag-rail__viewport` musi mieć `position: relative`.** Bez tego `offsetLeft`
   kafelków liczy się od `.ag-section` (ona jest pozycjonowana), a JS porównuje je

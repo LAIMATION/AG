@@ -43,6 +43,7 @@
 .ag-section__body {
   flex: 1;
   min-height: 0;
+  min-width: 0;
 }
 
 /* Sekcja startuje z wysokości ekranu, ale przy dłuższej treści rośnie. Luz oddają
@@ -564,9 +565,35 @@
 
 /* Karuzela: przewijaniem zajmuje się natywny scroll ze snapem, głębią GSAP.
    Kafelek trafia na środek kadru, sąsiednie zostają widoczne po bokach. */
+/* `minmax(0, 1fr)` i `min-width: 0` w całym łańcuchu są obowiązkowe: tor ma
+   `width: max-content`, a domyślne `min-width: auto` przepuszcza tę szerokość
+   w górę drzewa i rozpycha całą sekcję zamiast włączyć przewijanie. */
 .ag-rail {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: clamp(1.5rem, 3vh, 2.5rem);
+}
+
+/* Kadr karuzeli razem z nakładką strzałek — to on wyznacza ich pionowy środek. */
+.ag-rail__stage {
+  position: relative;
+  min-width: 0;
+}
+
+/* Strzałki leżą NA kadrze, przy jego skrajach, wyśrodkowane w pionie. Wcześniej
+   siedziały pod opisem i przy niskim oknie schodziły poniżej krawędzi ekranu. */
+.ag-rail__nav {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline: var(--s-3);
+  pointer-events: none;
+}
+
+.ag-rail__nav .ag-rail__btn {
+  pointer-events: auto;
 }
 
 .ag-rail__viewport {
@@ -574,6 +601,7 @@
      `.ag-section`, a JS porównuje je ze `scrollLeft` tego kadru — środek
      wychodził przesunięty i aktywny kafelek nigdy nie dochodził do skali 1. */
   position: relative;
+  min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
@@ -593,11 +621,17 @@
 }
 
 /* padding boczny = połowa kadru minus połowa kafelka, żeby pierwszy i ostatni
-   też dały się ustawić centralnie */
+   też dały się ustawić centralnie.
+
+   `width: max-content` jest tu obowiązkowe: bez niego tor ma szerokość kadru,
+   kafelki wystają poza jego border-box, a padding z prawej ląduje POD nimi
+   zamiast za ostatnim. Efekt był taki, że ostatni kafelek nie dawał się
+   dosunąć do środka — przewijanie „zatrzymywało się" przed końcem listy. */
 .ag-rail__track {
   --card-w: clamp(15rem, 34vw, 27rem);
 
   display: flex;
+  width: max-content;
   gap: clamp(0.75rem, 1.6vw, 1.5rem);
   padding-inline: max(0px, calc(50% - var(--card-w) / 2));
 }
@@ -685,36 +719,27 @@
   color: var(--c-muted);
 }
 
-.ag-rail__controls {
-  display: flex;
-  align-items: center;
-  gap: var(--s-4);
-}
-
+/* pełne wypełnienie, nie przezroczyste — przycisk leży na teksturze rysunku
+   i musi się od niej odciąć */
 .ag-rail__btn {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   display: grid;
   place-items: center;
   border: 1px solid var(--c-line);
   border-radius: var(--radius);
-  background: transparent;
+  background: var(--c-bg);
   color: var(--c-ink);
-  font-size: 1rem;
+  font-size: 1.125rem;
   cursor: pointer;
   transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease),
     color var(--dur) var(--ease);
 }
 
-.ag-rail__btn:hover:not(:disabled) {
+.ag-rail__btn:hover {
   background: var(--c-accent);
   border-color: var(--c-accent);
   color: var(--c-inverse);
-}
-
-.ag-rail__btn:disabled {
-  opacity: 0.35;
-  cursor: default;
 }
 
 .ag-rail__count {
@@ -904,6 +929,20 @@ a.ag-contact__value:hover {
   .ag-service {
     align-content: start;
     padding: clamp(1.25rem, 4vw, 2rem);
+  }
+
+  /* Na wąskim ekranie strzałki schodzą z kadru wprost pod karuzelę — nakładka
+     zabierałaby zbyt dużo z i tak małego kafelka. */
+  .ag-rail__nav {
+    position: static;
+    justify-content: center;
+    gap: var(--s-5);
+    padding-inline: 0;
+  }
+
+  .ag-rail__stage {
+    display: grid;
+    gap: var(--s-4);
   }
 
   .ag-rail__detail {
