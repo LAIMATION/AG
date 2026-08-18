@@ -1,11 +1,11 @@
-/* Jedyne źródło danych kontaktowych i treści sekcji.
-   Zmiana tekstów na stronie = zmiana w tym pliku. */
+/* Jedyne źródło treści i danych kontaktowych.
+   Narracja na „Ty". Na pierwszym planie Aleksandra Gosk, ATRIUM STUDIO w drugim. */
 
 export const site = {
   name: 'Aleksandra Gosk',
   role: 'Architekt',
-  tagline: 'Architektura · Organizacja budowy',
-  region: 'Zambrów · Białystok · Polska',
+  studio: 'ATRIUM STUDIO',
+  region: 'Białystok · Zambrów',
   // TODO: podmienić na prawdziwy numer telefonu
   phone: '+48 000 000 000',
   phoneHref: '+48000000000',
@@ -16,67 +16,80 @@ export const site = {
 
 export const nav = [
   { id: 'o-mnie', label: 'O mnie' },
-  { id: 'uslugi', label: 'Usługi' },
+  { id: 'uslugi', label: 'Zakres' },
   { id: 'realizacje', label: 'Realizacje' },
   { id: 'kontakt', label: 'Kontakt' },
 ] as const;
 
 export const hero = {
-  eyebrow: 'Architekt · Zambrów, Białystok',
+  eyebrow: 'Architekt · Białystok, Zambrów',
   title: 'Aleksandra Gosk',
+  script: 'Przestrzeń, która dojrzewa razem z Tobą',
   lead:
-    'Projektuję domy i budynki, które starzeją się dobrze — spokojne w formie, przemyślane w detalu, wygodne w codziennym użytkowaniu.',
-  cta: 'Porozmawiajmy o projekcie',
+    'Projektuję budynki dopasowane do ludzi, którzy w nich mieszkają i pracują — domy, budynki wielorodzinne, usługowe, hale, obory i budynki gospodarcze.',
+  cta: 'Napisz do mnie',
   scroll: 'Przewiń',
 } as const;
 
 export const about = {
   eyebrow: 'O mnie',
-  title: 'Architektura zaczyna się od rozmowy',
+  title: 'Zaczynamy od tego, jak chcesz żyć',
   paragraphs: [
-    'Nazywam się Aleksandra Gosk. Jestem architektem — projektuję budynki i prowadzę inwestorów przez cały proces: od pierwszego szkicu i warunków zabudowy, przez pozwolenie na budowę, aż po koordynację prac na budowie.',
-    'Pracuję kameralnie, przy ograniczonej liczbie projektów jednocześnie. Dzięki temu każdy z nich dostaje uwagę, na jaką zasługuje — a Państwo mają jeden, stały kontakt zamiast łańcucha pośredników.',
-    'Najbardziej zależy mi na tym, żeby budynek działał: dobrze ustawiony na działce, zgodny z przepisami, ekonomiczny w budowie i eksploatacji. Reszta — proporcje, światło, materiał — wynika z tych decyzji.',
+    'Nazywam się Aleksandra Gosk i projektuję budynki. Zanim cokolwiek narysuję, pytam, jak wygląda Twój zwykły dzień — bo z tego, a nie z modnego rzutu, wychodzi dom, w którym da się wygodnie mieszkać przez lata.',
+    'Prowadzę Cię przez cały proces: od oceny działki i warunków zabudowy, przez projekt i pozwolenie, po koordynację prac na budowie. Masz jeden kontakt zamiast łańcucha pośredników i wiesz, na jakim etapie jesteś.',
+    'Pracuję pod szyldem ATRIUM STUDIO, kameralnie, przy ograniczonej liczbie projektów naraz. Dzięki temu każdy dostaje tyle uwagi, ile faktycznie potrzebuje.',
   ],
   facts: [
-    { value: 'Zambrów · Białystok', label: 'Obszar działania' },
-    { value: 'Projekt · Budowa', label: 'Pełen zakres prowadzenia' },
+    { value: 'Białystok · Zambrów', label: 'Obszar działania' },
+    { value: 'Projekt i budowa', label: 'Pełen zakres prowadzenia' },
     { value: 'Kameralnie', label: 'Ograniczona liczba projektów' },
   ],
   photoAlt: 'Aleksandra Gosk — architekt',
 } as const;
 
 export const services = {
-  eyebrow: 'Usługi',
-  title: 'Zakres współpracy',
-  lead: 'Cztery obszary, które najczęściej łączą się w jeden proces — od pomysłu do odbioru budynku.',
+  eyebrow: 'Zakres',
+  title: 'Projektuję każdy rodzaj budynku',
+  lead:
+    'Dom jednorodzinny, blok, hala, obora czy budynek gospodarczy — proces jest ten sam, zmienia się tylko to, co budynek ma robić.',
   items: [
     {
       no: '01',
-      title: 'Projekty architektoniczne',
-      desc: 'Domy jednorodzinne i budynki usługowe. Koncepcja, projekt budowlany, projekt techniczny oraz komplet dokumentacji do pozwolenia na budowę.',
+      title: 'Budynki mieszkalne',
+      desc: 'Domy jednorodzinne, bliźniaki, zabudowa szeregowa i budynki wielorodzinne. Od koncepcji, przez projekt budowlany i techniczny, po komplet dokumentacji do pozwolenia.',
     },
     {
       no: '02',
-      title: 'Organizacja budowy',
-      desc: 'Koordynacja branż i wykonawców, harmonogram, kontrola zgodności realizacji z projektem. Prowadzę inwestycję także wtedy, gdy nie mogą Państwo być na budowie.',
+      title: 'Rolnictwo i gospodarka',
+      desc: 'Obory, chlewnie, stodoły, wiaty, magazyny i budynki gospodarcze. Znam wymagania, jakie stawiają im przepisy — i to, że mają przede wszystkim działać, a nie ładnie wyglądać na wizualizacji.',
     },
     {
       no: '03',
-      title: 'Świadectwa energetyczne',
-      desc: 'Charakterystyka i świadectwa energetyczne budynków — do odbioru, sprzedaży lub wynajmu, wraz z wyjaśnieniem, co realnie wynika z wyniku.',
+      title: 'Usługi, produkcja, hale',
+      desc: 'Budynki usługowe, warsztaty, hale produkcyjne i magazynowe. Projekt liczony pod realny sposób użytkowania, koszt budowy i późniejszą eksploatację.',
     },
     {
       no: '04',
-      title: 'Konsultacje architektoniczne',
+      title: 'Organizacja budowy',
+      desc: 'Koordynacja branż i wykonawców, harmonogram, kontrola zgodności realizacji z projektem. Prowadzę inwestycję także wtedy, gdy nie możesz być na budowie.',
+    },
+    {
+      no: '05',
+      title: 'Świadectwa energetyczne',
+      desc: 'Charakterystyka i świadectwa energetyczne budynków — do odbioru, sprzedaży lub wynajmu, razem z wyjaśnieniem, co z wyniku realnie wynika.',
+    },
+    {
+      no: '06',
+      title: 'Konsultacje',
       desc: 'Ocena działki, warunków zabudowy i MPZP, weryfikacja gotowego projektu, doradztwo przed zakupem. Jedno spotkanie potrafi oszczędzić miesiące.',
     },
   ],
 } as const;
 
 export const manifesto = {
-  quote: 'Dobry budynek nie zwraca na siebie uwagi. Po prostu działa — i wygląda tak samo dobrze za dziesięć lat.',
-  attribution: 'Aleksandra Gosk',
+  script: 'Wygoda na lata',
+  quote: 'Dobry budynek nie zwraca na siebie uwagi. Po prostu działa — i za dziesięć lat nadal jest wygodny.',
+  attribution: 'Aleksandra Gosk · ATRIUM STUDIO',
   note: 'Projekt, pozwolenie, budowa — jeden proces i jedna osoba odpowiedzialna za jego przebieg.',
 } as const;
 
@@ -85,24 +98,25 @@ export const projects = {
   title: 'Wybrane projekty',
   lead: 'Galeria w przygotowaniu — poniżej układ, w którym pojawią się zdjęcia zrealizowanych obiektów.',
   items: [
-    { title: 'Dom pod lasem', meta: 'Podlaskie · 2024 · projekt i nadzór', ratio: 'tall' },
-    { title: 'Stodoła współczesna', meta: 'Zambrów · 2024 · projekt budowlany', ratio: 'wide' },
-    { title: 'Dom z patio', meta: 'Białystok · 2023 · koncepcja', ratio: 'wide' },
-    { title: 'Budynek usługowy', meta: 'Podlaskie · 2023 · projekt i koordynacja', ratio: 'tall' },
-    { title: 'Rozbudowa siedliska', meta: 'Łomża · 2022 · projekt budowlany', ratio: 'wide' },
-    { title: 'Dom minimalny', meta: 'Podlaskie · 2022 · koncepcja', ratio: 'tall' },
+    { title: 'Dom pod lasem', meta: 'Podlaskie · 2024 · projekt i nadzór' },
+    { title: 'Obora wolnostanowiskowa', meta: 'Zambrów · 2024 · projekt budowlany' },
+    { title: 'Budynek wielorodzinny', meta: 'Białystok · 2023 · koncepcja' },
+    { title: 'Hala magazynowa', meta: 'Podlaskie · 2023 · projekt i koordynacja' },
+    { title: 'Rozbudowa siedliska', meta: 'Łomża · 2022 · projekt budowlany' },
+    { title: 'Dom minimalny', meta: 'Podlaskie · 2022 · koncepcja' },
   ],
 } as const;
 
 export const cta = {
-  title: 'Porozmawiajmy o Państwa projekcie',
+  eyebrow: 'Zacznijmy',
+  title: 'Pierwsza rozmowa jest bezpłatna i konkretna',
   action: 'Napisz wiadomość',
-  phoneLabel: 'lub proszę zadzwonić',
+  phoneLabel: 'albo zadzwoń',
 } as const;
 
 export const contact = {
   eyebrow: 'Kontakt',
-  title: 'Zacznijmy od rozmowy',
+  title: 'Napisz, co chcesz zbudować',
   lead:
-    'Proszę napisać kilka zdań o działce i etapie, na jakim są Państwo dzisiaj. Odpowiadam zwykle w ciągu jednego dnia roboczego.',
+    'Opisz działkę i etap, na jakim jesteś — nawet jeśli to dopiero pomysł. Odpowiadam zwykle w ciągu jednego dnia roboczego.',
 } as const;

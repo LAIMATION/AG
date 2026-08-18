@@ -1,62 +1,62 @@
-/* Design tokens — pełny opis w DESIGN_SYSTEM.md */
+/* Design tokens — ATRIUM STUDIO. Pełny opis w DESIGN_SYSTEM.md */
 
 :root {
   /* --- Kolor --------------------------------------------------------- */
-  --c-bg: #f6f3ee; /* alabaster — tło strony */
-  --c-bg-alt: #ece5da; /* ciemniejszy pas — rozdziela sąsiadujące sekcje bez linii */
-  --c-surface: #fdfbf8; /* karty, formularz */
-  --c-stone: #ebe5db; /* placeholdery, wypełnienia */
-  --c-line: #ddd6ca; /* linie, obrysy */
-  --c-line-soft: #e8e2d8;
+  --c-bg: #f5f2ea; /* krem — tło podstawowe */
+  --c-bg-alt: #ffffff; /* biel — pas rozdzielający sąsiednie sekcje */
+  --c-surface: #ffffff; /* karty, formularz */
+  --c-line: #c9c7be; /* szarość kreślarska — linie, obrysy, blueprint */
+  --c-line-soft: #e2e0d6;
 
-  --c-ink: #1c1a17; /* nagłówki, tekst główny */
-  --c-ink-soft: #4a453e; /* akapity */
-  --c-muted: #6f675d; /* podpisy, meta — ciemniejsze niż taupe, żeby wersaliki
-                         trzymały kontrast także na ciemniejszym pasie `--c-bg-alt` */
+  --c-ink: #1b2733; /* nagłówki */
+  --c-ink-soft: #33445a; /* granat atramentowy — tekst ciągły */
+  /* System podaje #6B7A8C; na kremie daje 3,9:1, czyli poniżej AA dla drobnego
+     tekstu, a w tej roli chodzą 12 px wersaliki. Przyciemnione do 4,8:1. */
+  --c-muted: #5c6b7d;
 
-  --c-accent: #8a7358; /* brąz/taupe — akcent */
-  --c-accent-soft: #b9a88f;
-  --c-accent-deep: #6b563f; /* pas CTA — jasny tekst wymaga ciemniejszego brązu */
+  --c-accent: #e07b2c; /* pomarańcz sygnałowy — linie, wypełnienia CTA */
+  --c-accent-soft: #f3d3b0;
+  /* Sam `--c-accent` na kremie to 2,7:1, więc nie nadaje się na tekst.
+     Ta odmiana służy wyłącznie do pisania akcentem. */
+  --c-accent-ink: #a85512;
 
-  --c-inverse: #14120f; /* sekcje na wideo */
-  --c-inverse-ink: #f6f3ee;
-  --c-inverse-muted: rgba(246, 243, 238, 0.82);
-  --c-inverse-line: rgba(246, 243, 238, 0.3);
+  --c-inverse: #1f2a35; /* głęboki granat — scrim, tekst na pomarańczu */
+  --c-inverse-ink: #f2eee4;
+  --c-inverse-muted: rgba(242, 238, 228, 0.82);
+  --c-inverse-line: rgba(242, 238, 228, 0.3);
 
-  /* bazowe przyciemnienie wideo — resztę kontrastu robią scrimy pod panelami */
   --c-overlay: linear-gradient(
     180deg,
-    rgba(20, 18, 15, 0.62) 0%,
-    rgba(20, 18, 15, 0.44) 45%,
-    rgba(20, 18, 15, 0.72) 100%
+    rgba(31, 42, 53, 0.62) 0%,
+    rgba(31, 42, 53, 0.44) 45%,
+    rgba(31, 42, 53, 0.72) 100%
   );
 
   /* --- Typografia ---------------------------------------------------- */
-  --f-display: var(--font-display), 'Cormorant Garamond', Georgia, serif;
-  --f-sans: var(--font-sans), 'Jost', 'Helvetica Neue', Arial, sans-serif;
+  /* Jedna rodzina groteskowa, skrajne wagi: 900 na hasła, 400/500 na resztę.
+     Krój skryptowy wyłącznie jako pojedynczy akcent na fotografii. */
+  --f-sans: var(--font-sans), 'Archivo', 'Segoe UI', system-ui, sans-serif;
+  --f-display: var(--f-sans);
+  --f-script: var(--font-script), 'Segoe Script', cursive;
 
-  /* Skala z podłogami w px, nie w `vh` — wysokość okna nie może decydować o tym,
-     czy tekst da się przeczytać. Dół skali trzyma 16 px dla tekstu ciągłego. */
-  --fs-display: clamp(3rem, 9vw, 8.5rem);
-  --fs-h1: clamp(2.5rem, 6vw, 5rem);
-  --fs-h2: clamp(2rem, 3.4vw, 3.25rem);
-  --fs-h3: clamp(1.25rem, 1.4vw, 1.5rem);
-  --fs-lead: clamp(1.125rem, 0.6vw + 1rem, 1.375rem);
-  --fs-body: clamp(1rem, 0.35vw + 0.9rem, 1.125rem);
+  --fs-display: clamp(2.75rem, 8vw, 7rem);
+  --fs-h1: clamp(2.25rem, 5vw, 4rem);
+  --fs-h2: clamp(1.75rem, 3vw, 2.75rem);
+  --fs-h3: clamp(1.125rem, 1.25vw, 1.375rem);
+  --fs-lead: clamp(1.0625rem, 0.5vw + 0.95rem, 1.25rem);
+  --fs-body: clamp(1rem, 0.3vw + 0.92rem, 1.0625rem);
   --fs-small: 0.875rem;
   --fs-eyebrow: 0.75rem;
 
-  --lh-tight: 1.1;
-  /* 1.14 obcinało ogonki „ą/ę" i zejścia „j/y" w Cormorancie — polski tekst
-     potrzebuje tu więcej powietrza niż angielski */
-  --lh-heading: 1.2;
-  --lh-lead: 1.55;
-  --lh-body: 1.7;
+  --lh-tight: 0.95;
+  --lh-heading: 1.08;
+  --lh-lead: 1.45;
+  --lh-body: 1.55;
 
   --ls-display: -0.02em;
   --ls-heading: -0.01em;
   --ls-body: 0;
-  --ls-eyebrow: 0.22em;
+  --ls-eyebrow: 0.1em;
   --ls-label: 0.14em;
 
   /* --- Przestrzeń ---------------------------------------------------- */
@@ -73,43 +73,36 @@
   --s-11: 10rem;
 
   --section-y: clamp(5rem, 11vw, 10rem);
-  /* góra mniejsza niż dół — tytuł ma siadać blisko początku pasa, nie w jego środku */
   --section-y-top: clamp(3rem, 6.5vw, 6rem);
-
-  /* Odstęp treści sekcji od krawędzi ekranu. Musi zmieścić pływający pasek, żeby
-     nagłówek nigdy nie wchodził pod szkło. */
   --slide-pad: max(2rem, calc(var(--nav-h) + var(--nav-offset) * 2));
-  --gutter: clamp(1.25rem, 5vw, 5rem);
+  /* margines zewnętrzny ~9–10% szerokości kadru, jak w materiale źródłowym */
+  --gutter: clamp(1.25rem, 9vw, 6rem);
   --maxw: 1440px;
   --maxw-text: 62ch;
 
   /* --- Detal --------------------------------------------------------- */
-  --radius: 2px;
-  --radius-media: 12px;
-  --radius-nav: 20px;
+  /* Zero zaokrągleń i zero cieni w całym systemie — płaska, kreślarska
+     precyzja. Głębię niosą linie i kontrast tła, nie rozmycie. */
+  --radius: 0px;
+  --radius-media: 0px;
+  --radius-nav: 0px;
   --border: 1px solid var(--c-line);
 
-  /* Mleczne szkło pod nawigacją. Ton musi być płaskim `background-color`, a nie
-     gradientem — `background-image` się nie interpoluje, więc przy przełączaniu
-     tonacji tło przeskakiwało, gdy obrys i tekst jeszcze płynęły. Wypukłość robi
-     stała warstwa połysku `.ag-nav__bar::before`, identyczna w obu tonacjach. */
-  --c-glass: rgba(250, 247, 242, 0.32);
-  --c-glass-edge: rgba(255, 255, 255, 0.5);
-  --c-glass-active: rgba(255, 255, 255, 0.44);
-  --shadow-glass: 0 14px 30px -18px rgba(20, 18, 15, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  /* linia spinająca: 48 × 2 px nad etykietą i nad stopką */
+  --rule-w: 48px;
+  --rule-h: 2px;
 
-  --c-glass-dark: rgba(26, 23, 19, 0.28);
-  --c-glass-dark-edge: rgba(255, 255, 255, 0.22);
-  --c-glass-dark-active: rgba(255, 255, 255, 0.16);
-  --shadow-glass-dark: 0 14px 30px -18px rgba(10, 9, 8, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.24);
+  /* pasek nawigacji — płaski, oparty na hairline, nie na cieniu */
+  --c-glass: rgba(245, 242, 234, 0.92);
+  --c-glass-edge: var(--c-line);
+  --c-glass-active: var(--c-accent);
+  --c-glass-dark: rgba(31, 42, 53, 0.86);
+  --c-glass-dark-edge: rgba(242, 238, 228, 0.28);
+  --c-glass-dark-active: var(--c-accent);
 
-  --nav-h: 52px; /* 44 px celu dotykowego + 4 px paddingu płytki po obu stronach */
+  --nav-h: 52px;
   --nav-offset: clamp(0.75rem, 2vh, 1.5rem);
   --fab-bottom: var(--nav-offset);
-  /* Ile miejsca u dołu ekranu zajmuje nasz własny interfejs. Treść dosunięta do dołu
-     musi to ominąć. Na desktopie pasek stoi u góry, więc dół jest wolny. */
   --bottom-ui: 0px;
 
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -124,11 +117,9 @@
 @media (max-width: 767px) {
   :root {
     --section-y: clamp(4rem, 14vw, 6rem);
-    /* na mobile pasek stoi u dołu — przycisk powrotu musi siedzieć nad nim */
     --fab-bottom: calc(
       var(--nav-offset) * 2 + var(--nav-h) + env(safe-area-inset-bottom, 0px)
     );
-    /* pasek nawigacji + przycisk powrotu nad nim */
     --bottom-ui: calc(var(--fab-bottom) + 44px);
   }
 }

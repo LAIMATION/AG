@@ -10,7 +10,8 @@ export function Hero() {
     <ScrollVideoScene id="top" src="/video/wideo-1.mp4" poster="/img/poster-1.jpg" length={3}>
       <div className="ag-scene__panel ag-scene__panel--bottom">
         <div className="ag-shell ag-hero__inner">
-          <p className="ag-eyebrow ag-hero__eyebrow">{hero.eyebrow}</p>
+          <p className="ag-eyebrow ag-hero__eyebrow ag-rule">{hero.eyebrow}</p>
+          <p className="ag-script ag-hero__script">{hero.script}</p>
           <h1 className="ag-hero__title">{hero.title}</h1>
           <p className="ag-hero__scroll">{hero.scroll} ↓</p>
         </div>
@@ -35,7 +36,7 @@ export function About() {
     <section className="ag-section" id="o-mnie">
       <div className="ag-section__wrap">
         <div className="ag-section__head">
-          <p className="ag-eyebrow">{about.eyebrow}</p>
+          <p className="ag-eyebrow ag-rule">{about.eyebrow}</p>
           <h2 className="ag-h2">{about.title}</h2>
         </div>
 
@@ -78,7 +79,7 @@ export function Services() {
     <section className="ag-section ag-section--alt" id="uslugi">
       <div className="ag-section__wrap">
         <div className="ag-section__head">
-          <p className="ag-eyebrow">{services.eyebrow}</p>
+          <p className="ag-eyebrow ag-rule">{services.eyebrow}</p>
           <h2 className="ag-h2">{services.title}</h2>
           <p className="ag-lead">{services.lead}</p>
         </div>
@@ -107,6 +108,7 @@ export function Manifesto() {
     >
       <div className="ag-scene__panel">
         <div className="ag-shell ag-manifesto__inner">
+          <p className="ag-script ag-manifesto__script">{manifesto.script}</p>
           <blockquote className="ag-manifesto__quote">{manifesto.quote}</blockquote>
           <p className="ag-manifesto__by">{manifesto.attribution}</p>
         </div>
@@ -126,14 +128,14 @@ export function Projects() {
     <section className="ag-section" id="realizacje">
       <div className="ag-section__wrap">
         <div className="ag-section__head">
-          <p className="ag-eyebrow">{projects.eyebrow}</p>
+          <p className="ag-eyebrow ag-rule">{projects.eyebrow}</p>
           <h2 className="ag-h2">{projects.title}</h2>
           <p className="ag-lead">{projects.lead}</p>
         </div>
 
         <ul className="ag-section__body ag-projects__grid">
           {projects.items.map((item) => (
-            <li className="ag-project" data-ratio={item.ratio} key={item.title}>
+            <li className="ag-project" key={item.title}>
               <div className="ag-project__frame">
                 <div className="ag-placeholder">
                   <span>Wkrótce</span>
@@ -155,12 +157,15 @@ export function CallToAction() {
   return (
     <section className="ag-cta" aria-labelledby="cta-title">
       <div className="ag-shell ag-cta__inner">
-        <h2 className="ag-cta__title" id="cta-title">
-          {cta.title}
-        </h2>
+        <div>
+          <p className="ag-eyebrow ag-rule ag-cta__eyebrow">{cta.eyebrow}</p>
+          <h2 className="ag-cta__title" id="cta-title">
+            {cta.title}
+          </h2>
+        </div>
 
         <div className="ag-cta__side">
-          <a className="ag-btn ag-btn--ghost" href="#kontakt">
+          <a className="ag-btn" href="#kontakt">
             {cta.action}
           </a>
           <p className="ag-cta__phone">
@@ -180,7 +185,7 @@ export function Contact() {
     <section className="ag-section ag-section--alt" id="kontakt">
       <div className="ag-section__wrap">
         <div className="ag-section__head">
-          <p className="ag-eyebrow">{contact.eyebrow}</p>
+          <p className="ag-eyebrow ag-rule">{contact.eyebrow}</p>
           <h2 className="ag-h2">{contact.title}</h2>
         </div>
 
@@ -228,10 +233,13 @@ export function Footer() {
   return (
     <footer className="ag-footer">
       <div className="ag-shell ag-footer__inner">
-        <span>
-          © {new Date().getFullYear()} {site.name} · {site.role}
+        {/* lockup w tonacji stopki z systemu: nazwisko na pierwszym planie, studio obok */}
+        <span className="ag-footer__lockup">
+          {site.name} · {site.studio} · {site.region}
         </span>
-        <span>{site.region}</span>
+        <span>
+          © {new Date().getFullYear()} {site.role}
+        </span>
       </div>
     </footer>
   );

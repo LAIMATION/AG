@@ -55,48 +55,31 @@
   max-width: var(--maxw-text);
 }
 
-/* --- Mleczne szkło (pasek + przycisk powrotu) ------------------------- */
+/* --- Płytka nawigacji (pasek + przycisk powrotu) --------------------- */
 
-/* Wspólna płytka: rozmycie tła, wewnętrzne rozjaśnienie u góry i cień pod spodem
-   dają wrażenie unoszącego się, lekko wypukłego szkła. Obie warstwy nawigacji
-   korzystają z tej samej klasy, więc nie mogą się rozjechać wizualnie. */
+/* Płaski prostokąt na hairline, bez zaokrągleń i bez cienia — system stoi na
+   kreślarskiej precyzji, nie na rozmytej głębi. Rozmycie tła zostaje, ale jako
+   mechanizm czytelności nad wideo, nie jako ozdoba. */
 .ag-glass {
   position: relative;
   pointer-events: auto;
   border: 1px solid var(--c-glass-edge);
   background-color: var(--c-glass);
-  backdrop-filter: blur(28px) saturate(1.6);
-  -webkit-backdrop-filter: blur(28px) saturate(1.6);
-  box-shadow: var(--shadow-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   /* Transform siedzi na płytce, nie na warstwie pozycjonującej — dzięki temu
      JS może zmierzyć nieprzesuniętą pozycję i poprawnie ustalić tonację.
      `opacity` jest tu zakazana: robi z przodka backdrop root, przez co
      `backdrop-filter` traci tło do próbkowania i szkło gaśnie na czas animacji. */
   transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease),
-    box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+    transform var(--dur) var(--ease);
   will-change: transform;
 }
 
-/* połysk — stały w obu tonacjach, więc przełączanie tonu nic tu nie przeskakuje */
-.ag-glass::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.2) 0%,
-    rgba(255, 255, 255, 0) 46%,
-    rgba(255, 255, 255, 0.07) 100%
-  );
-}
-
-/* nad scenami wideo i pasem CTA szkło przechodzi w ciemne, z jasnym tekstem */
+/* nad scenami wideo i pasem CTA płytka przechodzi w granat z jasnym tekstem */
 [data-tone='dark'] .ag-glass {
   border-color: var(--c-glass-dark-edge);
   background-color: var(--c-glass-dark);
-  box-shadow: var(--shadow-glass-dark);
 }
 
 /* --- Nawigacja ------------------------------------------------------- */
@@ -168,27 +151,23 @@
 }
 
 .ag-nav__link:hover {
-  background: rgba(255, 255, 255, 0.3);
+  color: var(--c-accent-ink);
 }
 
-.ag-nav__link[aria-current='true'] {
-  background: var(--c-glass-active);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 1px 2px rgba(20, 18, 15, 0.08);
+/* Aktywna zakładka to pełne wypełnienie akcentem. Tekst musi być wtedy granatowy —
+   biel na tym pomarańczu daje 3,0:1, granat 4,9:1. */
+.ag-nav__link[aria-current='true'],
+.ag-nav[data-tone='dark'] .ag-nav__link[aria-current='true'] {
+  background: var(--c-accent);
+  color: var(--c-inverse);
 }
 
 .ag-nav[data-tone='dark'] .ag-nav__link {
-  color: rgba(246, 243, 238, 0.92);
+  color: var(--c-inverse-ink);
 }
 
 .ag-nav[data-tone='dark'] .ag-nav__link:hover {
-  color: var(--c-inverse-ink);
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.ag-nav[data-tone='dark'] .ag-nav__link[aria-current='true'] {
-  color: var(--c-inverse-ink);
-  background: var(--c-glass-dark-active);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24), 0 1px 2px rgba(10, 9, 8, 0.2);
+  color: var(--c-accent-soft);
 }
 
 /* mobile: ten sam kafelek, tyle że u dołu */
@@ -243,7 +222,6 @@
   place-items: center;
   width: 44px;
   height: 44px;
-  border-radius: 50%;
   color: var(--c-ink);
 }
 
@@ -367,12 +345,20 @@
   color: var(--c-inverse-muted);
 }
 
+/* waga 900 — hasło okładki jest jedynym miejscem, gdzie krój idzie na maksimum */
 .ag-hero__title {
+  font-weight: 900;
   font-size: var(--fs-display);
   line-height: var(--lh-tight);
   letter-spacing: var(--ls-display);
   color: var(--c-inverse-ink);
   max-width: 14ch;
+}
+
+/* skryptowy akcent nad nazwiskiem — jedyne miejsce na stronie z tym krojem */
+.ag-hero__script {
+  color: var(--c-accent-soft);
+  max-width: 24ch;
 }
 
 .ag-hero__row {
@@ -414,7 +400,7 @@
 .ag-about__portrait {
   position: relative;
   aspect-ratio: 4 / 5;
-  background: var(--c-stone);
+  background: var(--c-line-soft);
   overflow: hidden;
   border-radius: var(--radius-media);
 }
@@ -453,8 +439,8 @@
 }
 
 .ag-fact__value {
-  font-family: var(--f-display);
-  font-size: 1.125rem;
+  font-weight: 600;
+  font-size: 1rem;
   color: var(--c-ink);
   line-height: 1.3;
 }
@@ -498,15 +484,14 @@
 
 /* --- Usługi ---------------------------------------------------------- */
 
+/* Sześć zakresów w siatce 3×2, rozdzielonych hairline'em — kafle stykają się
+   krawędziami jak pola na rysunku technicznym. */
 .ag-services__list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1px;
   background: var(--c-line);
   border: var(--border);
-  border-radius: var(--radius-media);
-  overflow: hidden;
 }
 
 .ag-service {
@@ -525,8 +510,9 @@
 
 .ag-service__no {
   font-size: var(--fs-eyebrow);
+  font-weight: 600;
   letter-spacing: var(--ls-eyebrow);
-  color: var(--c-accent);
+  color: var(--c-accent-ink);
 }
 
 .ag-service__desc {
@@ -554,13 +540,17 @@
 
 .ag-manifesto__quote {
   font-family: var(--f-display);
-  font-weight: 300;
-  font-size: clamp(1.625rem, 3.6vw, 3rem);
-  line-height: 1.28;
+  font-weight: 500;
+  font-size: clamp(1.5rem, 3.2vw, 2.75rem);
+  line-height: 1.15;
   letter-spacing: var(--ls-heading);
   color: var(--c-inverse-ink);
   max-width: 22ch;
   margin: 0;
+}
+
+.ag-manifesto__script {
+  color: var(--c-accent-soft);
 }
 
 .ag-manifesto__by {
@@ -591,7 +581,7 @@
   aspect-ratio: 3 / 2;
   overflow: hidden;
   border-radius: var(--radius-media);
-  background: var(--c-stone);
+  background: var(--c-line-soft);
 }
 
 .ag-project__meta {
@@ -600,8 +590,8 @@
 }
 
 .ag-project__title {
-  font-family: var(--f-display);
-  font-size: clamp(1.125rem, 1.1vw, 1.375rem);
+  font-weight: 500;
+  font-size: clamp(1rem, 1vw, 1.1875rem);
   line-height: 1.25;
   color: var(--c-ink);
 }
@@ -621,11 +611,13 @@
 
 /* Jedyny pas w akcentującym kolorze na całej stronie. Odcina sekcję kontaktu od
    realizacji i domyka narrację — bez niego obie sekcje zlewały się w jeden blok. */
+/* Jedyne pełne wypełnienie akcentem na całej stronie. Tekst granatowy, nie biały:
+   biel na tym pomarańczu daje 3,0:1, granat 4,9:1. */
 .ag-cta {
   position: relative;
   z-index: 1;
-  background: var(--c-accent-deep);
-  color: var(--c-inverse-ink);
+  background: var(--c-accent);
+  color: var(--c-inverse);
   padding-block: clamp(3.5rem, 7vw, 6rem);
 }
 
@@ -639,13 +631,20 @@
 
 .ag-cta__title {
   font-family: var(--f-display);
-  font-weight: 300;
-  font-size: clamp(1.75rem, 3.2vw, 2.75rem);
-  line-height: 1.2;
-  letter-spacing: var(--ls-heading);
-  color: var(--c-inverse-ink);
+  font-weight: 900;
+  font-size: clamp(1.75rem, 3.4vw, 3rem);
+  /* System podaje 0.95, ale to hasło łamie się na kilka linii i jest pisane małymi
+     literami — przy tej ciasnocie „ł/ę" z jednej linii dotykały następnej. */
+  line-height: 1.06;
+  letter-spacing: var(--ls-display);
+  color: var(--c-inverse);
   max-width: 18ch;
   margin: 0;
+  text-transform: lowercase;
+}
+
+.ag-cta__eyebrow {
+  color: var(--c-inverse);
 }
 
 .ag-cta__side {
@@ -661,23 +660,24 @@
 
 .ag-cta__phone-label {
   font-size: var(--fs-eyebrow);
+  font-weight: 600;
   letter-spacing: var(--ls-eyebrow);
   text-transform: uppercase;
-  color: rgba(246, 243, 238, 0.82);
+  color: var(--c-inverse);
 }
 
 .ag-cta__phone-value {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  font-family: var(--f-display);
+  font-weight: 600;
   font-size: clamp(1.25rem, 2vw, 1.625rem);
-  color: var(--c-inverse-ink);
-  transition: color var(--dur-fast) var(--ease);
+  color: var(--c-inverse);
+  transition: opacity var(--dur-fast) var(--ease);
 }
 
 .ag-cta__phone-value:hover {
-  color: var(--c-accent-soft);
+  opacity: 0.72;
 }
 
 /* --- Kontakt --------------------------------------------------------- */
@@ -722,15 +722,15 @@
   display: inline-flex;
   align-items: center;
   min-height: 44px;
-  font-family: var(--f-display);
-  font-size: clamp(1.25rem, 1.6vw, 1.625rem);
+  font-weight: 500;
+  font-size: clamp(1.125rem, 1.4vw, 1.375rem);
   line-height: 1.25;
   color: var(--c-ink);
   transition: color var(--dur-fast) var(--ease);
 }
 
 a.ag-contact__value:hover {
-  color: var(--c-accent);
+  color: var(--c-accent-ink);
 }
 
 @media (max-width: 899px) {
@@ -759,14 +759,28 @@ a.ag-contact__value:hover {
   color: var(--c-muted);
 }
 
+/* stopka/lockup z systemu: 500, wersaliki, tracking 0.14em, w akcencie */
+.ag-footer__lockup {
+  font-size: var(--fs-eyebrow);
+  font-weight: 500;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-accent-ink);
+}
+
 /* --- Rozkład na wąskim ekranie --------------------------------------- */
 
 /* Blok stoi na końcu pliku celowo: nadpisuje bazowe siatki sekcji, które są
    zdefiniowane wyżej i mają tę samą specyficzność. */
+@media (max-width: 1023px) {
+  .ag-services__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 899px) {
   .ag-services__list {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto;
   }
 
   .ag-service {

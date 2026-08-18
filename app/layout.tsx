@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Cormorant_Garamond, Jost } from 'next/font/google';
+import { Archivo, Playball } from 'next/font/google';
 import { Nav } from '@/components/Nav';
 import { SmoothScroll } from '@/components/SmoothScroll';
 import { site } from '@/lib/config';
@@ -9,39 +9,41 @@ import '@/styles/base.css';
 import '@/styles/layout.css';
 import '@/styles/components.css';
 
-const display = Cormorant_Garamond({
+/* Jedna rodzina groteskowa w skrajnych wagach niesie cały system;
+   krój skryptowy pojawia się wyłącznie jako pojedynczy akcent na fotografii. */
+const sans = Archivo({
   subsets: ['latin', 'latin-ext'],
-  weight: ['300', '400'],
-  display: 'swap',
-  variable: '--font-display',
-});
-
-const sans = Jost({
-  subsets: ['latin', 'latin-ext'],
-  weight: ['300', '400', '500'],
+  weight: ['400', '500', '600', '900'],
   display: 'swap',
   variable: '--font-sans',
 });
 
+const script = Playball({
+  subsets: ['latin', 'latin-ext'],
+  weight: ['400'],
+  display: 'swap',
+  variable: '--font-script',
+});
+
 export const metadata: Metadata = {
-  title: 'Aleksandra Gosk — architekt | Zambrów, Białystok',
+  title: 'Aleksandra Gosk — architekt | Białystok, Zambrów',
   description:
-    'Projekty architektoniczne domów i budynków, organizacja budowy, świadectwa energetyczne i konsultacje. Zambrów, Białystok i okolice.',
+    'Projektuję każdy rodzaj budynku: domy, budynki wielorodzinne, hale, obory i budynki gospodarcze. Organizacja budowy, świadectwa energetyczne, konsultacje. ATRIUM STUDIO — Białystok, Zambrów.',
   openGraph: {
     title: 'Aleksandra Gosk — architekt',
-    description: 'Architektura i organizacja budowy. Zambrów, Białystok.',
+    description: 'Przestrzeń, która dojrzewa razem z Tobą. ATRIUM STUDIO, Białystok i Zambrów.',
     locale: 'pl_PL',
     type: 'website',
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: '#f6f3ee',
+  themeColor: '#f5f2ea',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pl" className={`${display.variable} ${sans.variable}`}>
+    <html lang="pl" className={`${sans.variable} ${script.variable}`}>
       <body>
         {/* plakat hero to pierwsza rzecz, jaką widać — React 19 wynosi ten link do <head> */}
         <link rel="preload" as="image" href="/img/poster-1.jpg" />

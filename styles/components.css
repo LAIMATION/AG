@@ -4,12 +4,14 @@
   display: inline-flex;
   align-items: center;
   gap: var(--s-3);
+  min-height: 44px;
   padding: var(--s-4) var(--s-6);
-  border: 1px solid var(--c-ink);
+  border: 1px solid var(--c-accent);
   border-radius: var(--radius);
-  background: var(--c-ink);
-  color: var(--c-inverse-ink);
+  background: var(--c-accent);
+  color: var(--c-inverse);
   font-size: 0.75rem;
+  font-weight: 600;
   letter-spacing: var(--ls-label);
   text-transform: uppercase;
   cursor: pointer;
@@ -18,8 +20,21 @@
 }
 
 .ag-btn:hover {
+  background: var(--c-ink);
+  border-color: var(--c-ink);
+  color: var(--c-inverse-ink);
+}
+
+/* na pomarańczowym pasie przycisk musi się odciąć od tła — odwraca się na granat */
+.ag-cta .ag-btn {
+  background: var(--c-inverse);
+  border-color: var(--c-inverse);
+  color: var(--c-inverse-ink);
+}
+
+.ag-cta .ag-btn:hover {
   background: transparent;
-  color: var(--c-ink);
+  color: var(--c-inverse);
 }
 
 .ag-btn:disabled {
@@ -96,7 +111,7 @@
   border-radius: 0;
   padding: var(--s-3) 0;
   font-size: var(--fs-body);
-  font-weight: 300;
+  font-weight: 400;
   color: var(--c-ink);
   transition: border-color var(--dur) var(--ease);
 }
@@ -133,7 +148,7 @@
 }
 
 .ag-form__status[data-tone='ok'] {
-  color: var(--c-accent);
+  color: var(--c-accent-ink);
 }
 
 .ag-form__status[data-tone='error'] {
@@ -148,25 +163,25 @@
 
 /* --- Placeholder realizacji ------------------------------------------- */
 
+/* Tekstura rysunku technicznego zamiast szarego prostokąta — ten sam motyw
+   blueprint, którym system oznacza „u podstaw usługi stoi projekt". */
 .ag-placeholder {
   position: absolute;
   inset: 0;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, var(--c-stone) 0%, #e3dcd1 100%);
+  background-color: var(--c-bg);
+  background-image: repeating-linear-gradient(48deg, var(--c-line) 0 1px, transparent 1px 34px),
+    repeating-linear-gradient(-42deg, var(--c-line) 0 1px, transparent 1px 46px);
   color: var(--c-muted);
-}
-
-.ag-placeholder::before {
-  content: '';
-  position: absolute;
-  inset: var(--s-4);
-  border: 1px solid rgba(138, 115, 88, 0.22);
 }
 
 .ag-placeholder span {
   position: relative;
+  padding: var(--s-2) var(--s-3);
+  background: var(--c-bg);
   font-size: var(--fs-eyebrow);
+  font-weight: 600;
   letter-spacing: var(--ls-eyebrow);
   text-transform: uppercase;
 }

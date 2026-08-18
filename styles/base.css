@@ -24,7 +24,7 @@ body {
   font-family: var(--f-sans);
   font-size: var(--fs-body);
   line-height: var(--lh-body);
-  font-weight: 300;
+  font-weight: 400;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -40,15 +40,18 @@ body {
   }
 }
 
+/* Nagłówki treściowe chodzą w wadze regularnej/średniej; waga 900 jest
+   zarezerwowana dla haseł (hero, pas CTA), żeby nie straciła siły. */
 h1,
 h2,
 h3 {
   margin: 0;
   font-family: var(--f-display);
-  font-weight: 300;
+  font-weight: 500;
   color: var(--c-ink);
   line-height: var(--lh-heading);
   letter-spacing: var(--ls-heading);
+  text-wrap: balance;
 }
 
 p {
@@ -121,10 +124,21 @@ ul {
 .ag-eyebrow {
   font-family: var(--f-sans);
   font-size: var(--fs-eyebrow);
-  font-weight: 400;
+  font-weight: 600;
   letter-spacing: var(--ls-eyebrow);
   text-transform: uppercase;
   color: var(--c-muted);
+}
+
+/* Linia spinająca 48 × 2 px — sygnaturowy element systemu, stoi nad etykietą
+   i nad stopką. Rysowana pseudoelementem, żeby nie zaśmiecać markupu. */
+.ag-rule::before {
+  content: '';
+  display: block;
+  width: var(--rule-w);
+  height: var(--rule-h);
+  margin-bottom: var(--s-4);
+  background: var(--c-accent);
 }
 
 .ag-h2 {
@@ -140,4 +154,14 @@ ul {
   line-height: var(--lh-lead);
   color: var(--c-ink-soft);
   max-width: var(--maxw-text);
+}
+
+/* skryptowy akcent — wyłącznie pojedyncza linia na fotografii */
+.ag-script {
+  font-family: var(--f-script);
+  font-weight: 400;
+  font-size: clamp(1.375rem, 2.6vw, 2rem);
+  line-height: 1.2;
+  letter-spacing: 0;
+  color: var(--c-inverse-ink);
 }
