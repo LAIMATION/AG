@@ -66,8 +66,8 @@
   pointer-events: auto;
   border: 1px solid var(--c-glass-edge);
   background-color: var(--c-glass);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
   /* Transform siedzi na płytce, nie na warstwie pozycjonującej — dzięki temu
      JS może zmierzyć nieprzesuniętą pozycję i poprawnie ustalić tonację.
      `opacity` jest tu zakazana: robi z przodka backdrop root, przez co
@@ -155,15 +155,20 @@
   color: var(--c-accent-ink);
 }
 
-/* Aktywna zakładka to pełne wypełnienie akcentem. Tekst musi być wtedy granatowy —
-   biel na tym pomarańczu daje 3,0:1, granat 4,9:1. */
-.ag-nav__link[aria-current='true'],
-.ag-nav[data-tone='dark'] .ag-nav__link[aria-current='true'] {
-  background: var(--c-accent);
+/* Zaznaczenie: przezroczysty pomarańcz na rozmytym tle paska. Kolor tekstu idzie
+   za tonacją — na jasnym szkle plama wychodzi jasna i niesie granat, na ciemnym
+   wychodzi ciemna i niesie kremowy. */
+.ag-nav__link[aria-current='true'] {
+  background: var(--c-glass-active);
   color: var(--c-inverse);
 }
 
 .ag-nav[data-tone='dark'] .ag-nav__link {
+  color: var(--c-inverse-ink);
+}
+
+.ag-nav[data-tone='dark'] .ag-nav__link[aria-current='true'] {
+  background: var(--c-glass-dark-active);
   color: var(--c-inverse-ink);
 }
 

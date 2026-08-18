@@ -75,7 +75,27 @@ systemowych `0.95` — przy tej ciasnocie `ł/ę` z jednej linii dotykały nast�
 **`--radius: 0` w całym systemie. Zero cieni.** Płaska, kreślarska precyzja —
 głębię niosą linie i kontrast tła, nie rozmycie. Dotyczy też paska nawigacji
 i przycisku powrotu: prostokąty na hairline, bez zaokrągleń i bez cienia.
-`backdrop-filter` zostaje, ale jako mechanizm czytelności nad wideo.
+
+### Matowe szkło (pasek nawigacji, przycisk powrotu)
+
+Jedyne miejsce, gdzie system dopuszcza rozmycie. Tło ma **przebijać** przez płytkę,
+więc krycie jest niskie (`.62` jasne / `.58` ciemne), a robotę robi
+`backdrop-filter: blur(24px) saturate(1.2)`.
+
+Zaznaczenie aktywnej zakładki to **półprzezroczysty pomarańcz, nie własny
+`backdrop-filter`**. Element z `backdrop-filter` staje się backdrop rootem dla
+potomków, więc zagnieżdżone rozmycie próbkowałoby płaskie tło paska i nie dałoby
+nic. Przezroczysta plama przepuszcza już rozmyte tło paska, tylko podbarwione.
+
+Krycie plamy różni się między tonacjami, bo różni się kolor tekstu — nad ciemnym
+tłem plama wychodzi ciemna i granat na niej nie przechodzi:
+
+| Tonacja | Plama | Tekst | Kontrast |
+|---|---|---|---|
+| jasna | `rgba(224,123,44,.62)` | granat `#1f2a35` | **7,2:1** |
+| ciemna | `rgba(224,123,44,.45)` | krem `#f2eee4` | **4,7:1** |
+
+Sam pasek: 13,0:1 na jasnym, 7,5–9,5:1 nad wideo (najgorsza z próbkowanych klatek).
 
 ### Linia spinająca
 

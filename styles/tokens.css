@@ -92,13 +92,22 @@
   --rule-w: 48px;
   --rule-h: 2px;
 
-  /* pasek nawigacji — płaski, oparty na hairline, nie na cieniu */
-  --c-glass: rgba(245, 242, 234, 0.92);
+  /* Pasek nawigacji i przycisk powrotu — matowe szkło: tło ma przez nie przebijać,
+     więc krycie jest niskie, a robotę robi rozmycie.
+
+     Zaznaczenie jest półprzezroczystym pomarańczem, NIE własnym `backdrop-filter`:
+     element z `backdrop-filter` staje się backdrop rootem dla potomków, więc
+     zagnieżdżone rozmycie próbkowałoby płaskie tło paska i nie dawałoby nic.
+     Przezroczysta plama przepuszcza już rozmyte tło paska, tylko podbarwione.
+
+     Krycie zaznaczenia różni się między tonacjami, bo różni się kolor tekstu:
+     na jasnym granatowy potrzebuje gęstszej plamy, na ciemnym jasny — rzadszej. */
+  --c-glass: rgba(245, 242, 234, 0.62);
   --c-glass-edge: var(--c-line);
-  --c-glass-active: var(--c-accent);
-  --c-glass-dark: rgba(31, 42, 53, 0.86);
+  --c-glass-active: rgba(224, 123, 44, 0.62);
+  --c-glass-dark: rgba(31, 42, 53, 0.58);
   --c-glass-dark-edge: rgba(242, 238, 228, 0.28);
-  --c-glass-dark-active: var(--c-accent);
+  --c-glass-dark-active: rgba(224, 123, 44, 0.45);
 
   --nav-h: 52px;
   --nav-offset: clamp(0.75rem, 2vh, 1.5rem);
