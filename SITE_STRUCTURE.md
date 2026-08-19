@@ -26,8 +26,8 @@ WEB/
 │   ├── layout.css              # siatka strony, układy sekcji, responsywność
 │   └── components.css          # przyciski, pola formularza, placeholdery
 ├── public/
-│   ├── video/wideo-1.mp4       # hero — 1080p, ping-pong 20 s, 15,7 MB
-│   ├── video/wideo-2.mp4       # sekcja manifest — 1080p, ping-pong 20 s, 22,2 MB
+│   ├── video/wideo-1.mp4       # hero — 4K, ping-pong 20 s, 51,2 MB
+│   ├── video/wideo-2.mp4       # sekcja manifest — 4K, ping-pong 20 s, 68,6 MB
 │   ├── img/poster-1.jpg        # pierwsza klatka wideo-1 (plakat)
 │   ├── img/poster-2.jpg        # pierwsza klatka wideo-2 (plakat)
 │   └── img/aleksandra-gosk.jpg # portret do sekcji "O mnie"
@@ -269,9 +269,10 @@ i telefon zachowywały się tak samo jak desktop:
 | `pointer: coarse` | `scrub: 0.35` zamiast `1.1` — na telefonie sekunda opóźnienia czyta się jak awaria |
 | `prefers-reduced-motion: reduce` | wideo zatrzymane na pierwszej klatce |
 
-**Uwaga przy powrocie do `scrub`:** obecne pliki mają zwykły GOP (`-g 48`), więc seek
-wstecz kosztuje dekodowanie od poprzedniej klatki kluczowej. Włączenie `mode="scrub"`
-wymaga przekodowania na all-intra — patrz „Kodowanie wideo".
+**Uwaga przy powrocie do `scrub`:** obecne pliki mają zwykły GOP (`-g 48`) i 4K, więc
+seek wstecz kosztuje dekodowanie od poprzedniej klatki kluczowej na pełnej rozdzielczości.
+Włączenie `mode="scrub"` wymaga przekodowania na all-intra i najpewniej zejścia z 4K —
+patrz „Kodowanie wideo".
 
 #### Bezpiecznik dekodera liczony od `loadstart`, nie od montażu
 
@@ -404,28 +405,45 @@ tam i z powrotem — bez jednej linijki JS, bez seekowania i bez szansy na zaci�
 Przycięcie odwrotki jest obowiązkowe: bez `trim` klatka skrajna leci dwa razy pod rząd
 i na każdym zawrocie widać przytrzymanie.
 
-Skoro nie scrubujemy, znika powód dla all-intra — stąd **zwykły GOP (`-g 48`)**, który
-przy 1080p mieści się w budżecie bajtów dawnego 720p all-intra:
+**Rozdzielczość zostaje 4K — bez skalowania w dół.** Skoro nie scrubujemy, znika powód
+dla all-intra, więc zwykły GOP (`-g 48`) kupuje budżet na pełne 3840×2160:
 
-| | przed (720p all-intra, 8 s) | teraz (1080p GOP, 20 s ping-pong) |
+| | 720p all-intra, 8 s (pierwotnie) | 4K GOP, 20 s ping-pong (teraz) |
 |---|---|---|
-| wideo-1 | 15,3 MB @ 15,3 Mb/s | 15,7 MB @ 6,3 Mb/s |
-| wideo-2 | 18,1 MB @ 18,0 Mb/s | 22,2 MB @ 8,9 Mb/s |
+| wideo-1 | 15,3 MB @ 15,3 Mb/s | 51,2 MB @ 20,5 Mb/s |
+| wideo-2 | 18,1 MB @ 18,0 Mb/s | 68,6 MB @ 27,4 Mb/s |
 
-Odtworzenie kodowania (skrypt trzyma się tego samego schematu dla obu plików):
+Master jest **HEVC 10-bit**, wynik to **H.264 High 8-bit, Level 5.1** — High10 odpada,
+bo przeglądarki go nie dekodują. Konwersja do 8 bitów jest tu nieunikniona.
+
+### Odwrotka idzie połówkami, nie naraz
+
+`reverse` buforuje CAŁY strumień w pamięci: 241 klatek 4K to ~12,4 MB na klatkę, czyli
+**~3 GB**. Dlatego odwrotka powstaje z dwóch kawałków po ~120 klatek (~1,5 GB każdy),
+sklejanych w odwrotnej kolejności. Oba kawałki kodowane są **wprost z mastera**, nie
+z już przekodowanego przodu — inaczej połowa materiału byłaby drugą generacją.
+
+Odtworzenie (skrypt: `scratchpad/enkoduj4k.sh`, ten sam schemat dla obu plików):
 
 ```bash
-ffmpeg -y -i "../Wideo/Wideo v1.mp4" -an -vf "scale=1920:-2:flags=lanczos" -c:v libx264 -preset slow -crf 20 -pix_fmt yuv420p -g 48 -profile:v high -level 4.1 fwd.mp4
-ffmpeg -y -i "../Wideo/Wideo v1.mp4" -an -vf "scale=1920:-2:flags=lanczos,reverse,trim=start_frame=1:end_frame=240,setpts=PTS-STARTPTS" -c:v libx264 -preset slow -crf 20 -pix_fmt yuv420p -g 48 -profile:v high -level 4.1 rev.mp4
-printf "file 'fwd.mp4'\nfile 'rev.mp4'\n" > lista.txt
+Q="-c:v libx264 -preset slow -crf 20 -pix_fmt yuv420p -g 48 -profile:v high -level 5.1 -an"
+ffmpeg -y -i "../Wideo/Wideo v1.mp4" $Q p0.mp4
+ffmpeg -y -i "../Wideo/Wideo v1.mp4" -vf "trim=start_frame=121:end_frame=240,setpts=PTS-STARTPTS,reverse" $Q r1.mp4
+ffmpeg -y -i "../Wideo/Wideo v1.mp4" -vf "trim=start_frame=1:end_frame=121,setpts=PTS-STARTPTS,reverse" $Q r2.mp4
+printf "file 'p0.mp4'\nfile 'r1.mp4'\nfile 'r2.mp4'\n" > lista.txt
 ffmpeg -y -f concat -safe 0 -i lista.txt -c copy -movflags +faststart public/video/wideo-1.mp4
 ```
 
 `-movflags +faststart` jest obowiązkowe — bez niego `moov` ląduje za `mdat` i odtwarzanie
 czeka na cały transfer. Sprawdzone: kolejność atomów to `ftyp → moov → free → mdat`.
 
-Plakaty (`public/img/poster-*.jpg`) to pierwsza klatka pliku wynikowego, 1024 px, `-q:v 6`.
+Zmierzone w przeglądarce: `videoWidth × videoHeight` = **3840 × 2160**, 356 klatek
+zdekodowanych, **0 opuszczonych**, przejście przez punkt zawrotu (10,04 s) bez przerwy.
+
+Plakaty (`public/img/poster-*.jpg`) to pierwsza klatka pliku wynikowego, 1400 px, `-q:v 6`.
 Muszą być regenerowane razem z wideo, inaczej pierwsza klatka nie zgadza się z plakatem.
+Przy 4K plakat pełni też rolę siatki bezpieczeństwa: część urządzeń mobilnych nie
+dekoduje 4K H.264 i wtedy plakat jest jedynym, co widać.
 
 `ScrollVideoScene` kwantyzuje `currentTime` do granicy klatki (prop `fps`, domyślnie 24)
 — dotyczy wyłącznie trybu `scrub`.
@@ -464,15 +482,22 @@ ruchu, nie po jego końcu.
 
 - `site.phone` / `site.phoneHref` w `lib/config.ts` — obecnie `+48 000 000 000`.
 - Zdjęcia realizacji (obecnie placeholdery).
-- `public/video/*.mp4` to 37,9 MB — jeśli repo ma iść na GitHub, rozważyć Git LFS albo
-  hosting wideo poza repozytorium.
+- `public/video/*.mp4` to **119,8 MB** — GitHub ostrzega powyżej 50 MB na plik i twardo
+  blokuje powyżej 100 MB. `wideo-2.mp4` (68,6 MB) siedzi między tymi progami, więc
+  push przechodzi, ale kolejne podniesienie jakości już nie. Przy następnym kroku
+  w górę: Git LFS albo hosting wideo poza repozytorium.
 
 ## Ładowanie wideo
 
 Hero (`loading="eager"`, domyślne) startuje razem ze stroną. Scena manifestu ma
 `loading="lazy"` — atrybut `src` podpina się dopiero, gdy scena zbliży się do kadru
-na jeden ekran. Bez tego strona ciągnęła **37,9 MB** przy samym wejściu; teraz **15,7 MB**,
+na jeden ekran. Bez tego strona ciągnęła **119,8 MB** przy samym wejściu; teraz **51,2 MB**,
 i to pod zasłoną ekranu startowego.
+
+Plakat hero **nie jest już wstępnie pobierany** (`<link rel="preload">` usunięty z
+`app/layout.tsx`). Miał sens, gdy był pierwszą rzeczą na ekranie; teraz zasłania go ekran
+startowy, więc plakat jest wyłącznie awaryjny — a priorytetowe 140 kB odbierało pasmo
+plikowi 51 MB.
 
 Wykrywanie zbliżenia stoi na zwykłym nasłuchu `scroll`, **nie na `IntersectionObserver`**.
 Gdyby obserwator z jakiegokolwiek powodu nie zadziałał, cała scena zostałaby na samym

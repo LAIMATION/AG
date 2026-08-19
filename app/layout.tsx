@@ -47,8 +47,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pl" className={`${sans.variable} ${script.variable}`}>
       <body>
-        {/* plakat hero to pierwsza rzecz, jaką widać — React 19 wynosi ten link do <head> */}
-        <link rel="preload" as="image" href="/img/poster-1.jpg" />
+        {/* Plakat hero NIE jest już wstępnie pobierany. Miał sens, gdy był pierwszą
+            rzeczą na ekranie; teraz zasłania go ekran startowy i schodzi dopiero, gdy
+            wideo ma czym grać — więc plakat jest wyłącznie awaryjny (nieudane
+            dekodowanie 4K). Priorytetowe 140 kB odbierało pasmo plikowi 51 MB. */}
         {/* Zasłonę zdejmuje JavaScript. Bez niego nie miałby jej kto zdjąć,
             więc przy wyłączonych skryptach w ogóle się nie pokazuje. */}
         <noscript>
