@@ -13,8 +13,9 @@ WEB/
 │       └── kontakt/route.ts    # POST — wysyłka formularza przez Gmail SMTP (nodemailer)
 ├── components/
 │   ├── Nav.tsx                 # 'use client' — pasek + pływający przycisk powrotu
+│   ├── Preloader.tsx           # 'use client' — ekran startowy, schodzi gdy hero ma czym grać
 │   ├── SmoothScroll.tsx        # 'use client' — Lenis spięty z ScrollTriggerem
-│   ├── ScrollVideoScene.tsx    # 'use client' — sticky wideo + scrub GSAP ScrollTrigger
+│   ├── ScrollVideoScene.tsx    # 'use client' — sticky wideo; tryb `loop` (aktywny) / `scrub` (zachowany)
 │   ├── ContactForm.tsx         # 'use client' — formularz + stan wysyłki
 │   └── sections.tsx            # Hero, About, Services, Manifesto, Projects, Contact, Footer
 ├── lib/
@@ -25,8 +26,10 @@ WEB/
 │   ├── layout.css              # siatka strony, układy sekcji, responsywność
 │   └── components.css          # przyciski, pola formularza, placeholdery
 ├── public/
-│   ├── video/wideo-1.mp4       # hero — 720p, all-intra, 14,6 MB
-│   ├── video/wideo-2.mp4       # sekcja manifest — 720p, all-intra, 17,2 MB
+│   ├── video/wideo-1.mp4       # hero — 1080p, ping-pong 20 s, 15,7 MB
+│   ├── video/wideo-2.mp4       # sekcja manifest — 1080p, ping-pong 20 s, 22,2 MB
+│   ├── img/poster-1.jpg        # pierwsza klatka wideo-1 (plakat)
+│   ├── img/poster-2.jpg        # pierwsza klatka wideo-2 (plakat)
 │   └── img/aleksandra-gosk.jpg # portret do sekcji "O mnie"
 ├── .claude/launch.json
 ├── .env.example
@@ -231,22 +234,60 @@ Puste `GMAIL_*` → `500 mail-not-configured`, formularz pokazuje komunikat bł�
 ```
 
 Wideo trzyma się ekranu przez całą wysokość sceny (`position: sticky`, bez pinowania
-GSAP-em), tekst przewija się po nim. GSAP ScrollTrigger (`start: 'top top'`,
-`end: 'bottom bottom'`, `scrub: 1.1`) mapuje postęp scrolla 0→1 na `video.currentTime`
-0→`duration` — scroll w dół przewija wideo w przód, w górę w tył. Wideo dobiega do końca
-dokładnie wtedy, gdy sekcja się kończy.
+GSAP-em), tekst przewija się po nim.
 
-Wideo trwają po 8 s, więc `length={3}` (trzy ekrany scrolla) daje spokojne tempo.
+Scena ma dwa tryby, prop `mode`:
+
+| `mode` | Stan | Mechanizm |
+|---|---|---|
+| **`loop`** | **domyślny, aktywny** | wideo leci samo, natywnym `loop`. Ping-pong (przód, potem tył) jest wpisany w plik, nie w JS |
+| `scrub` | zachowany, nieaktywny | ScrollTrigger mapuje postęp scrolla 0→1 na `currentTime` 0→`duration` |
+
+Tryb `loop` nie dotyka klatek z poziomu JS — zapętlanie robi atrybut `loop`, a ping-pong
+jest już w pliku. Skrypt tylko uruchamia odtwarzanie przy `canplay` i ponawia przy
+pierwszym dotknięciu ekranu (iOS Low Power Mode i Safari z „Auto-Play: Never" nie puszczą
+startu bez gestu).
+
+**W JSX celowo nie ma atrybutu `autoPlay`.** Renderuje go serwer, więc odtwarzanie
+ruszało, zanim efekt zdążył odczytać `prefers-reduced-motion` — zmierzone **0,58 s ruchu
+u kogoś, kto prosił o brak ruchu**. Start idzie wyłącznie z JS.
+
+Zapętlone tło trwa 20 s i startuje samo, więc podlega **WCAG 2.2.2 (Pause, Stop, Hide)**.
+Przy `prefers-reduced-motion: reduce` wideo nie rusza w ogóle — zostaje pierwsza klatka,
+tak samo jak w trybie `scrub`. Zasłona startowa schodzi normalnie, bo gotowość melduje
+się niezależnie od tego, czy coś gra.
+
+Wideo trwają po 20 s (10 s materiału + 10 s odwrotki), `length={3}` daje spokojne tempo.
 Zmiana tempa = zmiana `length` w `components/sections.tsx`.
 
-Warianty przez `gsap.matchMedia()` — **bez progu szerokości**, żeby wąskie okno i telefon
-zachowywały się tak samo jak desktop (pliki są all-intra 720p, więc seek jest tani):
+Warianty `scrub` przez `gsap.matchMedia()` — **bez progu szerokości**, żeby wąskie okno
+i telefon zachowywały się tak samo jak desktop:
 
 | Warunek | Zachowanie |
 |---|---|
 | `prefers-reduced-motion: no-preference` | scrub klatek scrollem, każda szerokość okna |
 | `pointer: coarse` | `scrub: 0.35` zamiast `1.1` — na telefonie sekunda opóźnienia czyta się jak awaria |
 | `prefers-reduced-motion: reduce` | wideo zatrzymane na pierwszej klatce |
+
+**Uwaga przy powrocie do `scrub`:** obecne pliki mają zwykły GOP (`-g 48`), więc seek
+wstecz kosztuje dekodowanie od poprzedniej klatki kluczowej. Włączenie `mode="scrub"`
+wymaga przekodowania na all-intra — patrz „Kodowanie wideo".
+
+#### Bezpiecznik dekodera liczony od `loadstart`, nie od montażu
+
+W trybie `scrub` po 3 s bez danych scena przechodzi na zwykłe odtwarzanie (`fellBack`),
+żeby zamiast martwego prostokąta pokazać cokolwiek. Odliczanie startuje od zdarzenia
+`loadstart`, czyli od chwili, w której przeglądarka **faktycznie ruszyła po plik**.
+
+Wcześniej startowało od montażu komponentu. Przy `loading="lazy"` element nie ma wtedy
+jeszcze `src`, więc bezpiecznik wypadał na pusto **zawsze**, ustawiał `fellBack` i na
+trwałe wyłączał `applySeek` — scena manifestu zostawała zamrożona na pierwszej klatce,
+choć plik dochodził chwilę później bez zarzutu. Zmierzone przed i po, ten sam scenariusz:
+
+| | przed | po |
+|---|---|---|
+| `video.loop` po 4 s bez scrolla | `true` (fallback odpalił) | `false` |
+| `currentTime` przy 60% sceny | 0,042 s | 18,0 s |
 
 ### Co musi być spełnione, żeby scrub działał na telefonie
 
@@ -350,38 +391,88 @@ ruchowi kółka zatrzymać widoku w pół drogi.
 Sprawdzone przy 1280×720 i 375×812: nagłówek każdej z czterech zakładek ląduje na stałej
 wysokości, a w kadrze nie ma żadnej innej sekcji.
 
-## Kodowanie wideo pod scrub
+## Kodowanie wideo
 
-Źródła (`../Wideo/Wideo 1.mp4`, `Wideo 2.mp4`) to 1920×1080, 24 fps, 8 s, ~25–40 Mb/s ze
-standardowym GOP — każdy seek wymagał tam dekodowania od poprzedniej klatki kluczowej,
-stąd lagi. Pliki w `public/video/` są przekodowane na **720p all-intra**: wszystkie
-192 klatki to klatki kluczowe (`I`), więc każdy seek to dekodowanie jednej klatki.
+Źródła: `../Wideo/Wideo v1.mp4` → hero, `../Wideo/Wideo v2.mp4` → manifest.
+Mastery to **3840×2160, HEVC 10-bit, 24 fps, 10,04 s** (39 i 62 Mb/s).
 
-`ffmpeg-static` i `ffprobe-static` siedzą w `devDependencies` (binarki lokalne, nie
-trafiają na produkcję). Odtworzenie kodowania:
+Pliki w `public/video/` mają **ping-pong wpisany w plik**: za materiałem właściwym
+(241 klatek) idzie ten sam materiał odwrócony i przycięty o klatkę z obu stron
+(239 klatek). Razem 480 klatek / 20,0 s. Dzięki temu natywne `loop` odtwarza w kółko
+tam i z powrotem — bez jednej linijki JS, bez seekowania i bez szansy na zacięcie.
+
+Przycięcie odwrotki jest obowiązkowe: bez `trim` klatka skrajna leci dwa razy pod rząd
+i na każdym zawrocie widać przytrzymanie.
+
+Skoro nie scrubujemy, znika powód dla all-intra — stąd **zwykły GOP (`-g 48`)**, który
+przy 1080p mieści się w budżecie bajtów dawnego 720p all-intra:
+
+| | przed (720p all-intra, 8 s) | teraz (1080p GOP, 20 s ping-pong) |
+|---|---|---|
+| wideo-1 | 15,3 MB @ 15,3 Mb/s | 15,7 MB @ 6,3 Mb/s |
+| wideo-2 | 18,1 MB @ 18,0 Mb/s | 22,2 MB @ 8,9 Mb/s |
+
+Odtworzenie kodowania (skrypt trzyma się tego samego schematu dla obu plików):
 
 ```bash
-ffmpeg -y -i "../Wideo/Wideo 1.mp4" -an -vf "scale=1280:-2" -r 24 -c:v libx264 -preset slow -crf 22 -g 1 -keyint_min 1 -sc_threshold 0 -profile:v high -pix_fmt yuv420p -movflags +faststart public/video/wideo-1.mp4
+ffmpeg -y -i "../Wideo/Wideo v1.mp4" -an -vf "scale=1920:-2:flags=lanczos" -c:v libx264 -preset slow -crf 20 -pix_fmt yuv420p -g 48 -profile:v high -level 4.1 fwd.mp4
+ffmpeg -y -i "../Wideo/Wideo v1.mp4" -an -vf "scale=1920:-2:flags=lanczos,reverse,trim=start_frame=1:end_frame=240,setpts=PTS-STARTPTS" -c:v libx264 -preset slow -crf 20 -pix_fmt yuv420p -g 48 -profile:v high -level 4.1 rev.mp4
+printf "file 'fwd.mp4'\nfile 'rev.mp4'\n" > lista.txt
+ffmpeg -y -f concat -safe 0 -i lista.txt -c copy -movflags +faststart public/video/wideo-1.mp4
 ```
 
-`ScrollVideoScene` dodatkowo kwantyzuje `currentTime` do granicy klatki (prop `fps`,
-domyślnie 24) — bez tego scrub wysyłał kilka seeków w obrębie tej samej klatki.
+`-movflags +faststart` jest obowiązkowe — bez niego `moov` ląduje za `mdat` i odtwarzanie
+czeka na cały transfer. Sprawdzone: kolejność atomów to `ftyp → moov → free → mdat`.
 
-`motion` jest w `dependencies`, ale nie jest importowane — pozostałe animacje czekają
-na osobne polecenie.
+Plakaty (`public/img/poster-*.jpg`) to pierwsza klatka pliku wynikowego, 1024 px, `-q:v 6`.
+Muszą być regenerowane razem z wideo, inaczej pierwsza klatka nie zgadza się z plakatem.
+
+`ScrollVideoScene` kwantyzuje `currentTime` do granicy klatki (prop `fps`, domyślnie 24)
+— dotyczy wyłącznie trybu `scrub`.
+
+`motion` jest w `dependencies`, ale nie jest importowane.
+
+## Ekran startowy (`components/Preloader.tsx`)
+
+Zasłania stronę, dopóki hero nie ma czym grać — wideo waży kilkanaście MB i bez tego
+pierwsze sekundy wyglądały jak zawieszony plakat.
+
+Renderuje się **po stronie serwera**, więc jest już w pierwszym HTML-u. Gdyby montował
+się dopiero na kliencie, przez moment widać by było hero, które ma zasłaniać.
+
+Warunki zejścia:
+
+| | Wartość | Po co |
+|---|---|---|
+| hero melduje `canplay` **oraz** `document.fonts.ready` | — | właściwy sygnał gotowości |
+| dolna granica | 700 ms | przy pełnym cache ekran inaczej mrugnie i zniknie |
+| sufit | 7 s | awaria sieci nie może zamknąć nikogo pod zasłoną |
+
+Hero melduje gotowość zdarzeniem `ag:scena-gotowa`. Efekty dzieci lecą przed efektami
+rodzica, więc scena potrafi zameldować, zanim zasłona zdąży się podpiąć — wyścig zamyka
+flaga `stanScen.heroGotowe`, sprawdzana przy montażu.
+
+Zdjęcie z drzewa idzie na zegarze (1 s), **nie na `transitionend`**: przy
+`prefers-reduced-motion` zasłona gaśnie `opacity` zamiast jechać `transform`, więc
+nasłuch na `transform` nigdy by nie odpalił, a pusty `inset: 0` zostałby na stałe nad
+stroną i łapał wszystkie kliknięcia. `pointer-events: none` wchodzi już w chwili startu
+ruchu, nie po jego końcu.
+
+`<noscript>` chowa zasłonę — zdejmuje ją JavaScript, więc bez niego nie miałby jej kto zdjąć.
 
 ## Do uzupełnienia
 
 - `site.phone` / `site.phoneHref` w `lib/config.ts` — obecnie `+48 000 000 000`.
 - Zdjęcia realizacji (obecnie placeholdery).
-- `public/video/*.mp4` to 64 MB — jeśli repo ma iść na GitHub, rozważyć Git LFS albo
+- `public/video/*.mp4` to 37,9 MB — jeśli repo ma iść na GitHub, rozważyć Git LFS albo
   hosting wideo poza repozytorium.
 
 ## Ładowanie wideo
 
 Hero (`loading="eager"`, domyślne) startuje razem ze stroną. Scena manifestu ma
 `loading="lazy"` — atrybut `src` podpina się dopiero, gdy scena zbliży się do kadru
-na jeden ekran. Bez tego strona ciągnęła **32,5 MB** przy samym wejściu; teraz **14,6 MB**.
+na jeden ekran. Bez tego strona ciągnęła **37,9 MB** przy samym wejściu; teraz **15,7 MB**,
+i to pod zasłoną ekranu startowego.
 
 Wykrywanie zbliżenia stoi na zwykłym nasłuchu `scroll`, **nie na `IntersectionObserver`**.
 Gdyby obserwator z jakiegokolwiek powodu nie zadziałał, cała scena zostałaby na samym

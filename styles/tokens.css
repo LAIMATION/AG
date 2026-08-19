@@ -122,8 +122,15 @@
   --dur: 320ms;
   --dur-slow: 620ms;
 
+  /* Zejście ekranu startowego: jedyny długi ruch na stronie. Krzywa rusza wolno
+     i wyhamowuje na końcu — arkusz zdejmowany z deski, nie okno zamykane skrótem. */
+  --dur-boot: 900ms;
+  --ease-boot: cubic-bezier(0.76, 0, 0.24, 1);
+
   --z-nav: 100;
   --z-overlay: 50;
+  /* ekran startowy zasłania WSZYSTKO, łącznie z linkiem pomijającym (200) */
+  --z-boot: 300;
 }
 
 @media (max-width: 899px) {

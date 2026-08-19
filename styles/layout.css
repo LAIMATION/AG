@@ -56,6 +56,112 @@
   max-width: var(--maxw-text);
 }
 
+/* --- Ekran startowy --------------------------------------------------- */
+
+/* Zasłona na czas dociągania hero. Wychodzi jednym ruchem w górę — jak arkusz
+   zdejmowany z deski kreślarskiej. To jedyny autorski moment ruchu na wejściu;
+   reszta strony pojawia się bez animacji. */
+.ag-boot {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-boot);
+  display: grid;
+  place-items: center;
+  padding: var(--gutter);
+  background: var(--c-bg);
+  transform: translateY(0);
+  transition: transform var(--dur-boot) var(--ease-boot);
+}
+
+/* Klikalna od chwili, gdy zaczyna schodzić — nie po zakończeniu ruchu. Pół sekundy
+   martwych kliknięć nad już widoczną stroną czyta się jak zawieszenie. */
+.ag-boot[data-schodzi] {
+  transform: translateY(-100%);
+  pointer-events: none;
+}
+
+/* Treść gaśnie szybciej niż jedzie arkusz — inaczej napis „jedzie" razem z tłem
+   i przez pół sekundy widać go wjeżdżającego w górną krawędź ekranu. */
+.ag-boot__inner {
+  display: grid;
+  justify-items: start;
+  gap: var(--s-3);
+  transition: opacity var(--dur) var(--ease);
+}
+
+.ag-boot[data-schodzi] .ag-boot__inner {
+  opacity: 0;
+}
+
+.ag-boot__name {
+  font-size: var(--fs-h2);
+  font-weight: 500;
+  letter-spacing: var(--ls-heading);
+  line-height: var(--lh-heading);
+  color: var(--c-ink);
+}
+
+.ag-boot__lockup {
+  font-size: var(--fs-eyebrow);
+  font-weight: 500;
+  letter-spacing: var(--ls-label);
+  text-transform: uppercase;
+  color: var(--c-muted);
+}
+
+/* Linia spinająca systemu w roli paska postępu — ten sam element, który stoi nad
+   każdą etykietą, tutaj po prostu pracuje. Rośnie transformem, więc nie rusza layoutu. */
+.ag-boot__line {
+  position: relative;
+  width: 100%;
+  max-width: 15rem;
+  height: var(--rule-h);
+  margin-top: var(--s-3);
+  background: var(--c-line);
+}
+
+.ag-boot__line::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--c-accent);
+  transform-origin: left;
+  transform: scaleX(0);
+  animation: ag-boot-postep 5s var(--ease) forwards;
+}
+
+/* Do 92%, nie do 100% — pasek nie ma prawa zameldować końca, zanim hero faktycznie
+   nie ma czym grać. Domyka go dopiero `data-schodzi`. */
+@keyframes ag-boot-postep {
+  to {
+    transform: scaleX(0.92);
+  }
+}
+
+.ag-boot[data-schodzi] .ag-boot__line::before {
+  animation: none;
+  transform: scaleX(1);
+  transition: transform var(--dur-fast) var(--ease);
+}
+
+/* Ograniczony ruch: żadnego arkusza jadącego przez cały ekran ani rosnącego paska —
+   zasłona po prostu gaśnie, a linia stoi pełna. */
+@media (prefers-reduced-motion: reduce) {
+  .ag-boot {
+    transition: opacity var(--dur) var(--ease);
+  }
+
+  .ag-boot[data-schodzi] {
+    transform: none;
+    opacity: 0;
+  }
+
+  .ag-boot__line::before {
+    animation: none;
+    transform: scaleX(1);
+  }
+}
+
 /* --- Płytka nawigacji (pasek + przycisk powrotu) --------------------- */
 
 /* Płaski prostokąt na hairline, bez zaokrągleń i bez cienia — system stoi na

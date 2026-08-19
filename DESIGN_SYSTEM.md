@@ -108,6 +108,37 @@ prowadził do koloru, który już tam był.
 Sygnaturowy element: **48 × 2 px w akcencie**, nad etykietą i nad stopką.
 W kodzie klasa `.ag-rule` (pseudoelement, zero dodatkowego markupu).
 
+## Ruch
+
+Strona ma **jeden autorski moment ruchu**: zejście ekranu startowego. Reszta to
+przejścia stanów — hover, ton paska, zmiana opisu w karuzeli — na `--dur` i `--ease`.
+
+| Token | Wartość | Zastosowanie |
+|---|---|---|
+| `--ease` | `cubic-bezier(.22,.61,.36,1)` | wszystkie przejścia stanów |
+| `--dur-fast` / `--dur` / `--dur-slow` | `180` / `320` / `620 ms` | jw. |
+| `--dur-boot` | `900ms` | zejście ekranu startowego |
+| `--ease-boot` | `cubic-bezier(.76,0,.24,1)` | jw. — rusza wolno, wyhamowuje |
+
+### Ekran startowy
+
+Zasłona w `--c-bg` na czas dociągania hero (wideo waży kilkanaście MB). Wychodzi
+**jednym ruchem w górę**, jak arkusz zdejmowany z deski kreślarskiej — nie wygaszeniem.
+Krzywa `--ease-boot` jest symetryczna i wolna na starcie, żeby ruch czytał się jak
+podniesienie, a nie jak zamknięcie okna.
+
+Treść: nazwisko (`--fs-h2`, waga 500, **13,6:1**), pod nim lockup studia i regionu
+(`--fs-eyebrow`, wersaliki, **4,9:1**). Zero logotypu, zero spinnera.
+
+Pasek postępu to **linia spinająca systemu** — ten sam element, który stoi nad każdą
+etykietą, tutaj po prostu pracuje: 2 px, `--c-accent` na torze `--c-line`, rośnie
+`scaleX` (kompozytor, zero layoutu). Zatrzymuje się na **92%**, nie na 100% — pasek
+nie ma prawa zameldować końca, zanim hero faktycznie nie ma czym grać. Domyka go
+dopiero moment zejścia.
+
+Przy `prefers-reduced-motion: reduce` arkusz nie jedzie przez ekran i pasek nie rośnie:
+zasłona gaśnie, linia stoi pełna.
+
 ## Przestrzeń
 
 Skala 4 px: `--s-1` … `--s-11` = `0.25 / 0.5 / 0.75 / 1 / 1.5 / 2 / 3 / 4 / 6 / 8 / 10 rem`.

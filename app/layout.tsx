@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Archivo, Playball } from 'next/font/google';
 import { Nav } from '@/components/Nav';
+import { Preloader } from '@/components/Preloader';
 import { SmoothScroll } from '@/components/SmoothScroll';
 import { site } from '@/lib/config';
 
@@ -48,6 +49,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         {/* plakat hero to pierwsza rzecz, jaką widać — React 19 wynosi ten link do <head> */}
         <link rel="preload" as="image" href="/img/poster-1.jpg" />
+        {/* Zasłonę zdejmuje JavaScript. Bez niego nie miałby jej kto zdjąć,
+            więc przy wyłączonych skryptach w ogóle się nie pokazuje. */}
+        <noscript>
+          <style>{`.ag-boot { display: none !important; }`}</style>
+        </noscript>
+        <Preloader />
         <a className="ag-skip" href="#tresc">
           Przejdź do treści
         </a>

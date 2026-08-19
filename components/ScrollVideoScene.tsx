@@ -1,19 +1,32 @@
 'use client';
 
-/* Sekcja z wideo sterowanym scrollem.
-   Wideo jest sticky i wypełnia ekran przez całą wysokość sekcji, tekst przewija się po nim.
-   Postęp scrolla mapuje się na `currentTime` — scroll w dół przewija wideo w przód,
-   scroll w górę w tył (ScrollTrigger, scrub).
+/* Sekcja z wideo na pełnym kadrze. Wideo jest sticky i wypełnia ekran przez całą
+   wysokość sekcji, tekst przewija się po nim.
 
-   Scrub działa niezależnie od szerokości okna — pliki są all-intra 720p, więc seek to
-   dekodowanie jednej klatki. Jedyny wyjątek to prefers-reduced-motion: wideo stoi
-   na pierwszej klatce. */
+   Dwa tryby:
+
+   `loop` (domyślny, aktywny) — wideo leci samo, w tle. Ping-pong (przód, potem tył)
+   jest WPISANY W PLIK: za materiałem właściwym idzie ten sam materiał odwrócony,
+   więc natywne `loop` odtwarza w kółko tam i z powrotem. Zero JS na klatkach, zero
+   seekowania, zero szansy na zacięcie — i pliki mogą być zwykłym GOP-em zamiast
+   all-intra, co przy 1080p mieści się w budżecie dawnego 720p.
+
+   `scrub` (zachowany, nieaktywny) — postęp scrolla mapowany na `currentTime` przez
+   ScrollTrigger. Wymaga plików all-intra, inaczej seek wstecz kosztuje dekodowanie
+   od poprzedniej klatki kluczowej. Włącza się przez `mode="scrub"`. */
 
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
+
+/** Scena hero melduje gotowość, żeby ekran startowy wiedział, kiedy zejść. */
+export const SCENA_GOTOWA = 'ag:scena-gotowa';
+
+/* Efekty dzieci lecą przed efektami rodzica, więc hero potrafi zameldować gotowość,
+   zanim ekran startowy zdąży się podpiąć pod zdarzenie. Ta flaga zamyka ten wyścig. */
+export const stanScen = { heroGotowe: false };
 
 type Props = {
   id?: string;
@@ -22,11 +35,12 @@ type Props = {
   poster: string;
   /** długość sekcji w wysokościach ekranu — ostatni ekran zostaje na samo wideo */
   length: number;
-  /** klatki na sekundę pliku — służy do kwantyzacji seeków */
+  /** klatki na sekundę pliku — kwantyzacja seeków, tylko dla `scrub` */
   fps?: number;
   /** `lazy` odkłada pobranie pliku, aż scena zbliży się do kadru */
   loading?: 'eager' | 'lazy';
   veil?: 'default' | 'soft';
+  mode?: 'loop' | 'scrub';
   children: React.ReactNode;
 };
 
@@ -38,23 +52,22 @@ export function ScrollVideoScene({
   fps = 24,
   loading = 'eager',
   veil = 'default',
+  mode = 'loop',
   children,
 }: Props) {
   const rootRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  /* Wideo poniżej pierwszego ekranu nie może startować razem ze stroną — dwa pliki
-     po kilkanaście MB pobierane od razu to kilkanaście sekund transferu na komórce.
-     Źródło podpinamy dopiero, gdy scena zbliży się do kadru na jeden ekran. */
+  /* Wideo poniżej pierwszego ekranu nie może startować razem ze stroną — kilkanaście
+     MB pobierane od razu to kilkanaście sekund transferu na komórce. Źródło podpinamy
+     dopiero, gdy scena zbliży się do kadru na jeden ekran. */
   useEffect(() => {
     const root = rootRef.current;
     const video = videoRef.current;
     if (!root || !video || loading !== 'lazy' || video.src) return;
 
     /* Zwykły nasłuch scrolla zamiast IntersectionObserver: jeśli obserwator z
-       jakiegokolwiek powodu nie zadziała, cała scena zostaje na samym plakacie
-       i scrub nie ma czego przewijać. Ten wariant korzysta z tego samego
-       zdarzenia, na którym stoi reszta strony. */
+       jakiegokolwiek powodu nie zadziała, cała scena zostaje na samym plakacie. */
     const check = () => {
       const rect = root.getBoundingClientRect();
       const zapas = window.innerHeight; // jeden ekran przed wejściem w kadr
@@ -69,10 +82,63 @@ export function ScrollVideoScene({
     return () => window.removeEventListener('scroll', check);
   }, [loading, src]);
 
+  /* --- Tryb pętli ------------------------------------------------------- */
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || mode !== 'loop') return;
+
+    /* Zapętlone tło trwa 20 s i startuje samo, więc podlega WCAG 2.2.2 (Pause, Stop,
+       Hide). Przy `reduce` nie odtwarzamy nic — zostaje pierwsza klatka, tak samo jak
+       robił to tryb `scrub`.
+
+       Dlatego w JSX NIE MA atrybutu `autoPlay`: renderuje go serwer, więc odtwarzanie
+       ruszało, zanim efekt zdążył odczytać media query — zmierzone 0,58 s ruchu u kogoś,
+       kto prosił o brak ruchu. Start idzie wyłącznie stąd, przy `canplay`. */
+    const bezRuchu = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* Odrzucony `play()` to norma, nie awaria: iOS w Low Power Mode i Safari z
+       ustawieniem „Auto-Play: Never" nie puszczą startu bez gestu. Stąd ponowienie
+       przy pierwszym dotknięciu ekranu. */
+    const graj = () => {
+      if (bezRuchu) {
+        video.pause();
+        return;
+      }
+      if (!video.paused) return;
+      video.play().catch(() => {});
+    };
+
+    const gotowe = () => {
+      graj();
+      if (loading === 'lazy') return;
+      stanScen.heroGotowe = true;
+      window.dispatchEvent(new Event(SCENA_GOTOWA));
+    };
+
+    if (video.readyState >= 3) gotowe();
+    video.addEventListener('canplay', gotowe);
+    // `loadeddata` domyka przypadek, w którym autoplay ruszył, zanim efekt zdążył wejść
+    video.addEventListener('loadeddata', graj);
+    if (!bezRuchu) {
+      window.addEventListener('pointerdown', graj, { passive: true });
+      window.addEventListener('touchstart', graj, { passive: true });
+    }
+
+    return () => {
+      video.removeEventListener('canplay', gotowe);
+      video.removeEventListener('loadeddata', graj);
+      window.removeEventListener('pointerdown', graj);
+      window.removeEventListener('touchstart', graj);
+    };
+  }, [mode, loading]);
+
+  /* --- Tryb scrub (zachowany, nieaktywny) -------------------------------- */
+
   useEffect(() => {
     const root = rootRef.current;
     const video = videoRef.current;
-    if (!root || !video) return;
+    if (!root || !video || mode !== 'scrub') return;
 
     const onMeta = () => ScrollTrigger.refresh();
     video.addEventListener('loadedmetadata', onMeta);
@@ -86,127 +152,134 @@ export function ScrollVideoScene({
         coarse: '(pointer: coarse)',
       },
       (ctx) => {
-      const { motion, coarse } = ctx.conditions as { motion: boolean; coarse: boolean };
-      if (!motion) return;
+        const { motion, coarse } = ctx.conditions as { motion: boolean; coarse: boolean };
+        if (!motion) return;
 
-      video.loop = false;
+        video.loop = false;
 
-      /* iOS nie dekoduje wideo, którego nigdy nie odtworzono, a samo `play()`
-         przy montowaniu bywa odrzucane bez gestu użytkownika (Low Power Mode,
-         Safari → Auto-Play: Never). Dlatego rozgrzewkę ponawiamy przy pierwszym
-         dotknięciu ekranu — bez tego telefon pokazuje zamrożony kadr. */
-      /* Element `<video>` jest pusty, dopóki nie zdekodowano ani jednej klatki —
-         do tego momentu widać `poster`. Pauzujemy więc dopiero po pierwszej
-         WYRYSOWANEJ klatce, inaczej przy wolnym łączu zatrzymywaliśmy odtwarzanie,
-         zanim cokolwiek trafiło na ekran, i kadr zostawał pusty aż do scrolla. */
-      const frameGuards: number[] = [];
+        /* Element `<video>` jest pusty, dopóki nie zdekodowano ani jednej klatki —
+           do tego momentu widać `poster`. Pauzujemy więc dopiero po pierwszej
+           WYRYSOWANEJ klatce, inaczej przy wolnym łączu zatrzymywaliśmy odtwarzanie,
+           zanim cokolwiek trafiło na ekran. */
+        const frameGuards: number[] = [];
 
-      const pauseOnFirstFrame = () => {
-        const withRvfc = video as HTMLVideoElement & {
-          requestVideoFrameCallback?: (cb: () => void) => number;
+        const pauseOnFirstFrame = () => {
+          const withRvfc = video as HTMLVideoElement & {
+            requestVideoFrameCallback?: (cb: () => void) => number;
+          };
+          const stop = () => {
+            if (video.paused) return;
+            video.pause();
+            applySeek();
+          };
+
+          if (typeof withRvfc.requestVideoFrameCallback === 'function') {
+            withRvfc.requestVideoFrameCallback(stop);
+            /* Bezpiecznik: `requestVideoFrameCallback` nie odpala się, gdy karta nie
+               kompozytuje (np. jest w tle). Bez tego wideo grałoby aż do końca. */
+            frameGuards.push(window.setTimeout(stop, 300));
+            return;
+          }
+          stop();
         };
-        const stop = () => {
-          if (video.paused) return;
-          video.pause();
-          applySeek();
-        };
 
-        if (typeof withRvfc.requestVideoFrameCallback === 'function') {
-          withRvfc.requestVideoFrameCallback(stop);
-          /* Bezpiecznik: `requestVideoFrameCallback` nie odpala się, gdy karta nie
-             kompozytuje (np. jest w tle). Bez tego wideo grałoby dalej aż do końca
-             i scrub startowałby od ostatniej klatki. */
-          frameGuards.push(window.setTimeout(stop, 300));
-          return;
-        }
-        stop();
-      };
-
-      let unlocked = false;
-      const unlock = () => {
-        if (unlocked) return;
-        const started = video.play();
-        if (!started) {
-          unlocked = true;
-          pauseOnFirstFrame();
-          return;
-        }
-        started
-          .then(() => {
+        let unlocked = false;
+        const unlock = () => {
+          if (unlocked) return;
+          const started = video.play();
+          if (!started) {
             unlocked = true;
             pauseOnFirstFrame();
-          })
-          .catch(() => {});
-      };
+            return;
+          }
+          started
+            .then(() => {
+              unlocked = true;
+              pauseOnFirstFrame();
+            })
+            .catch(() => {});
+        };
 
-      /* Gdyby `play()` nie ruszył (polityka autoplay, oszczędzanie danych), samo
-         dojście danych nie zawsze wymusza wyrysowanie klatki — drobny seek to robi. */
-      const onLoadedData = () => {
-        if (video.paused && video.currentTime === 0) video.currentTime = 1 / fps;
-      };
-      video.addEventListener('loadeddata', onLoadedData);
+        /* Gdyby `play()` nie ruszył (polityka autoplay, oszczędzanie danych), samo
+           dojście danych nie zawsze wymusza wyrysowanie klatki — drobny seek to robi. */
+        const onLoadedData = () => {
+          if (video.paused && video.currentTime === 0) video.currentTime = 1 / fps;
+        };
+        video.addEventListener('loadeddata', onLoadedData);
 
-      let fellBack = false;
-      const proxy = { p: 0 };
+        let fellBack = false;
+        const proxy = { p: 0 };
 
-      const applySeek = () => {
-        if (fellBack) return;
-        const d = video.duration;
-        if (!d || !Number.isFinite(d) || video.readyState < 1) return;
+        const applySeek = () => {
+          if (fellBack) return;
+          const d = video.duration;
+          if (!d || !Number.isFinite(d) || video.readyState < 1) return;
 
-        // przyciągnij do granicy klatki — bez tego lecą seeki w obrębie tej samej
-        const step = 1 / fps;
-        const target = Math.round(Math.min(proxy.p * d, d - step) / step) * step;
-        if (Math.abs(video.currentTime - target) < step / 2) return;
+          // przyciągnij do granicy klatki — bez tego lecą seeki w obrębie tej samej
+          const step = 1 / fps;
+          const target = Math.round(Math.min(proxy.p * d, d - step) / step) * step;
+          if (Math.abs(video.currentTime - target) < step / 2) return;
 
-        /* Kluczowe dla telefonu: gdy seek trwa, NIE porzucamy pozycji. Wcześniej
-           taka klatka przepadała, a po wyhamowaniu scrolla nie było już żadnego
-           `onUpdate`, żeby ją nadgonić — wideo zostawało na starym kadrze. */
-        if (video.seeking) return;
-        video.currentTime = target;
-      };
+          /* Kluczowe dla telefonu: gdy seek trwa, NIE porzucamy pozycji — po
+             wyhamowaniu scrolla nie byłoby już żadnego `onUpdate`, żeby ją nadgonić. */
+          if (video.seeking) return;
+          video.currentTime = target;
+        };
 
-      // po każdym zakończonym seeku dociągamy do aktualnej pozycji scrolla
-      const onSeeked = () => applySeek();
-      video.addEventListener('seeked', onSeeked);
+        // po każdym zakończonym seeku dociągamy do aktualnej pozycji scrolla
+        const onSeeked = () => applySeek();
+        video.addEventListener('seeked', onSeeked);
 
-      unlock();
-      window.addEventListener('pointerdown', unlock, { passive: true });
-      window.addEventListener('touchstart', unlock, { passive: true });
+        unlock();
+        window.addEventListener('pointerdown', unlock, { passive: true });
+        window.addEventListener('touchstart', unlock, { passive: true });
 
-      /* Gdyby dekoder mimo wszystko nie ruszył, lepiej pokazać zwykłe odtwarzanie
-         niż martwy prostokąt. */
-      const guard = window.setTimeout(() => {
-        if (video.readyState >= 2) return;
-        fellBack = true;
-        video.loop = true;
-        video.play().catch(() => {});
-      }, 3000);
+        /* Gdyby dekoder mimo wszystko nie ruszył, lepiej pokazać zwykłe odtwarzanie
+           niż martwy prostokąt.
 
-      const tween = gsap.to(proxy, {
-        p: 1,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: root,
-          start: 'top top',
-          end: 'bottom bottom',
-          // na dotyku krótszy scrub — 1.1 s opóźnienia na telefonie czyta się jak awaria
-          scrub: coarse ? 0.35 : 1.1,
-          invalidateOnRefresh: true,
-        },
-        onUpdate: applySeek,
-      });
+           Odliczanie startuje od `loadstart`, czyli od chwili, w której przeglądarka
+           FAKTYCZNIE ruszyła po plik — nie od montażu komponentu. Przy `loading="lazy"`
+           element nie ma w tym momencie jeszcze `src`, więc bezpiecznik liczony od
+           montażu wypadał zawsze na pusto, ustawiał `fellBack` i na trwałe zabijał
+           scrub tej sceny, choć plik dochodził chwilę później bez zarzutu. */
+        let guard = 0;
+        const startGuard = () => {
+          window.clearTimeout(guard);
+          guard = window.setTimeout(() => {
+            if (video.readyState >= 2) return;
+            fellBack = true;
+            video.loop = true;
+            video.play().catch(() => {});
+          }, 3000);
+        };
+        if (video.currentSrc || video.src) startGuard();
+        video.addEventListener('loadstart', startGuard);
 
-      return () => {
-        frameGuards.forEach(window.clearTimeout);
-        window.clearTimeout(guard);
-        window.removeEventListener('pointerdown', unlock);
-        window.removeEventListener('touchstart', unlock);
-        video.removeEventListener('seeked', onSeeked);
-        video.removeEventListener('loadeddata', onLoadedData);
-        tween.scrollTrigger?.kill();
-        tween.kill();
-      };
+        const tween = gsap.to(proxy, {
+          p: 1,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: root,
+            start: 'top top',
+            end: 'bottom bottom',
+            // na dotyku krótszy scrub — 1.1 s opóźnienia na telefonie czyta się jak awaria
+            scrub: coarse ? 0.35 : 1.1,
+            invalidateOnRefresh: true,
+          },
+          onUpdate: applySeek,
+        });
+
+        return () => {
+          frameGuards.forEach(window.clearTimeout);
+          window.clearTimeout(guard);
+          window.removeEventListener('pointerdown', unlock);
+          window.removeEventListener('touchstart', unlock);
+          video.removeEventListener('loadstart', startGuard);
+          video.removeEventListener('seeked', onSeeked);
+          video.removeEventListener('loadeddata', onLoadedData);
+          tween.scrollTrigger?.kill();
+          tween.kill();
+        };
       },
     );
 
@@ -220,7 +293,7 @@ export function ScrollVideoScene({
       video.removeEventListener('loadedmetadata', onMeta);
       mm.revert();
     };
-  }, [fps]);
+  }, [fps, mode]);
 
   return (
     <section
@@ -239,6 +312,7 @@ export function ScrollVideoScene({
             poster={poster}
             muted
             playsInline
+            loop={mode === 'loop'}
             preload={loading === 'lazy' ? 'none' : 'auto'}
           />
           <div className="ag-scene__veil" data-veil={veil} />
