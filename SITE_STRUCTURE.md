@@ -376,3 +376,14 @@ na osobne polecenie.
 - Zdjęcia realizacji (obecnie placeholdery).
 - `public/video/*.mp4` to 64 MB — jeśli repo ma iść na GitHub, rozważyć Git LFS albo
   hosting wideo poza repozytorium.
+
+## Ładowanie wideo
+
+Hero (`loading="eager"`, domyślne) startuje razem ze stroną. Scena manifestu ma
+`loading="lazy"` — atrybut `src` podpina się dopiero, gdy scena zbliży się do kadru
+na jeden ekran. Bez tego strona ciągnęła **32,5 MB** przy samym wejściu; teraz **14,6 MB**.
+
+Wykrywanie zbliżenia stoi na zwykłym nasłuchu `scroll`, **nie na `IntersectionObserver`**.
+Gdyby obserwator z jakiegokolwiek powodu nie zadziałał, cała scena zostałaby na samym
+plakacie i scrub nie miałby czego przewijać — a tego trybu awarii nie widać na oko.
+Nasłuch scrolla korzysta z tego samego zdarzenia, na którym stoi reszta strony.

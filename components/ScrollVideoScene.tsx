@@ -24,6 +24,8 @@ type Props = {
   length: number;
   /** klatki na sekundę pliku — służy do kwantyzacji seeków */
   fps?: number;
+  /** `lazy` odkłada pobranie pliku, aż scena zbliży się do kadru */
+  loading?: 'eager' | 'lazy';
   veil?: 'default' | 'soft';
   children: React.ReactNode;
 };
@@ -34,11 +36,38 @@ export function ScrollVideoScene({
   poster,
   length,
   fps = 24,
+  loading = 'eager',
   veil = 'default',
   children,
 }: Props) {
   const rootRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  /* Wideo poniżej pierwszego ekranu nie może startować razem ze stroną — dwa pliki
+     po kilkanaście MB pobierane od razu to kilkanaście sekund transferu na komórce.
+     Źródło podpinamy dopiero, gdy scena zbliży się do kadru na jeden ekran. */
+  useEffect(() => {
+    const root = rootRef.current;
+    const video = videoRef.current;
+    if (!root || !video || loading !== 'lazy' || video.src) return;
+
+    /* Zwykły nasłuch scrolla zamiast IntersectionObserver: jeśli obserwator z
+       jakiegokolwiek powodu nie zadziała, cała scena zostaje na samym plakacie
+       i scrub nie ma czego przewijać. Ten wariant korzysta z tego samego
+       zdarzenia, na którym stoi reszta strony. */
+    const check = () => {
+      const rect = root.getBoundingClientRect();
+      const zapas = window.innerHeight; // jeden ekran przed wejściem w kadr
+      if (rect.top > window.innerHeight + zapas || rect.bottom < -zapas) return;
+      window.removeEventListener('scroll', check);
+      video.src = src;
+      video.load();
+    };
+
+    check();
+    window.addEventListener('scroll', check, { passive: true });
+    return () => window.removeEventListener('scroll', check);
+  }, [loading, src]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -204,7 +233,14 @@ export function ScrollVideoScene({
           dzięki czemu wideo zostaje przypięte aż do końca sceny */}
       <div className="ag-scene__media" aria-hidden="true">
         <div className="ag-scene__frame">
-          <video ref={videoRef} src={src} poster={poster} muted playsInline preload="auto" />
+          <video
+            ref={videoRef}
+            src={loading === 'lazy' ? undefined : src}
+            poster={poster}
+            muted
+            playsInline
+            preload={loading === 'lazy' ? 'none' : 'auto'}
+          />
           <div className="ag-scene__veil" data-veil={veil} />
         </div>
       </div>

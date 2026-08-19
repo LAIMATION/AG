@@ -195,12 +195,26 @@ export function ProjectRail() {
             (`overflow-y: hidden`), więc ten atrybut tylko odbierał Lenisowi koło:
             przeglądarka przewijała stronę natywnie i skokowo, a Lenis animował
             dalej ze swojej nieaktualnej pozycji — stąd szarpanie nad tą sekcją. */}
+        {/* `tabIndex` jest tu wymogiem, nie ozdobą: obszar przewijalny musi dać się
+            obsłużyć klawiaturą (WCAG 2.1.1), a kafelki są `div`-ami, więc same
+            fokusa nie łapią. Strzałki w lewo/prawo przesuwają o jeden kafelek. */}
         <div
           className="ag-rail__viewport"
           ref={viewportRef}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'ArrowLeft') {
+              e.preventDefault();
+              step(-1);
+            }
+            if (e.key === 'ArrowRight') {
+              e.preventDefault();
+              step(1);
+            }
+          }}
           role="group"
           aria-roledescription="karuzela"
-          aria-label="Realizacje"
+          aria-label="Realizacje — użyj strzałek w lewo i w prawo"
         >
           <ul className="ag-rail__track">
             {loop.map((p, i) => (

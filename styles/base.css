@@ -87,9 +87,22 @@ ul {
   color: var(--c-ink);
 }
 
+/* WCAG 1.4.11 wymaga 3:1 dla wskaźnika fokusa. Sam `--c-accent` daje 2,67:1 na kremie
+   i 2,98:1 na bieli — dlatego pierścień idzie w `--c-accent-ink` (4,8:1) i ma 2 px.
+   Na ciemnych tłach ten brąz znika, więc scena wideo i pas CTA dostają własny kolor. */
 :focus-visible {
-  outline: 1px solid var(--c-accent);
+  outline: 2px solid var(--c-accent-ink);
   outline-offset: 3px;
+}
+
+.ag-scene :focus-visible,
+[data-tone='dark'] :focus-visible {
+  outline-color: var(--c-inverse-ink);
+}
+
+/* na pomarańczu kremowy pierścień daje 2,7:1 — tam kontrast niesie granat */
+.ag-cta :focus-visible {
+  outline-color: var(--c-inverse);
 }
 
 .ag-skip {

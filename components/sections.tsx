@@ -105,6 +105,7 @@ export function Manifesto() {
       src="/video/wideo-2.mp4"
       poster="/img/poster-2.jpg"
       length={3}
+      loading="lazy"
       veil="soft"
     >
       <div className="ag-scene__panel">
