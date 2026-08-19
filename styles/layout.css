@@ -177,7 +177,7 @@
 }
 
 /* mobile: ten sam kafelek, tyle że u dołu */
-@media (max-width: 767px) {
+@media (max-width: 899px) {
   .ag-nav {
     top: auto;
     bottom: calc(var(--nav-offset) + env(safe-area-inset-bottom, 0px));
@@ -241,7 +241,7 @@
   transform: translateY(calc(100% + var(--fab-bottom)));
 }
 
-@media (max-width: 767px) {
+@media (max-width: 899px) {
   .ag-fab {
     right: var(--s-4);
   }
@@ -500,8 +500,11 @@
   border: var(--border);
 }
 
+/* Kafle są KREMOWE na białym pasie, nie białe: `--c-surface` na sekcji
+   `--c-bg-alt` dawał ten sam #ffffff, więc kafle znikały w tle, a hover
+   prowadził do koloru, który już tam był. */
 .ag-service {
-  background: var(--c-surface);
+  background: var(--c-bg);
   padding: clamp(1.5rem, 2.4vw, 2.5rem);
   display: grid;
   gap: var(--s-3);
@@ -511,7 +514,7 @@
 }
 
 .ag-service:hover {
-  background: #fff;
+  background: var(--c-bg-alt);
 }
 
 .ag-service__no {
@@ -921,7 +924,7 @@ a.ag-contact__value:hover {
 
 /* Blok stoi na końcu pliku celowo: nadpisuje bazowe siatki sekcji, które są
    zdefiniowane wyżej i mają tę samą specyficzność. */
-@media (max-width: 1023px) {
+@media (max-width: 1199px) {
   .ag-services__list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

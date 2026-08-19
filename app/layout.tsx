@@ -11,9 +11,10 @@ import '@/styles/components.css';
 
 /* Jedna rodzina groteskowa w skrajnych wagach niesie cały system;
    krój skryptowy pojawia się wyłącznie jako pojedynczy akcent na fotografii. */
+/* Bez listy wag — Archivo jest krojem zmiennym, więc jeden plik obsługuje całą oś
+   400–900. Wyliczanie wag pobierało cztery osobne pliki statyczne. */
 const sans = Archivo({
   subsets: ['latin', 'latin-ext'],
-  weight: ['400', '500', '600', '900'],
   display: 'swap',
   variable: '--font-sans',
 });

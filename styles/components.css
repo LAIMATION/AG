@@ -152,7 +152,7 @@
 }
 
 .ag-form__status[data-tone='error'] {
-  color: #9c4a35;
+  color: var(--c-error);
 }
 
 .ag-form__note {

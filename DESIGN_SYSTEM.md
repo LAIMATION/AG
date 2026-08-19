@@ -27,6 +27,7 @@ używany oszczędnie i konsekwentnie.
 | `--c-accent-soft` | `#f3d3b0` | akcent na ciemnym tle |
 | `--c-inverse` | `#1f2a35` | głęboki granat — scrim, tekst na pomarańczu |
 | `--c-inverse-ink` | `#f2eee4` | tekst na zdjęciach i granacie |
+| `--c-error` | `#b03a2e` | stan błędu formularza — 5,4:1 na kremie, 6,0:1 na bieli |
 
 ### Dwa odstępstwa od materiału źródłowego — oba wymuszone kontrastem
 
@@ -44,7 +45,8 @@ wersaliki 4,9–5,5:1 · hasło CTA 4,9:1 · przycisk 18,1:1.
 
 ## Typografia
 
-**Jedna rodzina groteskowa w skrajnych wagach** — Archivo (`latin-ext`, waga 400/500/600/900).
+**Jedna rodzina groteskowa w skrajnych wagach** — Archivo jako **krój zmienny**
+(oś 100–900, jeden plik na subset zamiast pliku na wagę).
 Krój skryptowy — Playball — **wyłącznie jako pojedyncza linia na fotografii**
 (hero i manifest); poza wideo nie występuje. Sprawdzone: Playball ma komplet
 polskich znaków łącznie z `ł`.
@@ -97,6 +99,10 @@ tłem plama wychodzi ciemna i granat na niej nie przechodzi:
 
 Sam pasek: 13,0:1 na jasnym, 7,5–9,5:1 nad wideo (najgorsza z próbkowanych klatek).
 
+Kafle w sekcji „Zakres" są **kremowe na białym pasie**. Wcześniej stały na
+`--c-surface`, czyli tym samym `#ffffff` co pas pod nimi — znikały w tle, a hover
+prowadził do koloru, który już tam był.
+
 ### Linia spinająca
 
 Sygnaturowy element: **48 × 2 px w akcencie**, nad etykietą i nad stopką.
@@ -119,28 +125,11 @@ Gęstość rozrzedzona, wyrównanie do lewej, blok treści w dolnej lub środkow
 
 | Próg | Zmiana |
 |---|---|
-| `≤599px` | realizacje → 1 kolumna, wiersz formularza → 1 kolumna |
-| `≤767px` | nawigacja na dół, pełna szerokość; `padding-bottom` na `body` |
-| `≤899px` | zakres → 1 kolumna; „O mnie" i „Kontakt" → 1 kolumna; sekcja może urosnąć ponad ekran |
-| `≤1023px` | zakres → 2 kolumny |
+| `≤599px` | wiersz formularza → 1 kolumna |
+| `≤899px` | nawigacja na dół; zakres → 1 kolumna; „O mnie" i „Kontakt" → 1 kolumna; strzałki karuzeli pod kadr; sekcja może urosnąć ponad ekran |
+| `≤1199px` | zakres → 2 kolumny |
 
-## Cele dotykowe
-
-Każdy `<a>` i `<button>` ma co najmniej **44 px** wysokości — łącznie z linkami
-`tel:`/`mailto:`, które jako sam wiersz tekstu mają ~25 px. Realizuje to
-`display: inline-flex; align-items: center; min-height: 44px`.
-
-## Ruch
-
-Przejścia stanu (hover, nawigacja, focus) + sceny wideo sterowane scrollem
-(GSAP ScrollTrigger — patrz SITE_STRUCTURE.md). Materiał źródłowy jest statyczny;
-animacje pochodzą z wideo i zostały zachowane bez zmian.
-
-## Zasady stosowania
-
-1. Kolor niesie hierarchię, nie dekorację — pełne wypełnienie akcentem występuje
-   na stronie **raz**, w pasie przed kontaktem.
-2. Zero zaokrągleń, zero cieni. Rozdziela linia 1 px albo zmiana tonu tła.
-3. Skrypt tylko na fotografii i tylko jedna linia.
-4. Waga 900 tylko na hasła.
-5. Nowe komponenty korzystają wyłącznie z tokenów.
+Skala to **600 / 900 / 1200**. Wcześniej progi stały na 599 / 767 / 899 / 1023, przez co
+między 768 a 899 px wychodziła strefa niczyja: górny pasek nawigacji przy w pełni
+jednokolumnowym układzie i strzałkach karuzeli już zepchniętych pod kadr. Nawigacja
+przełącza się teraz razem z układem.

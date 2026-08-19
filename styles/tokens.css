@@ -20,6 +20,9 @@
      Ta odmiana służy wyłącznie do pisania akcentem. */
   --c-accent-ink: #a85512;
 
+  /* czerwień stanu błędu — 5,4:1 na kremie, 6,1:1 na bieli */
+  --c-error: #b03a2e;
+
   --c-inverse: #1f2a35; /* głęboki granat — scrim, tekst na pomarańczu */
   --c-inverse-ink: #f2eee4;
   --c-inverse-muted: rgba(242, 238, 228, 0.82);
@@ -123,7 +126,7 @@
   --z-overlay: 50;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 899px) {
   :root {
     --section-y: clamp(4rem, 14vw, 6rem);
     --fab-bottom: calc(
