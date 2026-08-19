@@ -360,6 +360,24 @@ z `body` kontener scrolla i psuje `position: sticky`.
 
 ## Płynny scroll (`components/SmoothScroll.tsx`)
 
+### `lerp`, nie `duration` + `easing`
+
+Tryb `duration` to animacja o ustalonej długości: każde drgnięcie kółka startuje od
+nowa przebieg do nowego celu. Przy szybkim kręceniu kolejne przebiegi nadpisują się
+nawzajem, prędkość urywa się na każdym starcie i wychodzi z tego **pływanie
+z opóźnieniem, nie gładkość**. Było `duration: 1.15` z krzywą sześcienną.
+
+`lerp: 0.09` to wygładzanie wykładnicze — co klatkę pokonujemy ułamek dystansu, jaki
+został do celu. Nowe zdarzenie niczego nie przerywa, tylko przesuwa cel, więc ruch jest
+ciągły i zawsze liczony od pozycji **aktualnie na ekranie**: bez skoku i bez ściany
+prędkości przy zmianie kierunku. Stała czasowa ~0,19 s zamiast 1,15 s do wyhamowania.
+Lenis 1.x normalizuje `lerp` czasem klatki, więc 144 Hz nie przewija szybciej niż 60 Hz.
+
+Skok z menu (`scrollTo`) zostaje na **ustalonym czasie** — to ruch zakomenderowany, nie
+gest, i `lerp` go nie dotyczy. Krzywa jest tam podana wprost, bo po wyrzuceniu `easing`
+z konstruktora `scrollTo` brałby domyślną z biblioteki.
+
+
 Lenis zamontowany w `app/layout.tsx`. Bez niego jedno kliknięcie kółka to skok o ~100 px
 — tekst i klatki wideo przeskakują. Lenis interpoluje ten skok, a `scrub` dostaje ciągły
 strumień pozycji zamiast schodków.
@@ -504,6 +522,12 @@ ruchu, nie po jego końcu.
   w górę: Git LFS albo hosting wideo poza repozytorium.
 
 ## Ładowanie wideo
+
+**Gra zawsze najwyżej jedna scena.** Wideo pauzuje się, gdy jego sekcja wyjdzie
+poza kadr, i wraca, gdy do niego wjedzie. Bez tego oba pliki 4K dekodowały się
+równolegle przez cały czas — zmierzone: po powrocie na górę strony wideo manifestu
+nadal leciało, choć było ekran niżej. Dwa strumienie 4K naraz to podwojony koszt
+dekodera na każdą klatkę, a płaci się nim płynnością scrolla.
 
 Hero (`loading="eager"`, domyślne) startuje razem ze stroną. Scena manifestu ma
 `loading="lazy"` — atrybut `src` podpina się dopiero, gdy scena zbliży się do kadru

@@ -20,9 +20,24 @@ export function SmoothScroll() {
     let tick: ((time: number) => void) | null = null;
 
     if (!reduced) {
+      /* `lerp`, nie `duration` + `easing`.
+
+         Tryb `duration` to animacja o ustalonej długości: każde drgnięcie kółka
+         startuje od nowa 1,15-sekundowy przebieg do nowego celu. Przy szybkim
+         kręceniu kolejne przebiegi nadpisują się nawzajem, prędkość urywa się na
+         każdym starcie i wychodzi z tego pływanie z opóźnieniem — nie gładkość.
+
+         `lerp` to wygładzanie wykładnicze: co klatkę pokonujemy ułamek dystansu,
+         jaki został do celu. Nowe zdarzenie nie przerywa niczego, tylko przesuwa
+         cel — ruch jest ciągły i zawsze liczony od pozycji AKTUALNIE na ekranie,
+         więc nie ma ani skoku, ani ściany prędkości przy zmianie kierunku.
+         Lenis 1.x normalizuje `lerp` czasem klatki, więc 144 Hz nie przewija
+         szybciej niż 60 Hz.
+
+         0,09 daje stałą czasową ~0,19 s. Niżej robi się ślisko i traci kontakt
+         z kółkiem, wyżej wraca schodkowanie. */
       lenis = new Lenis({
-        duration: 1.15,
-        easing: (t: number) => 1 - Math.pow(1 - t, 3),
+        lerp: 0.09,
         smoothWheel: true,
         wheelMultiplier: 0.9,
         touchMultiplier: 1.4,
@@ -64,8 +79,18 @@ export function SmoothScroll() {
         top = Math.max(sectionTop, head.getBoundingClientRect().top + window.scrollY - pad);
       }
 
-      if (lenis) lenis.scrollTo(top, { duration: 1.2, lock: true });
-      else window.scrollTo({ top });
+      /* Skok z menu to ruch ZAKOMENDEROWANY, nie gest — tu ustalony czas jest na
+         miejscu i `lerp` z konstruktora go nie dotyczy. Krzywa podana wprost, bo po
+         wyrzuceniu `easing` z konstruktora `scrollTo` brałby domyślną z biblioteki.
+         Wykładnicza, nie sześcienna: przy skoku przez pół strony mocniej wyhamowuje
+         na końcu, więc sekcja „dojeżdża", a nie „dobija". */
+      if (lenis) {
+        lenis.scrollTo(top, {
+          duration: 1.2,
+          easing: (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)),
+          lock: true,
+        });
+      } else window.scrollTo({ top });
     };
 
     document.addEventListener('click', onClick);

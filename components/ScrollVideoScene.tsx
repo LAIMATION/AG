@@ -85,8 +85,9 @@ export function ScrollVideoScene({
   /* --- Tryb pętli ------------------------------------------------------- */
 
   useEffect(() => {
+    const root = rootRef.current;
     const video = videoRef.current;
-    if (!video || mode !== 'loop') return;
+    if (!root || !video || mode !== 'loop') return;
 
     /* Zapętlone tło trwa 16 s i startuje samo, więc podlega WCAG 2.2.2 (Pause, Stop,
        Hide). Przy `reduce` nie odtwarzamy nic — zostaje pierwsza klatka, tak samo jak
@@ -97,20 +98,29 @@ export function ScrollVideoScene({
        kto prosił o brak ruchu. Start idzie wyłącznie stąd, przy `canplay`. */
     const bezRuchu = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    /* Odrzucony `play()` to norma, nie awaria: iOS w Low Power Mode i Safari z
-       ustawieniem „Auto-Play: Never" nie puszczą startu bez gestu. Stąd ponowienie
-       przy pierwszym dotknięciu ekranu. */
-    const graj = () => {
-      if (bezRuchu) {
-        video.pause();
+    /* Gra TYLKO wtedy, gdy scena jest w kadrze. Bez tego oba pliki 4K dekodują się
+       równolegle przez cały czas — zmierzone: po powrocie na górę strony wideo
+       manifestu nadal leciało, choć było ekran poniżej. Dwa strumienie 4K naraz to
+       podwojony koszt dekodera na każdą klatkę, a płaci się nim płynność scrolla.
+
+       Odrzucony `play()` to norma, nie awaria: iOS w Low Power Mode i Safari
+       z ustawieniem „Auto-Play: Never" nie puszczą startu bez gestu — stąd
+       ponowienie przy pierwszym dotknięciu ekranu. */
+    const wKadrze = () => {
+      const rect = root.getBoundingClientRect();
+      return rect.top < window.innerHeight && rect.bottom > 0;
+    };
+
+    const rzadz = () => {
+      if (bezRuchu || !wKadrze()) {
+        if (!video.paused) video.pause();
         return;
       }
-      if (!video.paused) return;
-      video.play().catch(() => {});
+      if (video.paused) video.play().catch(() => {});
     };
 
     const gotowe = () => {
-      graj();
+      rzadz();
       if (loading === 'lazy') return;
       stanScen.heroGotowe = true;
       window.dispatchEvent(new Event(SCENA_GOTOWA));
@@ -118,18 +128,20 @@ export function ScrollVideoScene({
 
     if (video.readyState >= 3) gotowe();
     video.addEventListener('canplay', gotowe);
-    // `loadeddata` domyka przypadek, w którym autoplay ruszył, zanim efekt zdążył wejść
-    video.addEventListener('loadeddata', graj);
+    // `loadeddata` domyka przypadek, w którym odtwarzanie ruszyło przed wejściem efektu
+    video.addEventListener('loadeddata', rzadz);
+    window.addEventListener('scroll', rzadz, { passive: true });
     if (!bezRuchu) {
-      window.addEventListener('pointerdown', graj, { passive: true });
-      window.addEventListener('touchstart', graj, { passive: true });
+      window.addEventListener('pointerdown', rzadz, { passive: true });
+      window.addEventListener('touchstart', rzadz, { passive: true });
     }
 
     return () => {
       video.removeEventListener('canplay', gotowe);
-      video.removeEventListener('loadeddata', graj);
-      window.removeEventListener('pointerdown', graj);
-      window.removeEventListener('touchstart', graj);
+      video.removeEventListener('loadeddata', rzadz);
+      window.removeEventListener('scroll', rzadz);
+      window.removeEventListener('pointerdown', rzadz);
+      window.removeEventListener('touchstart', rzadz);
     };
   }, [mode, loading]);
 
