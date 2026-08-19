@@ -26,8 +26,8 @@ WEB/
 │   ├── layout.css              # siatka strony, układy sekcji, responsywność
 │   └── components.css          # przyciski, pola formularza, placeholdery
 ├── public/
-│   ├── video/wideo-1.mp4       # hero — 4K, ping-pong 20 s, 51,2 MB
-│   ├── video/wideo-2.mp4       # sekcja manifest — 4K, ping-pong 20 s, 68,6 MB
+│   ├── video/wideo-1.mp4       # hero — 4K/30fps, ping-pong 16 s, 44,3 MB
+│   ├── video/wideo-2.mp4       # sekcja manifest — 4K/30fps, ping-pong 16 s, 59,9 MB
 │   ├── img/poster-1.jpg        # pierwsza klatka wideo-1 (plakat)
 │   ├── img/poster-2.jpg        # pierwsza klatka wideo-2 (plakat)
 │   └── img/aleksandra-gosk.jpg # portret do sekcji "O mnie"
@@ -252,12 +252,12 @@ startu bez gestu).
 ruszało, zanim efekt zdążył odczytać `prefers-reduced-motion` — zmierzone **0,58 s ruchu
 u kogoś, kto prosił o brak ruchu**. Start idzie wyłącznie z JS.
 
-Zapętlone tło trwa 20 s i startuje samo, więc podlega **WCAG 2.2.2 (Pause, Stop, Hide)**.
+Zapętlone tło trwa 16 s i startuje samo, więc podlega **WCAG 2.2.2 (Pause, Stop, Hide)**.
 Przy `prefers-reduced-motion: reduce` wideo nie rusza w ogóle — zostaje pierwsza klatka,
 tak samo jak w trybie `scrub`. Zasłona startowa schodzi normalnie, bo gotowość melduje
 się niezależnie od tego, czy coś gra.
 
-Wideo trwają po 20 s (10 s materiału + 10 s odwrotki), `length={3}` daje spokojne tempo.
+Wideo trwają po 16 s (8 s materiału + 8 s odwrotki), `length={3}` daje spokojne tempo.
 Zmiana tempa = zmiana `length` w `components/sections.tsx`.
 
 Warianty `scrub` przez `gsap.matchMedia()` — **bez progu szerokości**, żeby wąskie okno
@@ -399,7 +399,7 @@ Mastery to **3840×2160, HEVC 10-bit, 24 fps, 10,04 s** (39 i 62 Mb/s).
 
 Pliki w `public/video/` mają **ping-pong wpisany w plik**: za materiałem właściwym
 (241 klatek) idzie ten sam materiał odwrócony i przycięty o klatkę z obu stron
-(239 klatek). Razem 480 klatek / 20,0 s. Dzięki temu natywne `loop` odtwarza w kółko
+(239 klatek). Razem 480 klatek / 16,0 s. Dzięki temu natywne `loop` odtwarza w kółko
 tam i z powrotem — bez jednej linijki JS, bez seekowania i bez szansy na zacięcie.
 
 Przycięcie odwrotki jest obowiązkowe: bez `trim` klatka skrajna leci dwa razy pod rząd
@@ -408,10 +408,10 @@ i na każdym zawrocie widać przytrzymanie.
 **Rozdzielczość zostaje 4K — bez skalowania w dół.** Skoro nie scrubujemy, znika powód
 dla all-intra, więc zwykły GOP (`-g 48`) kupuje budżet na pełne 3840×2160:
 
-| | 720p all-intra, 8 s (pierwotnie) | 4K GOP, 20 s ping-pong (teraz) |
+| | 720p all-intra, 24 fps, 8 s (pierwotnie) | 4K GOP, 30 fps, 16 s ping-pong (teraz) |
 |---|---|---|
-| wideo-1 | 15,3 MB @ 15,3 Mb/s | 51,2 MB @ 20,5 Mb/s |
-| wideo-2 | 18,1 MB @ 18,0 Mb/s | 68,6 MB @ 27,4 Mb/s |
+| wideo-1 | 15,3 MB @ 15,3 Mb/s | 44,3 MB @ 22,1 Mb/s |
+| wideo-2 | 18,1 MB @ 18,0 Mb/s | 59,9 MB @ 30,0 Mb/s |
 
 Master jest **HEVC 10-bit**, wynik to **H.264 High 8-bit, Level 5.1** — High10 odpada,
 bo przeglądarki go nie dekodują. Konwersja do 8 bitów jest tu nieunikniona.
@@ -437,8 +437,24 @@ ffmpeg -y -f concat -safe 0 -i lista.txt -c copy -movflags +faststart public/vid
 `-movflags +faststart` jest obowiązkowe — bez niego `moov` ląduje za `mdat` i odtwarzanie
 czeka na cały transfer. Sprawdzone: kolejność atomów to `ftyp → moov → free → mdat`.
 
-Zmierzone w przeglądarce: `videoWidth × videoHeight` = **3840 × 2160**, 356 klatek
-zdekodowanych, **0 opuszczonych**, przejście przez punkt zawrotu (10,04 s) bez przerwy.
+### 30 fps przez przyspieszenie, nie przez interpolację
+
+Źródło ma 24 fps. Na ekranie 60 Hz wychodzi **60 / 24 = 2,5**, więc klatki lecą
+naprzemiennie po 3 i 2 odświeżenia (pulldown) — na powolnym najeździe widać to jako
+szarpanie. Przy 30 fps jest równo **60 / 30 = 2** i judder znika.
+
+Klatkaż podnosimy **tempem**: `setpts=PTS/1.25` plus `-r 30`. Wszystkie 241 klatek
+źródła zostają co do jednej, tylko zajmują 8,03 s zamiast 10,04 s (241 / 8,0333 = 30
+równo). Żadna klatka nie jest ani powielona, ani wymyślona, ani wyrzucona — sprawdzone:
+`nb_read_frames` = 480 przed i po.
+
+Interpolacja (`minterpolate`) zachowałaby tempo, ale na 4K liczy się w dziesiątkach
+minut na plik i potrafi zostawić artefakty na krawędziach.
+
+`-g 60` zamiast `-g 48` — ta sama odległość klatek kluczowych w sekundach (2 s).
+
+Zmierzone w przeglądarce: `videoWidth × videoHeight` = **3840 × 2160**, **0 klatek
+opuszczonych**, przejście przez punkt zawrotu bez przerwy.
 
 Plakaty (`public/img/poster-*.jpg`) to pierwsza klatka pliku wynikowego, 1400 px, `-q:v 6`.
 Muszą być regenerowane razem z wideo, inaczej pierwsza klatka nie zgadza się z plakatem.
@@ -482,8 +498,8 @@ ruchu, nie po jego końcu.
 
 - `site.phone` / `site.phoneHref` w `lib/config.ts` — obecnie `+48 000 000 000`.
 - Zdjęcia realizacji (obecnie placeholdery).
-- `public/video/*.mp4` to **119,8 MB** — GitHub ostrzega powyżej 50 MB na plik i twardo
-  blokuje powyżej 100 MB. `wideo-2.mp4` (68,6 MB) siedzi między tymi progami, więc
+- `public/video/*.mp4` to **104,2 MB** — GitHub ostrzega powyżej 50 MB na plik i twardo
+  blokuje powyżej 100 MB. `wideo-2.mp4` (59,9 MB) siedzi między tymi progami, więc
   push przechodzi, ale kolejne podniesienie jakości już nie. Przy następnym kroku
   w górę: Git LFS albo hosting wideo poza repozytorium.
 
@@ -491,7 +507,7 @@ ruchu, nie po jego końcu.
 
 Hero (`loading="eager"`, domyślne) startuje razem ze stroną. Scena manifestu ma
 `loading="lazy"` — atrybut `src` podpina się dopiero, gdy scena zbliży się do kadru
-na jeden ekran. Bez tego strona ciągnęła **119,8 MB** przy samym wejściu; teraz **51,2 MB**,
+na jeden ekran. Bez tego strona ciągnęła **104,2 MB** przy samym wejściu; teraz **44,3 MB**,
 i to pod zasłoną ekranu startowego.
 
 Plakat hero **nie jest już wstępnie pobierany** (`<link rel="preload">` usunięty z

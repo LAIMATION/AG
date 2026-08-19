@@ -9,7 +9,7 @@
    jest WPISANY W PLIK: za materiałem właściwym idzie ten sam materiał odwrócony,
    więc natywne `loop` odtwarza w kółko tam i z powrotem. Zero JS na klatkach, zero
    seekowania, zero szansy na zacięcie — i pliki mogą być zwykłym GOP-em zamiast
-   all-intra, co przy 1080p mieści się w budżecie dawnego 720p.
+   all-intra, co kupuje budżet na pełne 4K.
 
    `scrub` (zachowany, nieaktywny) — postęp scrolla mapowany na `currentTime` przez
    ScrollTrigger. Wymaga plików all-intra, inaczej seek wstecz kosztuje dekodowanie
@@ -35,7 +35,7 @@ type Props = {
   poster: string;
   /** długość sekcji w wysokościach ekranu — ostatni ekran zostaje na samo wideo */
   length: number;
-  /** klatki na sekundę pliku — kwantyzacja seeków, tylko dla `scrub` */
+  /** klatki na sekundę pliku — kwantyzacja seeków, tylko dla `scrub`. Pliki mają 30. */
   fps?: number;
   /** `lazy` odkłada pobranie pliku, aż scena zbliży się do kadru */
   loading?: 'eager' | 'lazy';
@@ -49,7 +49,7 @@ export function ScrollVideoScene({
   src,
   poster,
   length,
-  fps = 24,
+  fps = 30,
   loading = 'eager',
   veil = 'default',
   mode = 'loop',
@@ -88,7 +88,7 @@ export function ScrollVideoScene({
     const video = videoRef.current;
     if (!video || mode !== 'loop') return;
 
-    /* Zapętlone tło trwa 20 s i startuje samo, więc podlega WCAG 2.2.2 (Pause, Stop,
+    /* Zapętlone tło trwa 16 s i startuje samo, więc podlega WCAG 2.2.2 (Pause, Stop,
        Hide). Przy `reduce` nie odtwarzamy nic — zostaje pierwsza klatka, tak samo jak
        robił to tryb `scrub`.
 
