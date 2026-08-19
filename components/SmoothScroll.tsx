@@ -34,12 +34,27 @@ export function SmoothScroll() {
          Lenis 1.x normalizuje `lerp` czasem klatki, więc 144 Hz nie przewija
          szybciej niż 60 Hz.
 
-         0,09 daje stałą czasową ~0,19 s. Niżej robi się ślisko i traci kontakt
-         z kółkiem, wyżej wraca schodkowanie. */
+         Dwa pokrętła robią tu RÓŻNE rzeczy i mylenie ich to główny powód, dla
+         którego gładki scroll wychodzi „lagujący":
+
+         `lerp` — jak szybko dojeżdżamy do celu, i to ONO odpowiada za wrażenie lagu.
+         Wygładzanie wykładnicze ma długi ogon: przy 0,09 pojedynczy klik sunął
+         jeszcze ~0,6 s po tym, jak kółko już stanęło. Ruch trwający dłużej niż
+         wywołujący go gest nie czyta się jako gładki, tylko jako spóźniony — i to
+         on sprawia, że krok wygląda na „wielki skok", bo widać całą jego drogę.
+         0,14 skraca dojazd do ~0,33 s.
+
+         `wheelMultiplier` — DYSTANS na kliknięcie, zupełnie osobna sprawa. Kusi,
+         żeby go ściąć, ale strona ma 10,5 ekranu (6 z tego to dwie przypięte sceny
+         wideo). Zmierzone: 0,9 to 105 kliknięć do końca, 0,7 już 135. 0,8 ścina
+         krok do ~80 px kosztem ~13 kliknięć i to jest cała rozsądna rezerwa.
+
+         Gdyby dalej było ospale, kręcić `lerp` (0,16–0,18), nie mnożnikiem —
+         mnożnik w dół robi stronę mozolną, nie gładką. */
       lenis = new Lenis({
-        lerp: 0.09,
+        lerp: 0.14,
         smoothWheel: true,
-        wheelMultiplier: 0.9,
+        wheelMultiplier: 0.8,
         touchMultiplier: 1.4,
       });
 

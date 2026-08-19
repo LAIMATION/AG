@@ -370,11 +370,34 @@ nowa przebieg do nowego celu. Przy szybkim kręceniu kolejne przebiegi nadpisuj�
 nawzajem, prędkość urywa się na każdym starcie i wychodzi z tego **pływanie
 z opóźnieniem, nie gładkość**. Było `duration: 1.15` z krzywą sześcienną.
 
-`lerp: 0.09` to wygładzanie wykładnicze — co klatkę pokonujemy ułamek dystansu, jaki
-został do celu. Nowe zdarzenie niczego nie przerywa, tylko przesuwa cel, więc ruch jest
-ciągły i zawsze liczony od pozycji **aktualnie na ekranie**: bez skoku i bez ściany
-prędkości przy zmianie kierunku. Stała czasowa ~0,19 s zamiast 1,15 s do wyhamowania.
-Lenis 1.x normalizuje `lerp` czasem klatki, więc 144 Hz nie przewija szybciej niż 60 Hz.
+`lerp` to wygładzanie wykładnicze — co klatkę pokonujemy ułamek dystansu, jaki został
+do celu. Nowe zdarzenie niczego nie przerywa, tylko przesuwa cel, więc ruch jest ciągły
+i zawsze liczony od pozycji **aktualnie na ekranie**: bez skoku i bez ściany prędkości
+przy zmianie kierunku. Lenis 1.x normalizuje `lerp` czasem klatki, więc 144 Hz nie
+przewija szybciej niż 60 Hz.
+
+### Dwa pokrętła, dwie różne sprawy
+
+Mylenie ich to główny powód, dla którego gładki scroll wychodzi „lagujący".
+
+| Pokrętło | Co robi | Wartość |
+|---|---|---|
+| `lerp` | jak szybko dojeżdżamy do celu | **0,14** |
+| `wheelMultiplier` | dystans na kliknięcie kółka | **0,8** (~80 px) |
+
+**Za wrażenie lagu odpowiada `lerp`, nie mnożnik.** Wygładzanie wykładnicze ma długi
+ogon — przy 0,09 pojedynczy klik sunął jeszcze ~0,53 s po tym, jak kółko stanęło. Ruch
+trwający dłużej niż wywołujący go gest nie czyta się jako gładki, tylko jako spóźniony,
+i to on sprawia, że krok wygląda na „wielki skok": widać całą jego drogę. 0,14 skraca
+dojazd do ~0,33 s.
+
+Stałe czasowe przy 60 Hz (dojazd do 95%): `0,09` → 0,53 s · `0,13` → 0,36 s ·
+**`0,14` → 0,33 s** · `0,16` → 0,29 s · `0,18` → 0,25 s.
+
+**Mnożnika nie wolno ciąć mocno.** Strona ma **10,5 ekranu**, z czego 6 to dwie przypięte
+sceny wideo. Zmierzone kliknięcia kółka do końca strony: `0,9` → 105, `0,8` → 118,
+`0,7` → 135. 0,8 to cała rozsądna rezerwa — niżej strona robi się mozolna, nie gładsza.
+Gdyby dalej było ospale, kręcić `lerp` (0,16–0,18).
 
 Skok z menu (`scrollTo`) zostaje na **ustalonym czasie** — to ruch zakomenderowany, nie
 gest, i `lerp` go nie dotyczy. Krzywa jest tam podana wprost, bo po wyrzuceniu `easing`
