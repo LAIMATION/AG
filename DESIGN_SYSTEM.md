@@ -72,6 +72,38 @@ tekst da się przeczytać. Luz oddają zdjęcia i odstępy, nigdy tekst.
 Hasło CTA łamie się na kilka linii małymi literami, więc dostało `1.06` zamiast
 systemowych `0.95` — przy tej ciasnocie `ł/ę` z jednej linii dotykały następnej.
 
+### Znak studia — lockup ATRIUM / STUDIO
+
+Dwuwierszowy znak w hero, odwzorowany z logotypu. Jego tożsamość to trzy rzeczy:
+**wersaliki w wadze regularnej, szerokie światło międzyliterowe i „STUDIO" dosunięte
+do prawej krawędzi „ATRIUM"**.
+
+| | Stopień | Waga | Światło |
+|---|---|---|---|
+| ATRIUM | `clamp(1.625rem, 2.6vw, 2.25rem)` | 400 | `.16em` |
+| STUDIO | `max(.6875rem, .34em)` | 400 | `.26em` |
+
+**Stopień niesie cały znak, wiersze liczą się w `em` od niego.** Przy dwóch niezależnych
+`clamp`ach stosunek wierszy pływał z szerokością okna (zmierzone 0,55 na wąskim wobec
+0,33 na szerokim), a w logotypie jest stały. Teraz 0,34 na szerokim i 0,42 na wąskim —
+`max()` nie pozwala drugiemu wierszowi zejść poniżej 11 px, bo w tym systemie
+czytelność wygrywa z wiernością odwzorowania.
+
+Światło **rośnie** wraz ze zmniejszeniem stopnia (`.16em` → `.26em`): mniejszy stopień
+znosi więcej światła, więc przy równej wartości drugi wiersz czytałby się jako ciaśniejszy.
+To jedyne miejsce w systemie, gdzie tracking idzie w górę — w znaku światło nie jest
+dostrojeniem, tylko samą tożsamością.
+
+**Oba wiersze mają ujemny margines prawy równy własnemu światłu.** `letter-spacing`
+dokłada światło także za ostatnią literą, więc bez tej korekty „STUDIO" wyrównywałoby
+się do pustki za „M", a nie do samego „M". Sprawdzone eksperymentem: bez korekty tusz
+rozjeżdża się o 1,3 px, z korektą stoi równo na wszystkich trzech szerokościach.
+
+Znak stoi w górnej krawędzi pierwszego ekranu, na **tej samej osi pionowej** co eyebrow,
+hasło i nazwisko. Hierarchia marki zostaje nietknięta: znak ma 36 px w wadze 400,
+nazwisko `clamp(2.75rem, 8vw, 7rem)` w wadze 900. Kolor kremowy `--c-inverse-ink`,
+kontrast **12,6:1** na scrimie sceny.
+
 ## Kształt
 
 **`--radius: 0` w całym systemie. Zero cieni.** Płaska, kreślarska precyzja —

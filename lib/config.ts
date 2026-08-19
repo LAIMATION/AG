@@ -5,6 +5,9 @@ export const site = {
   name: 'Aleksandra Gosk',
   role: 'Architekt',
   studio: 'ATRIUM STUDIO',
+  /* Znak studia rozbity na dwie linie — w lockupie „STUDIO" jest osobnym,
+     pomniejszonym wierszem dosuniętym do prawej krawędzi „ATRIUM". */
+  studioMark: { name: 'ATRIUM', sub: 'STUDIO' },
   region: 'Białystok · Zambrów',
   // TODO: podmienić na prawdziwy numer telefonu
   phone: '+48 000 000 000',

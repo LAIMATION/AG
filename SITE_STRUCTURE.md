@@ -64,7 +64,10 @@ jak przypadkowy podział. Kolejność: `--c-bg` (O mnie) → `--c-bg-alt` (Usłu
 początku pasa.
 
 ### 1. Hero
-Scena wideo (`ScrollVideoScene`, `length={3}`) na Wideo 1. Panel 1 (dosunięty do dołu):
+Scena wideo (`ScrollVideoScene`, `length={3}`) na Wideo 1.
+W górnej krawędzi pierwszego ekranu **znak studia** (`.ag-lockup`, ATRIUM / STUDIO) —
+specyfikacja w DESIGN_SYSTEM.md. Stoi na tej samej osi pionowej co eyebrow, hasło
+i nazwisko; treść znaku pochodzi z `site.studioMark`. Panel 1 (dosunięty do dołu):
 eyebrow → imię i nazwisko (`clamp(3rem, 9vw, 8.5rem)`) → wskaźnik scrolla.
 Panel 2: lead + CTA „Porozmawiajmy o projekcie". Trzeci ekran to samo wideo.
 

@@ -9,7 +9,18 @@ import { about, contact, cta, hero, manifesto, projects, services, site } from '
 export function Hero() {
   return (
     <ScrollVideoScene id="top" src="/video/wideo-1.mp4" poster="/img/poster-1.jpg" length={3}>
+      {/* Znak studia stempluje górę kadru, nazwisko trzyma dół — dzięki temu ATRIUM
+          jest obecne, ale hierarchia marki zostaje nietknięta. */}
       <div className="ag-scene__panel ag-scene__panel--bottom">
+        <div className="ag-hero__mark">
+          <div className="ag-shell">
+            <p className="ag-lockup">
+              <span className="ag-lockup__name">{site.studioMark.name}</span>
+              <span className="ag-lockup__sub">{site.studioMark.sub}</span>
+            </p>
+          </div>
+        </div>
+
         <div className="ag-shell ag-hero__inner">
           <p className="ag-eyebrow ag-hero__eyebrow ag-rule">{hero.eyebrow}</p>
           <p className="ag-script ag-hero__script">{hero.script}</p>
