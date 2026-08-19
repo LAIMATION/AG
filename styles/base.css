@@ -178,3 +178,25 @@ ul {
   letter-spacing: 0;
   color: var(--c-inverse-ink);
 }
+
+/* --- Ograniczony ruch ------------------------------------------------ */
+
+/* Sceny wideo, Lenis i karuzela pytają o to ustawienie w JS, ale przejścia CSS
+   — pasek, hover, przyciski — grały niezależnie. Skracamy je do niezauważalnych
+   zamiast wyłączać: stan nadal się zmienia, tylko bez animacji. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 1ms;
+    --dur: 1ms;
+    --dur-slow: 1ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}

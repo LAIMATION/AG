@@ -1,8 +1,13 @@
 'use client';
 
-/* Formularz kontaktowy — POST na /api/kontakt, wysyłka SMTP przez Gmail. */
+/* Formularz kontaktowy — POST na /api/kontakt, wysyłka SMTP przez Gmail.
+
+   Limity znaków pochodzą z `formLimits` i są tu tylko afordancją: pole przestaje
+   przyjmować znaki, licznik pokazuje ile zostało. Właściwa walidacja siedzi na
+   serwerze, bo `maxLength` da się ominąć wysyłając żądanie z pominięciem formularza. */
 
 import { useState } from 'react';
+import { formLimits } from '@/lib/config';
 
 type Tone = 'idle' | 'ok' | 'error';
 
@@ -10,6 +15,7 @@ export function ContactForm() {
   const [status, setStatus] = useState('');
   const [tone, setTone] = useState<Tone>('idle');
   const [sending, setSending] = useState(false);
+  const [uzyte, setUzyte] = useState(0);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -36,39 +42,50 @@ export function ContactForm() {
       if (!res.ok) throw new Error('send-failed');
 
       form.reset();
+      setUzyte(0);
       setTone('ok');
       setStatus('Dziękuję — wiadomość została wysłana.');
     } catch {
       setTone('error');
-      setStatus('Nie udało się wysłać. Proszę spróbować ponownie lub zadzwonić.');
+      setStatus('Nie udało się wysłać. Spróbuj ponownie albo zadzwoń.');
     } finally {
       setSending(false);
     }
   };
 
+  const zostalo = formLimits.wiadomosc.max - uzyte;
+
   return (
-    <form className="ag-form" onSubmit={onSubmit}>
+    <form className="ag-form" onSubmit={onSubmit} noValidate={false}>
       <div className="ag-form__row">
         <label className="ag-field">
-          <span className="ag-field__label">Imię i nazwisko</span>
+          <span className="ag-field__label">
+            Imię i nazwisko <span className="ag-field__req">(wymagane)</span>
+          </span>
           <input
             className="ag-input"
             name="imie"
             type="text"
             required
+            minLength={formLimits.imie.min}
+            maxLength={formLimits.imie.max}
             autoComplete="name"
-            placeholder="Jak się do Państwa zwracać"
+            placeholder="Jak się do Ciebie zwracać"
           />
         </label>
 
         <label className="ag-field">
-          <span className="ag-field__label">E-mail</span>
+          <span className="ag-field__label">
+            E-mail <span className="ag-field__req">(wymagane)</span>
+          </span>
           <input
             className="ag-input"
             name="email"
             type="email"
             required
+            maxLength={formLimits.email.max}
             autoComplete="email"
+            inputMode="email"
             placeholder="adres@poczta.pl"
           />
         </label>
@@ -80,18 +97,28 @@ export function ContactForm() {
           className="ag-input"
           name="telefon"
           type="tel"
+          maxLength={formLimits.telefon.max}
           autoComplete="tel"
+          inputMode="tel"
           placeholder="+48 …"
         />
       </label>
 
       <label className="ag-field ag-field--grow">
-        <span className="ag-field__label">Wiadomość</span>
+        <span className="ag-field__label">
+          Wiadomość <span className="ag-field__req">(wymagane)</span>
+          <span className="ag-field__count" aria-hidden="true">
+            {zostalo} znaków
+          </span>
+        </span>
         <textarea
           className="ag-textarea"
           name="wiadomosc"
           required
-          placeholder="Lokalizacja działki, planowany metraż, etap przygotowań, terminy…"
+          minLength={formLimits.wiadomosc.min}
+          maxLength={formLimits.wiadomosc.max}
+          onChange={(e) => setUzyte(e.currentTarget.value.length)}
+          placeholder="Lokalizacja działki, rodzaj budynku, planowany metraż, etap przygotowań, terminy…"
         />
       </label>
 
@@ -107,7 +134,14 @@ export function ContactForm() {
         <button className="ag-btn" type="submit" disabled={sending}>
           {sending ? 'Wysyłam…' : 'Wyślij wiadomość'}
         </button>
-        <span className="ag-form__status" data-tone={tone} role="status" aria-live="polite">
+        {/* Błąd musi przerwać czytnikowi bieżącą wypowiedź — `status` jest zbyt
+            łagodny na komunikat, po którym trzeba coś poprawić. */}
+        <span
+          className="ag-form__status"
+          data-tone={tone}
+          role={tone === 'error' ? 'alert' : 'status'}
+          aria-live={tone === 'error' ? 'assertive' : 'polite'}
+        >
           {status}
         </span>
       </div>

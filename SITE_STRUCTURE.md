@@ -387,3 +387,26 @@ Wykrywanie zbliżenia stoi na zwykłym nasłuchu `scroll`, **nie na `Intersectio
 Gdyby obserwator z jakiegokolwiek powodu nie zadziałał, cała scena zostałaby na samym
 plakacie i scrub nie miałby czego przewijać — a tego trybu awarii nie widać na oko.
 Nasłuch scrolla korzysta z tego samego zdarzenia, na którym stoi reszta strony.
+
+## Walidacja formularza
+
+Limity żyją w `formLimits` (`lib/config.ts`) i obowiązują po obu stronach:
+
+| Pole | Min | Max | Dodatkowo |
+|---|---|---|---|
+| `imie` | 2 | 80 | — |
+| `email` | — | 254 | `type="email"` + regexp na serwerze |
+| `telefon` | — | 24 | opcjonalne |
+| `wiadomosc` | 10 | 1500 | licznik pozostałych znaków |
+
+`maxLength` i `type="email"` w przeglądarce to **afordancja, nie zabezpieczenie** —
+żądanie da się wysłać z pominięciem formularza, więc `app/api/kontakt/route.ts`
+sprawdza te same progi i odrzuca niepoprawne z `400 invalid-fields` oraz listą pól.
+Sprawdza też typ: pole niebędące stringiem leci jako puste, nie wywala trasy.
+
+Z `replyTo` i `subject` wycinane są znaki końca linii — obie wartości pochodzą
+od użytkownika i trafiają do nagłówków wiadomości.
+
+Zmierzone na żywej trasie: zły e-mail, za krótkie/za długie imię, za krótka/za długa
+wiadomość i pole nietekstowe → `400`; honeypot → `200` (udawany sukces);
+poprawne dane przechodzą walidację i idą do SMTP.

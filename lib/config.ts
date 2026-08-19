@@ -144,3 +144,13 @@ export const contact = {
   lead:
     'Opisz działkę i etap, na jakim jesteś — nawet jeśli to dopiero pomysł. Odpowiadam zwykle w ciągu jednego dnia roboczego.',
 } as const;
+
+/* Limity pól formularza. Jedno źródło dla klienta i serwera — `maxLength` w przeglądarce
+   to wygoda, nie zabezpieczenie: żądanie da się wysłać z pominięciem formularza,
+   więc te same progi obowiązują w `app/api/kontakt/route.ts`. */
+export const formLimits = {
+  imie: { min: 2, max: 80 },
+  email: { max: 254 }, // RFC 5321: maksymalna długość adresu
+  telefon: { max: 24 },
+  wiadomosc: { min: 10, max: 1500 },
+} as const;

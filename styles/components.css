@@ -161,3 +161,23 @@
   max-width: 46ch;
 }
 
+
+/* oznaczenie pola wymaganego — słowem, nie gwiazdką: gwiazdka bez legendy
+   niczego nie tłumaczy, a czytnik odczyta ją jako „star" */
+.ag-field__req {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--c-muted);
+}
+
+/* licznik pozostałych znaków — `aria-hidden`, bo `maxLength` i tak zatrzyma pisanie,
+   a ciągłe ogłaszanie liczby zagłuszałoby wpisywaną treść */
+.ag-field__count {
+  float: right;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--c-muted);
+  font-variant-numeric: tabular-nums;
+}
