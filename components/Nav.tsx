@@ -10,6 +10,7 @@
    odpowiednika w menu, więc tam zaznaczenie po prostu gaśnie). */
 
 import { useEffect, useRef, useState } from 'react';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { nav } from '@/lib/config';
 
 const MOVE_THRESHOLD = 10; // px — drobne drgnięcie nie chowa paska
@@ -182,6 +183,11 @@ export function Nav() {
         data-hidden={hidden}
         data-tone={fabDark ? 'dark' : 'light'}
       >
+        {/* Przełącznik motywu dzieli warstwę z przyciskiem powrotu: ta sama pozycja,
+            to samo szkło, to samo chowanie i ta sama tonacja tła. Do paska nawigacji
+            nie miał jak wejść — przy pięciu zakładkach na 375 px zostało 5 px zapasu. */}
+        <ThemeToggle />
+
         <a className="ag-fab__btn ag-glass" href="#top" aria-label="Wróć na górę strony">
           <ArrowUp />
         </a>

@@ -44,6 +44,63 @@ granat daje **4,9:1**. Tak samo aktywna zakładka w pasku nawigacji.
 Zmierzone po wdrożeniu: akapit 8,9:1 · nagłówek 13,6:1 · lead 8,9–9,9:1 ·
 wersaliki 4,9–5,5:1 · hasło CTA 4,9:1 · przycisk 18,1:1.
 
+## Tryb ciemny
+
+**To nie jest inwersja jasnego motywu, tylko druga historyczna postać tego samego
+rysunku: blueprint.** Krem z granatowym tuszem odwraca się w granat z jasną kreską —
+dlatego bazą jest ten sam granat, który w jasnym motywie niesie scrim.
+
+Włącza go przycisk (`components/ThemeToggle.tsx`), wybór trzyma `localStorage`.
+Domyślny jest motyw jasny; przejście na `prefers-color-scheme` to jedna linia
+w skrypcie w `app/layout.tsx`, gdyby kiedyś miało iść za ustawieniem systemu.
+
+### Odwracają się wyłącznie tokeny strony
+
+| Token | Jasny | Ciemny | Kontrast w ciemnym |
+|---|---|---|---|
+| `--c-bg` | `#f5f2ea` | `#14202b` | — |
+| `--c-bg-alt` / `--c-surface` | `#ffffff` | `#1b2a37` | 1,13 wobec tła (jasny ma 1,12) |
+| `--c-line` | `#c9c7be` | `#44586c` | **2,25** (jasny: 1,51) |
+| `--c-line-soft` | `#e2e0d6` | `#2c4152` | tekstury kreślarskie |
+| `--c-ink` | `#1b2733` | `#f2eee4` | **14,3:1** |
+| `--c-ink-soft` | `#33445a` | `#dcd8ce` | **11,6:1** |
+| `--c-muted` | `#5c6b7d` | `#93a1af` | **6,3:1** |
+| `--c-accent-ink` | `#a85512` | `#f0a45a` | **8,0:1** (jasny: 4,8:1) |
+| `--c-error` | `#b03a2e` | `#f0847a` | **6,5:1** |
+
+**Rodzina `--c-inverse*`, `--c-overlay` i szkło zostają nietknięte.** Nie znaczą
+„przeciwieństwo motywu", tylko „stała para nad zdjęciem i nad pomarańczowym pasem".
+Dzięki temu scena wideo i pas CTA wyglądają w obu motywach identycznie — i tak mają.
+To ta jedna decyzja sprawia, że cały tryb ciemny mieści się w kilkunastu liniach.
+
+**Pomarańcz wypełnień się nie zmienia** — to sygnatura marki i na granacie działa.
+Zmienia się tylko odmiana tekstowa: na kremie musiała ciemnieć do brązu (4,8:1),
+na granacie może pojaśnieć i wychodzi 8,0:1.
+
+**Hairline jest mocniejszy niż w jasnym motywie** (2,25 wobec 1,51 na kremie): na ciemnym
+tle cienka linia gubi się szybciej, a to na niej stoi cały podział na pola. Tekstury
+kreślarskie w Realizacjach i bibliotece odwracają się same, bo stoją na tych tokenach —
+i dopiero na granacie wyglądają jak to, czym są, czyli blueprint.
+
+`color-scheme: dark` ustawiane razem z motywem — bez tego paski przewijania i natywne
+pola formularza zostają jasne i odcinają się od strony.
+
+### Zmierzone
+
+Przemiat kontrastu przez sekcje, stopkę, formularz, regał i galerię:
+**149 elementów w każdym motywie, zero poniżej progu WCAG AA.**
+
+### Bez błysku przy wejściu
+
+Motyw nakłada skrypt w `app/layout.tsx` wykonywany **przed pierwszym malowaniem**.
+Gdyby ustawiał go dopiero React po hydratacji, użytkownik trybu ciemnego dostawałby
+błysk jasnej strony przy każdym wejściu — a zasłona startowa też jest jasna, więc by
+go nie zakryła. Skrypt ustawia też `theme-color`, czyli barwę paska adresu na mobile.
+
+Sam `ThemeToggle` startuje ze stanem `light` i dociąga prawdziwy po zamontowaniu:
+serwer nie zna `localStorage`, więc każde zgadywanie w renderze kończy się rozjazdem
+z HTML-em. Ten stan steruje wyłącznie ikoną i etykietą — motyw jest już na `<html>`.
+
 ## Typografia
 
 **Jedna rodzina groteskowa w skrajnych wagach** — Archivo jako **krój zmienny**

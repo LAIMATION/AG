@@ -137,6 +137,43 @@
   --z-boot: 300;
 }
 
+/* --- Tryb ciemny ------------------------------------------------------ */
+
+/* To NIE jest inwersja jasnego motywu, tylko druga historyczna postać tego samego
+   rysunku: blueprint. Krem z granatowym tuszem odwraca się w granat z jasną kreską —
+   dlatego bazą jest ten sam granat, który w jasnym motywie niesie scrim.
+
+   Odwracają się WYŁĄCZNIE tokeny strony. Rodzina `--c-inverse*`, `--c-overlay`
+   i szkło zostają nietknięte, bo nie znaczą „przeciwieństwo motywu", tylko „stała
+   para nad zdjęciem i nad pomarańczowym pasem". Scena wideo i pas CTA wyglądają
+   w obu motywach tak samo — i tak mają. */
+:root[data-motyw='dark'] {
+  /* natywne kontrolki, paski przewijania i pola formularza idą za motywem */
+  color-scheme: dark;
+
+  --c-bg: #14202b;
+  --c-bg-alt: #1b2a37;
+  --c-surface: #1b2a37;
+
+  /* Hairline mocniejszy niż w jasnym motywie (2,25:1 wobec 1,51:1 na kremie):
+     na ciemnym tle cienka linia gubi się szybciej, a to na niej stoi cały podział
+     na pola. Linia miękka niesie tekstury kreślarskie — na granacie mają czytać
+     się mocniej niż na papierze, bo o to w blueprincie chodzi. */
+  --c-line: #44586c;
+  --c-line-soft: #2c4152;
+
+  --c-ink: #f2eee4; /* 14,3:1 */
+  --c-ink-soft: #dcd8ce; /* 11,6:1 */
+  --c-muted: #93a1af; /* 6,3:1 — z zapasem, bo w tej roli chodzą 12 px wersaliki */
+
+  /* Pomarańcz wypełnień zostaje ten sam — to sygnatura marki i na granacie działa.
+     Zmienia się odmiana tekstowa: na kremie musiała ciemnieć do brązu, tu może
+     pojaśnieć i wychodzi 8,0:1 zamiast 4,8:1. */
+  --c-accent-ink: #f0a45a;
+
+  --c-error: #f0847a; /* 6,5:1 */
+}
+
 @media (max-width: 899px) {
   :root {
     --section-y: clamp(4rem, 14vw, 6rem);

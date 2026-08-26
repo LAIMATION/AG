@@ -337,30 +337,48 @@
 
 /* --- Pływający przycisk powrotu -------------------------------------- */
 
+/* Warstwa mieści teraz dwa przyciski — motyw nad powrotem na górę. Kolumna od dołu,
+   żeby powrót został tam, gdzie kciuk go zna, a przełącznik dołożył się ponad nim. */
 .ag-fab {
   position: fixed;
   right: var(--nav-offset);
   bottom: var(--fab-bottom);
   z-index: var(--z-nav);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
   pointer-events: none;
 }
 
+/* `padding` i `cursor` jawnie, bo jeden z tych przycisków to `<button>` — bez tego
+   niesie domyślne wyściółki przeglądarki i kursor strzałki. */
 .ag-fab__btn {
   display: grid;
   place-items: center;
   width: 44px;
   height: 44px;
+  padding: 0;
   color: var(--c-ink);
+  cursor: pointer;
 }
 
 .ag-fab[data-tone='dark'] .ag-fab__btn {
   color: var(--c-inverse-ink);
 }
 
-/* chowa się w dół, aż wyjdzie poza ekran — `100%` to własna wysokość,
-   `--fab-bottom` to odstęp od dolnej krawędzi */
+/* Chowa się w dół, aż wyjdzie poza ekran — `100%` to własna wysokość, `--fab-bottom`
+   to odstęp od dolnej krawędzi. Transform siedzi na PRZYCISKACH, nie na warstwie
+   pozycjonującej: JS mierzy nieprzesuniętą warstwę, żeby poprawnie ustalić tonację tła.
+
+   Górny przycisk musi pokonać dodatkowo wysokość dolnego i odstęp między nimi —
+   przy jednakowym przesunięciu zatrzymałby się dokładnie tam, gdzie stał dolny,
+   i zostałby na ekranie. */
 .ag-fab[data-hidden='true'] .ag-fab__btn {
   transform: translateY(calc(100% + var(--fab-bottom)));
+}
+
+.ag-fab[data-hidden='true'] .ag-fab__btn:first-child {
+  transform: translateY(calc(200% + var(--s-2) + var(--fab-bottom)));
 }
 
 @media (max-width: 899px) {

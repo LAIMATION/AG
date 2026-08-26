@@ -14,6 +14,7 @@ WEB/
 ├── components/
 │   ├── Nav.tsx                 # 'use client' — pasek + pływający przycisk powrotu
 │   ├── Preloader.tsx           # 'use client' — ekran startowy, schodzi gdy hero ma czym grać
+│   ├── ThemeToggle.tsx         # 'use client' — przełącznik motywu, w warstwie .ag-fab
 │   ├── SmoothScroll.tsx        # 'use client' — Lenis spięty z ScrollTriggerem
 │   ├── ScrollVideoScene.tsx    # 'use client' — sticky wideo; tryb `loop` (aktywny) / `scrub` (zachowany)
 │   ├── ProjectShelf.tsx        # 'use client' — regał plansz w Realizacjach
