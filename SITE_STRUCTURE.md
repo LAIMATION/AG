@@ -104,6 +104,17 @@ danych i tak jest gotowa na podmianę.
 Kadr sam przełączy się z siatki kreślarskiej na zdjęcie — żaden plik komponentu ani CSS
 nie wymaga wtedy zmiany.
 
+#### Kolejność na wąskim ekranie
+
+Siatka stoi na **nazwanych obszarach**, nie na zwykłych kolumnach. Dzięki temu poniżej
+900 px da się rozdzielić spis i status: spis idzie **nad kadr**, status pod niego.
+Wcześniej oba siedziały pod kadrem, więc wybranie ostatniego projektu wymagało
+przewinięcia w dół i powrotu w górę, żeby zobaczyć wynik. Zmierzone po zmianie:
+ostatni przycisk spisu kończy się **16 px nad kadrem**.
+
+W jednej kolumnie bocznej (poprzednia wersja) było to niemożliwe — dlatego spis
+i status są rodzeństwem kadru, a nie jego sąsiadami w jednym pudełku.
+
 #### Dlaczego inaczej niż karuzela Realizacji
 
 | | Realizacje | Gotowe projekty |
@@ -145,7 +156,7 @@ Trzeci sposób prezentacji na stronie i **celowo różny od dwóch pozostałych*
 |---|---|---|---|
 | co robisz | **widzisz wszystko naraz** | wybierasz ze spisu | przewijasz |
 | forma | sześć płyt, wybrana rozsuwa się w miejscu | jeden duży kadr + spis w kolumnie | kafelki płyną, sąsiedzi w kadrze |
-| tytuł | **pionowo, jak grzbiet teczki** | poziomo pod kadrem | poziomo pod kadrem |
+| tytuł | **pionowo zawsze, grzbiet teczki** | poziomo pod kadrem | poziomo pod kadrem |
 | pusta płyta | **bez tekstury** | siatka prostokątna | skos |
 
 Metafora jest z warsztatu: sześć plansz stoi obok siebie jak grzbiety teczek na półce.
@@ -167,26 +178,43 @@ Zmierzone przy 1440 px: regał ma 1425 px i sięga od krawędzi do krawędzi. Po
 ~1560 px szerokości okna ogranicza go `--maxw` sekcji, co jest w porządku — to nadal
 1632 px pasa.
 
-#### Trzy błędy pierwszej wersji i ich przyczyny
+#### Cztery błędy i ich przyczyny
 
-1. **Pionowe tytuły wychodziły poza płytę** — do 99 px ponad krawędź, cztery z sześciu
-   nachodziły na numer. Winny nie był tytuł, tylko **ukryty opis**: chowała go sama
-   przezroczystość, więc mimo niewidoczności nadal zajmował miejsce i wypychał tytuł
-   w górę. Teraz wiersz opisu zwija się do zera (`grid-template-rows: auto minmax(0, 0fr)`),
-   a tytuł zaczyna się 180 px poniżej krawędzi zamiast 99 px powyżej.
-2. **Obrót pion → poziom szarpał**, bo szedł przez `writing-mode`, który nie jest
-   animowalny — przeskok wypadał w połowie ruchu płyty. Teraz obraca TRANSFORM
-   (`rotate(-90deg)` → `rotate(0)`, punkt obrotu w lewym dolnym rogu, żeby tekst
-   wychodził z tego samego narożnika w obu stanach). Sprawdzone:
-   `matrix(0,-1,1,0,0,0)` → `matrix(1,0,0,1,0,0)`, interpolacja 0,62 s.
-   Przy okazji **jeden stopień pisma w obu stanach** — zmiana stopnia przy wyborze była
-   drugą, niezależną animacją w tym samym momencie.
-3. **Nie dało się zamknąć płyty.** Kliknięcie w otwartą zamyka ją teraz (`-1` = żadna
-   wybrana, wszystkie równe). Wymagało to **usunięcia wyboru na najechanie**: to się
-   wykluczało — zamknięta płyta natychmiast otwierała się z powrotem, bo kursor wciąż
-   nad nią stał. Najazd tylko podświetla tytuł, wybór jest kliknięciem.
-   Stan niesie `aria-expanded`, nie `aria-current` — to rozwijanie, nie wskazanie
-   pozycji w zbiorze.
+1. **Pionowe tytuły wychodziły poza płytę i były widoczne w połowie.** Dwie osobne
+   przyczyny, jedna po drugiej. Najpierw ukryty opis: chowała go sama przezroczystość,
+   więc mimo niewidoczności zajmował miejsce i wypychał tytuł w górę (zmierzone: 99 px
+   ponad krawędź, 4 z 6 tytułów na numerze). Potem, po przejściu na obrót transformem,
+   **transform w ogóle się nie nakładał** — `computed transform` wychodził macierzą
+   jednostkową, więc tytuł leżał poziomo jako pasek 275 px w płycie szerokiej 177 px
+   i połowa była przycięta.
+
+   Uwaga metodyczna: `getBoundingClientRect()` na elemencie z `white-space: nowrap`
+   mierzy PUDEŁKO, nie tekst — tekst wylewający się poza pudełko jest w tym pomiarze
+   niewidoczny. Dlatego pierwszy pomiar fałszywie orzekł „mieści się". Rozstrzyga
+   dopiero `Range` po zawartości.
+
+2. **Obrót pion → poziom był toporny.** Usunięty w całości: tytuł zostaje pionowy
+   zawsze. Przy wyborze i tak zmienia się szerokość płyty, akcent na numerze i pojawia
+   się opis — obrót nie dokładał informacji, tylko ruch.
+
+   Pion robi teraz **prawdziwy `writing-mode: vertical-rl`**, bez transformu. Różnica
+   jest zasadnicza: `writing-mode` daje elementowi realne pudełko (wąskie i wysokie),
+   więc układ wie, ile miejsca zajmuje, da się je wyśrodkować zwykłym `align-items`
+   i ograniczyć `max-height`. Obrócony transformem tekst zachowuje pudełko poziome.
+
+3. **Tytuły nie były na środku** — o 20 px, czyli dokładnie połowę różnicy między
+   górnym (`--s-8`) a dolnym (`--s-5`) paddingiem płyty. Padding wyrównany do
+   symetrycznego; numer jest pozycjonowany absolutnie, więc nie potrzebuje
+   zarezerwowanego miejsca u góry. Po: odchyłka **0 px**.
+
+4. **Na wąskim ekranie tytuł otwartej płyty zasłaniał numer.** Numer był absolutny,
+   więc leżał w tej samej przestrzeni co tytuł. Na mobile **wraca do przepływu**
+   i dostaje własną kolumnę siatki — zmierzone: numer x 16–32, tytuł x 48–359,
+   zero nachodzenia na żadnej płycie.
+
+Opis odkrywa się **rozmyciem i przesunięciem** (`blur(8px)` → ostro, `-0.75rem` → 0),
+nie obrotem. Stan bazowy elementu jest widoczny, a chowana jest dopiero płyta zwinięta:
+gdyby przejścia nie ruszyły, treść czynnej płyty i tak byłaby na ekranie.
 
 #### Rzeczy, które trzeba wiedzieć przy modyfikacji
 

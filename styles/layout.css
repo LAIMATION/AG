@@ -768,6 +768,8 @@
 /* Płyty NIE mają tekstury. Karuzela miała skos, galeria biblioteki ma siatkę — trzeci
    deseń zrobiłby z warsztatu jarmark. Regał niosą typografia i podział na pola, więc
    bez zdjęć jest kompletny, a nie pusty. */
+/* Płyta jest siatką: kolumna tytułu (wąska, pionowa) i kolumna opisu. Numer stoi
+   absolutnie w lewym górnym rogu, więc nie bierze udziału w siatce. */
 .ag-shelf__plate {
   position: relative;
   flex: 1 1 0;
@@ -777,6 +779,16 @@
   background: var(--c-bg);
   overflow: hidden;
   cursor: pointer;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--s-5);
+  /* Padding SYMETRYCZNY w pionie, inaczej „wyśrodkowany" tytuł siada o połowę
+     różnicy niżej — zmierzone 20 px przy górze `--s-8` i dole `--s-5`. Numer jest
+     pozycjonowany absolutnie, więc nie potrzebuje zarezerwowanego miejsca u góry:
+     najwyższy tytuł (275 px w płycie 478 px) i tak zaczyna się 59 px pod nim. */
+  padding: var(--s-5) var(--s-4);
+  text-align: left;
   /* Rozsuwanie zmienia layout, nie transform — to jedyny sposób, żeby sąsiednie płyty
      realnie ustąpiły miejsca. Sześć pól to koszt, na który stać tę jedną interakcję. */
   transition: flex-grow var(--dur-slow) var(--ease), background-color var(--dur) var(--ease);
@@ -814,9 +826,6 @@
   color: var(--c-inverse-ink);
 }
 
-/* Numer i treść pozycjonowane absolutnie, nie flexem: przy zwiniętej płycie opis
-   i tak jest w drzewie (chowa go przezroczystość), a we flexie jego wysokość
-   wypychałaby numer poza kadr. */
 .ag-shelf__no {
   position: absolute;
   top: var(--s-5);
@@ -834,78 +843,57 @@
   color: var(--c-accent-ink);
 }
 
-/* Wiersz opisu ZWIJA SIĘ DO ZERA, gdy płyta jest zwinięta. Wcześniej chowała go sama
-   przezroczystość — i to był błąd: niewidoczny opis nadal zajmował miejsce i wypychał
-   pionowy tytuł w górę, poza płytę. Zmierzone: „Obora wolnostanowiskowa" wychodziła
-   99 px ponad krawędź, a cztery z sześciu tytułów nachodziły na numer.
+/* Tytuł pionowy PRAWDZIWYM `writing-mode`, nie obróconym transformem.
 
-   `minmax(0, …)`, nie samo `0fr`: wiersz `fr` ma automatyczne minimum równe treści,
-   więc samo `0fr` nie zeruje wysokości. */
-.ag-shelf__body {
-  position: absolute;
-  left: var(--s-4);
-  right: var(--s-4);
-  bottom: var(--s-5);
-  z-index: 1;
-  display: grid;
-  grid-template-rows: auto minmax(0, 0fr);
-  text-align: left;
-  transition: grid-template-rows var(--dur-slow) var(--ease);
-}
-
-.ag-shelf__plate[data-czynna] .ag-shelf__body {
-  grid-template-rows: auto minmax(0, 1fr);
-}
-
-/* Tytuł czytany od dołu do góry — grzbiet teczki na półce.
-
-   Obrót robi TRANSFORM, nie `writing-mode`. `writing-mode` nie jest animowalne, więc
-   przejście pion → poziom było szarpnięciem w połowie ruchu płyty. Transform
-   interpoluje się płynnie i zostaje na kompozytorze.
-
-   Punkt obrotu w lewym dolnym rogu: tekst wychodzi z tego samego narożnika w obu
-   stanach, więc przy obrocie nic nie skacze. */
+   Różnica jest zasadnicza: `writing-mode` daje elementowi realne pudełko — wąskie
+   i wysokie — więc układ wie, ile miejsca zajmuje, można je wyśrodkować zwykłym
+   `align-items` i przyciąć `max-height`. Obrócony transformem tekst zachowuje pudełko
+   poziome, więc układ „widzi" pasek szerszy od płyty; przy nieudanym obrocie tekst
+   leżał poziomo i połowa wypadała poza kadr. */
 .ag-shelf__title {
+  grid-column: 1;
+  z-index: 1;
+  writing-mode: vertical-rl;
   font-family: var(--f-display);
-  /* Jeden stopień w obu stanach. Zmiana stopnia przy wyborze to druga, niezależna
-     animacja w tym samym momencie — a wyróżnienie czynnej płyty niosą i tak jej
-     szerokość, poziomy tytuł, opis i akcent na numerze. */
   font-size: clamp(1.125rem, 1.6vw, 1.5rem);
   font-weight: 500;
-  line-height: 1.1;
+  line-height: 1;
   letter-spacing: var(--ls-heading);
   color: var(--c-ink);
   white-space: nowrap;
-  transform-origin: 0 100%;
-  transform: rotate(-90deg);
-  transition: transform var(--dur-slow) var(--ease), color var(--dur) var(--ease);
+  /* najdłuższy tytuł ma 275 px przy 430 px prześwitu, ale to zabezpieczenie na treść,
+     która dojdzie później */
+  max-height: 100%;
+  overflow: hidden;
+  transition: color var(--dur) var(--ease);
 }
 
-.ag-shelf__plate[data-czynna] .ag-shelf__title {
-  transform: rotate(0deg);
-}
-
-/* Sam najazd kursorem tylko podświetla tytuł — NIE wybiera płyty. Wybór jest
-   kliknięciem, żeby dało się go też cofnąć; przy wyborze na najechanie zamknięcie
-   płyty byłoby natychmiast odwracane przez kursor, który wciąż nad nią stoi. */
+/* Sam najazd kursorem tylko podświetla tytuł — NIE wybiera płyty. */
 .ag-shelf__plate:hover .ag-shelf__title {
   color: var(--c-accent-ink);
 }
 
+/* Opis odkrywa się rozmyciem i przesunięciem, nie obrotem. Stan BAZOWY jest widoczny,
+   a chowa się dopiero płytę zwiniętą — gdyby przejścia z jakiegoś powodu nie ruszyły,
+   treść czynnej płyty i tak jest na ekranie. Odwrotny zapis zostawiłby ją niewidoczną. */
 .ag-shelf__detail {
+  grid-column: 2;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   gap: var(--s-2);
   max-width: 46ch;
   min-height: 0;
   overflow: hidden;
-  padding-top: var(--s-3);
-  opacity: 0;
-  transition: opacity var(--dur) var(--ease);
+  transition: opacity var(--dur-slow) var(--ease), filter var(--dur-slow) var(--ease),
+    transform var(--dur-slow) var(--ease);
 }
 
-.ag-shelf__plate[data-czynna] .ag-shelf__detail {
-  opacity: 1;
+.ag-shelf__plate:not([data-czynna]) .ag-shelf__detail {
+  opacity: 0;
+  filter: blur(8px);
+  transform: translateX(-0.75rem);
+  pointer-events: none;
 }
 
 .ag-shelf__meta {
@@ -925,15 +913,24 @@
 /* Inny sposób oglądania niż karuzela Realizacji i celowo: tam kafelki płyną, a sąsiedzi
    zostają w kadrze jako kontekst opowieści. Tutaj się WYBIERA — więc obraz bierze cały
    kadr, a reszta zwija się do ponumerowanego spisu obok, jak plansze w tece. */
+/* Nazwane obszary, nie zwykle kolumny: dzieki nim na waskim ekranie da sie ROZDZIELIC
+   spis i status — spis nad kadr, status pod niego. W jednej kolumnie bocznej byloby to
+   niemozliwe, a to wlasnie ta kolejnosc utrudniala obsluge na telefonie. */
 .ag-gal {
   display: grid;
   grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
-  gap: clamp(1.5rem, 3vw, 3rem);
+  grid-template-areas:
+    "stage index"
+    "stage state";
+  grid-template-rows: auto 1fr;
+  column-gap: clamp(1.5rem, 3vw, 3rem);
+  row-gap: var(--s-4);
   align-items: start;
   min-width: 0;
 }
 
 .ag-gal__stage {
+  grid-area: stage;
   display: grid;
   gap: var(--s-5);
   min-width: 0;
@@ -1024,15 +1021,8 @@
 
 /* Odstęp `--s-4`, nie `--s-5`: przy większym przycisk CTA wypadał pod krawędź ekranu
    po skoku z menu (zmierzone: dół przycisku na 927 px przy kadrze 900 px). */
-.ag-gal__side {
-  display: grid;
-  gap: var(--s-4);
-  justify-items: start;
-  align-content: start;
-  min-width: 0;
-}
-
 .ag-gal__index {
+  grid-area: index;
   display: grid;
   gap: var(--s-3);
   width: 100%;
@@ -1095,6 +1085,7 @@
 }
 
 .ag-gal__state {
+  grid-area: state;
   display: grid;
   gap: var(--s-2);
   padding: clamp(1rem, 1.8vw, 1.375rem);
@@ -1305,42 +1296,58 @@ a.ag-contact__value:hover {
     margin-inline: calc(var(--gutter) * -1);
   }
 
+  /* Numer WRACA DO PRZEPŁYWU i dostaje własną kolumnę siatki. Absolutny numer
+     nakładał się na tytuł otwartej płyty — dwa elementy w tym samym miejscu
+     i tylko przypadek decydował, który wygra. W siatce nie mają jak na siebie wejść. */
   .ag-shelf__plate {
     flex: none;
     min-height: 4.5rem;
     border-right: 0;
     border-bottom: var(--border);
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 0fr);
+    align-items: start;
+    gap: 0 var(--s-4);
     padding: var(--s-4);
-    transition: background-color var(--dur) var(--ease);
+    transition: grid-template-rows var(--dur-slow) var(--ease),
+      background-color var(--dur) var(--ease);
+  }
+
+  .ag-shelf__plate[data-czynna] {
+    grid-template-rows: auto minmax(0, 1fr);
   }
 
   .ag-shelf__plate:last-child {
     border-bottom: 0;
   }
 
-  /* Wysokość płyty dyktuje treść — wiersze siatki są już w regule bazowej. */
-  .ag-shelf__body {
+  .ag-shelf__no {
     position: static;
+    grid-column: 1;
+    grid-row: 1;
+    /* wersaliki 12 px siadają optycznie na linii pisma tytułu, nie na jego górze */
+    padding-top: 0.35em;
+  }
+
+  /* Pionowy tytuł w wierszu wysokim na 72 px nie ma się jak zmieścić — na wąskim
+     ekranie płyty leżą, więc tekst wraca do poziomu. */
+  .ag-shelf__title {
+    grid-column: 2;
+    grid-row: 1;
+    writing-mode: horizontal-tb;
+    white-space: normal;
+    max-height: none;
+  }
+
+  .ag-shelf__detail {
+    grid-column: 2;
+    grid-row: 2;
+    padding-top: var(--s-3);
   }
 
   /* Bezczynne, dopóki nie ma zdjęć: kadr z fotografią potrzebuje wysokości, sam tekst nie. */
   .ag-shelf__plate:not([data-pusta])[data-czynna] {
     min-height: 18rem;
-  }
-
-  /* Pionowy tytuł w wierszu wysokim na 72 px nie ma się jak zmieścić — na wąskim
-     ekranie płyty leżą, więc obrót w ogóle nie wchodzi. */
-  .ag-shelf__title,
-  .ag-shelf__plate[data-czynna] .ag-shelf__title {
-    transform: none;
-    white-space: normal;
-  }
-
-  .ag-shelf__no {
-    top: var(--s-4);
   }
 
   .ag-contact__grid {
@@ -1351,8 +1358,15 @@ a.ag-contact__value:hover {
     justify-content: start;
   }
 
+  /* Spis NAD kadrem: wczesniej oba siedzialy pod nim, wiec wybranie ostatniego
+     projektu wymagalo przewiniecia w dol i powrotu w gore, zeby zobaczyc wynik. */
   .ag-gal {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "index"
+      "stage"
+      "state";
+    grid-template-rows: auto auto auto;
   }
 
   /* na wąskim ekranie kadr robi się kwadratowy — 16:9 przy 340 px to pasek 190 px,

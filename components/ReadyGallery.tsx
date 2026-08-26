@@ -39,8 +39,12 @@ export function ReadyGallery() {
         </a>
       </div>
 
-      <div className="ag-gal__side">
-        <nav className="ag-gal__index" aria-label={katalog.indeksLabel}>
+      {/* Spis i status są RODZEŃSTWEM kadru, nie dziećmi wspólnej kolumny bocznej.
+          Dzięki temu na wąskim ekranie da się je rozdzielić: spis idzie NAD kadr,
+          status pod niego. Wcześniej oba siedziały pod kadrem, więc wybranie
+          ostatniego projektu wymagało przewinięcia w dół i powrotu w górę,
+          żeby zobaczyć, co się wybrało. */}
+      <nav className="ag-gal__index" aria-label={katalog.indeksLabel}>
           <p className="ag-eyebrow ag-gal__index-label">{katalog.indeksLabel}</p>
           <ol>
             {plyty.map((p, i) => (
@@ -68,13 +72,12 @@ export function ReadyGallery() {
                 </button>
               </li>
             ))}
-          </ol>
-        </nav>
+        </ol>
+      </nav>
 
-        <div className="ag-gal__state">
-          <p className="ag-gal__state-label">{katalog.stanLabel}</p>
-          <p className="ag-gal__state-text">{katalog.stanText}</p>
-        </div>
+      <div className="ag-gal__state">
+        <p className="ag-gal__state-label">{katalog.stanLabel}</p>
+        <p className="ag-gal__state-text">{katalog.stanText}</p>
       </div>
     </div>
   );
