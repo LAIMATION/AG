@@ -937,39 +937,190 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* --- Gotowe projekty -------------------------------------------------- */
+/* --- Gotowe projekty: galeria biblioteki ------------------------------ */
 
-/* Lżejsza kolumna z lewej niesie stan i akcję, cięższa z prawej — etapy adaptacji.
-   `align-items: start`, bo kolumny mają różną długość i rozciąganie krótszej
-   zostawiłoby blok statusu zawieszony w pustce. */
-.ag-ready__grid {
+/* Inny sposób oglądania niż karuzela Realizacji i celowo: tam kafelki płyną, a sąsiedzi
+   zostają w kadrze jako kontekst opowieści. Tutaj się WYBIERA — więc obraz bierze cały
+   kadr, a reszta zwija się do ponumerowanego spisu obok, jak plansze w tece. */
+.ag-gal {
   display: grid;
-  grid-template-columns: minmax(0, 4fr) minmax(0, 6fr);
-  gap: clamp(1.5rem, 3.5vw, 3.5rem);
+  grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+  gap: clamp(1.5rem, 3vw, 3rem);
   align-items: start;
+  min-width: 0;
 }
 
-.ag-ready__aside {
+.ag-gal__stage {
   display: grid;
   gap: var(--s-5);
+  min-width: 0;
+}
+
+/* przycisk nie rozciąga się na całą kolumnę — kadr tak, przycisk zostaje przy lewej */
+.ag-gal__cta {
+  justify-self: start;
+}
+
+/* Kadr wchodzi osiadając, jak odkładana plansza. Animacja BEZ `fill-mode`: stanem
+   bazowym płyty jest pełna widoczność, więc jeśli animacja z jakiegokolwiek powodu
+   nie ruszy, treść i tak jest na ekranie. Przy `prefers-reduced-motion` globalna
+   reguła ścina czas do 1 ms. Remount po zmianie płyty odpala ją od nowa. */
+.ag-gal__plate {
+  margin: 0;
+  display: grid;
+  gap: var(--s-4);
+  animation: ag-gal-wejscie var(--dur-slow) var(--ease);
+}
+
+@keyframes ag-gal-wejscie {
+  from {
+    opacity: 0;
+    transform: scale(1.02);
+  }
+}
+
+.ag-gal__frame {
+  position: relative;
+  /* `width: 100%` jest tu obowiązkowe obok `max-height`: przy samym `aspect-ratio`
+     ograniczona wysokość ZWĘŻA element, żeby utrzymać proporcję — kadr zszedł z 833
+     na 718 px i zostawiał 115 px pustki w kolumnie. Definitywna szerokość sprawia,
+     że proporcja rządzi już tylko wysokością, a sufit ją przycina. */
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  /* Sufit, bo 16:9 na szerokiej kolumnie wypychało sekcję do 1,11 ekranu przy 1,00
+     każdej innej. Kadr robi się wtedy szerszy niż 16:9 — dla zdjęcia krytego przez
+     object-fit i dla pustej siatki jest to bez znaczenia. */
+  max-height: 36vh;
+  overflow: hidden;
+  border: var(--border);
+  border-radius: var(--radius-media);
+  background: var(--c-bg);
+}
+
+.ag-gal__frame img {
+  object-fit: cover;
+}
+
+/* Pusta płyta to arkusz kreślarski: siatka prostokątna w cichszej linii. Karuzela
+   Realizacji ma skos — dzięki temu obie czytają się jako ten sam warsztat, ale nie
+   jako ta sama rzecz. Znika sama z siebie, gdy w kadrze pojawi się zdjęcie. */
+.ag-gal__frame[data-pusta] {
+  background-image: repeating-linear-gradient(
+      0deg,
+      var(--c-line-soft) 0 1px,
+      transparent 1px 34px
+    ),
+    repeating-linear-gradient(90deg, var(--c-line-soft) 0 1px, transparent 1px 34px);
+}
+
+.ag-gal__plate-no {
+  position: absolute;
+  top: var(--s-4);
+  left: var(--s-4);
+  padding: var(--s-1) var(--s-2);
+  background: var(--c-bg);
+  border: var(--border);
+  font-size: var(--fs-eyebrow);
+  font-weight: 600;
+  letter-spacing: var(--ls-eyebrow);
+  color: var(--c-accent-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.ag-gal__caption {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.ag-gal__desc {
+  color: var(--c-ink-soft);
+  max-width: 62ch;
+}
+
+/* --- Spis płyt -------------------------------------------------------- */
+
+/* Odstęp `--s-4`, nie `--s-5`: przy większym przycisk CTA wypadał pod krawędź ekranu
+   po skoku z menu (zmierzone: dół przycisku na 927 px przy kadrze 900 px). */
+.ag-gal__side {
+  display: grid;
+  gap: var(--s-4);
   justify-items: start;
   align-content: start;
   min-width: 0;
 }
 
-/* Brak biblioteki jest WYRÓŻNIONY, nie schowany: akcentująca krawędź u góry mówi
-   „tu coś dojdzie" — ten sam sygnał, co na formularzu kontaktowym. Kremowy blok
-   na białym pasie, bo `--c-surface` byłby tym samym bielą co sekcja pod spodem. */
-.ag-ready__note {
+.ag-gal__index {
+  display: grid;
+  gap: var(--s-3);
+  width: 100%;
+  min-width: 0;
+}
+
+.ag-gal__index-label {
+  color: var(--c-muted);
+}
+
+/* Pozycje rozdziela hairline, nie odstęp — to jeden spis, a nie sześć przycisków. */
+.ag-gal__pick {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--s-3);
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  padding: var(--s-2) 0;
+  border: 0;
+  border-top: var(--border);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: color var(--dur) var(--ease);
+}
+
+.ag-gal__index li:first-child .ag-gal__pick {
+  border-top: 0;
+}
+
+.ag-gal__pick-no {
+  font-size: var(--fs-eyebrow);
+  font-weight: 600;
+  letter-spacing: var(--ls-eyebrow);
+  color: var(--c-muted);
+  font-variant-numeric: tabular-nums;
+  transition: color var(--dur) var(--ease);
+}
+
+.ag-gal__pick-name {
+  font-size: var(--fs-body);
+  color: var(--c-ink-soft);
+  transition: color var(--dur) var(--ease);
+}
+
+.ag-gal__pick:hover .ag-gal__pick-name {
+  color: var(--c-accent-ink);
+}
+
+/* Wybór niesie KOLOR i waga, nie tło: pas jest biały, a plama tła zrobiłaby z listy
+   sześć kafelków — dokładnie to, czego ten układ miał uniknąć. */
+.ag-gal__pick[aria-current] .ag-gal__pick-no,
+.ag-gal__pick[aria-current] .ag-gal__pick-name {
+  color: var(--c-accent-ink);
+}
+
+.ag-gal__pick[aria-current] .ag-gal__pick-name {
+  font-weight: 600;
+}
+
+.ag-gal__state {
   display: grid;
   gap: var(--s-2);
-  padding: clamp(1.25rem, 2.2vw, 1.75rem);
+  padding: clamp(1rem, 1.8vw, 1.375rem);
   background: var(--c-bg);
   border: var(--border);
   border-top: 2px solid var(--c-accent);
 }
 
-.ag-ready__note-label {
+.ag-gal__state-label {
   font-size: var(--fs-eyebrow);
   font-weight: 600;
   letter-spacing: var(--ls-eyebrow);
@@ -977,58 +1128,9 @@
   color: var(--c-accent-ink);
 }
 
-.ag-ready__note-text {
+.ag-gal__state-text {
+  font-size: var(--fs-small);
   color: var(--c-ink-soft);
-  max-width: 44ch;
-}
-
-.ag-ready__steps {
-  display: grid;
-  gap: var(--s-4);
-  align-content: start;
-  min-width: 0;
-}
-
-/* Etapy rozdziela hairline, nie odstęp — lista ma się czytać jak następujące po
-   sobie pozycje jednego procesu, a nie jak pięć osobnych kart. */
-.ag-step {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: var(--s-4);
-  /* odstęp oddaje wysokość, gdy ekran jest niski — pięć etapów ma się zmieścić
-     w kadrze razem z resztą sekcji, a luz odbieramy odstępom, nigdy tekstowi */
-  padding-block: clamp(0.75rem, 1.6vh, 1.125rem);
-  border-top: var(--border);
-}
-
-.ag-step:first-child {
-  border-top: 0;
-  padding-top: 0;
-}
-
-.ag-step:last-child {
-  padding-bottom: 0;
-}
-
-.ag-step__no {
-  font-size: var(--fs-eyebrow);
-  font-weight: 600;
-  letter-spacing: var(--ls-eyebrow);
-  color: var(--c-accent-ink);
-  font-variant-numeric: tabular-nums;
-  /* numer siada na linii pisma nagłówka, nie na górnej krawędzi jego pudełka */
-  padding-top: 0.3em;
-}
-
-.ag-step__body {
-  display: grid;
-  gap: var(--s-2);
-  min-width: 0;
-}
-
-.ag-step__desc {
-  color: var(--c-ink-soft);
-  max-width: 54ch;
 }
 
 /* --- Pas CTA przed kontaktem ----------------------------------------- */
@@ -1239,8 +1341,14 @@ a.ag-contact__value:hover {
     justify-content: start;
   }
 
-  .ag-ready__grid {
+  .ag-gal {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* na wąskim ekranie kadr robi się kwadratowy — 16:9 przy 340 px to pasek 190 px,
+     za mało, żeby wizualizacja cokolwiek pokazała */
+  .ag-gal__frame {
+    aspect-ratio: 4 / 3;
   }
 
   .ag-form {

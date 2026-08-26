@@ -138,49 +138,50 @@ export const projects = {
   ],
 } as const;
 
-/* Biblioteka jeszcze nie istnieje, więc sekcja NIE może być zapowiedzią — samo
-   „wkrótce" nie daje odwiedzającemu nic. Treścią jest to, co jest dostępne dziś:
-   adaptacja. W Polsce projekt z katalogu nie nadaje się do pozwolenia, dopóki
-   architekt nie dopasuje go do działki i nie podpisze się pod nim jako projektant
-   adaptujący — i to jest usługa, którą ta zakładka sprzedaje. Biblioteka dochodzi
-   jako zapowiedziany, uczciwie oznaczony brak. */
-export const gotowe = {
+/* Biblioteka gotowych projektów. Dziś to RUSZTOWANIE, nie katalog — dlatego płyty
+   opisują typy budynków, które Aleksandra planuje wystawić, a nie zmyślone konkretne
+   projekty z metryczkami. Zmyślony katalog czytałby się jak prawdziwy i byłby po prostu
+   nieprawdą.
+
+   Dodanie realnego projektu: dopisz `foto` (ścieżka w /public/img) i `dane`
+   (pary etykieta–wartość, np. powierzchnia, kondygnacje). Płyta sama przełączy się
+   z tekstury na zdjęcie, a panel pokaże specyfikację. Nic poza tym plikiem. */
+export const katalog = {
   eyebrow: 'Gotowe projekty',
-  title: 'Gotowy projekt to punkt wyjścia, nie gotowy dom',
+  title: 'Biblioteka projektów do adaptacji',
   lead:
-    'Projekt z katalogu kosztuje mniej i skraca drogę do pozwolenia. Sam z siebie nie da się go jednak zbudować: zanim trafi do urzędu, ktoś musi dopasować go do Twojej działki i wziąć za niego odpowiedzialność. Tym się zajmuję.',
-  bibliotekaLabel: 'Biblioteka w przygotowaniu',
-  biblioteka:
-    'Składam własny zestaw projektów gotowych do adaptacji — domy jednorodzinne, budynki gospodarcze i hale. Zanim się tu pojawi, adaptuję projekt kupiony w dowolnej pracowni.',
-  krokiLabel: 'Co obejmuje adaptacja',
-  kroki: [
+    'Składam zestaw własnych projektów gotowych — takich, które kupujesz od ręki i które adaptuję do Twojej działki. Poniżej typy, które się w nim znajdą. Do czasu, aż zapełnię tę półkę, adaptuję też projekt kupiony w dowolnej innej pracowni.',
+  stanLabel: 'Karta w przygotowaniu',
+  stanText:
+    'Wizualizacje, rzuty i metraże pojawią się tutaj, gdy projekt trafi do biblioteki. Szukasz czegoś z tej półki już teraz? Napisz.',
+  action: 'Zapytaj o projekt',
+  indeksLabel: 'Spis płyt',
+  plyty: [
     {
-      no: '01',
-      title: 'Sprawdzenie działki',
-      desc: 'Plan miejscowy albo warunki zabudowy, wjazd, media, kształt i orientacja terenu. Mówię Ci, czy dany projekt w ogóle się zmieści — zanim za niego zapłacisz.',
+      nazwa: 'Dom parterowy',
+      opis: 'Bez schodów, z całą funkcją na jednym poziomie. Wygodny na lata — także wtedy, gdy wchodzenie na piętro przestaje być obojętne.',
     },
     {
-      no: '02',
-      title: 'Projekt zagospodarowania terenu',
-      desc: 'Ustawienie budynku, dojazdu i przyłączy na Twojej działce. Tego nie ma w żadnym projekcie z katalogu — powstaje zawsze na miejscu.',
+      nazwa: 'Dom z poddaszem',
+      opis: 'Ta sama powierzchnia użytkowa na mniejszym obrysie. Wybór na wąską działkę albo tam, gdzie plan miejscowy narzuca dach spadzisty.',
     },
     {
-      no: '03',
-      title: 'Dopasowanie konstrukcji',
-      desc: 'Strefa śniegowa i wiatrowa, warunki gruntowe, fundamenty, instalacje. Ten sam projekt pod Zambrowem i nad morzem to dwie różne konstrukcje.',
+      nazwa: 'Dom z garażem',
+      opis: 'Garaż wpisany w bryłę, nie doklejony obok. Wjazd, kotłownia i wejście gospodarcze policzone jako jeden ciąg, a nie trzy osobne decyzje.',
     },
     {
-      no: '04',
-      title: 'Zmiany, których chcesz',
-      desc: 'Układ ścian, okna, wysokości, elewacja, garaż. Zakres ustalamy przed startem, bo część zmian wymaga zgody autora projektu.',
+      nazwa: 'Budynek gospodarczy',
+      opis: 'Stodoła, wiata, garaż wolnostojący, magazyn. Konstrukcja liczona pod to, co realnie ma stanąć w środku i wjechać do wnętrza.',
     },
     {
-      no: '05',
-      title: 'Podpis i komplet do urzędu',
-      desc: 'Jako projektant adaptujący biorę odpowiedzialność za projekt i składam komplet dokumentacji do pozwolenia na budowę.',
+      nazwa: 'Budynek inwentarski',
+      opis: 'Obora, chlewnia, kurnik. Wentylacja, ciągi obsługi i wymagania weterynaryjne wchodzą do projektu od pierwszego szkicu, nie na końcu.',
+    },
+    {
+      nazwa: 'Hala',
+      opis: 'Magazynowa, produkcyjna albo warsztatowa. Rozpiętość, wysokość i plac manewrowy ustawione pod naczepy i pod przyszłą rozbudowę.',
     },
   ],
-  action: 'Zapytaj o adaptację',
 } as const;
 
 export const cta = {

@@ -16,6 +16,7 @@ WEB/
 │   ├── Preloader.tsx           # 'use client' — ekran startowy, schodzi gdy hero ma czym grać
 │   ├── SmoothScroll.tsx        # 'use client' — Lenis spięty z ScrollTriggerem
 │   ├── ScrollVideoScene.tsx    # 'use client' — sticky wideo; tryb `loop` (aktywny) / `scrub` (zachowany)
+│   ├── ReadyGallery.tsx        # 'use client' — galeria biblioteki gotowych projektów
 │   ├── ContactForm.tsx         # 'use client' — formularz + stan wysyłki
 │   └── sections.tsx            # Hero, About, Services, Manifesto, Projects, Contact, Footer
 ├── lib/
@@ -88,27 +89,52 @@ Druga scena wideo (`length={3}`, przyciemnienie `soft`) na **Wideo 2**: panel z 
 i panel z krótką notą. Oddziela ofertę od portfolio i utrzymuje balans
 „architektka ↔ architektura".
 
-### 6. Gotowe projekty
+### 6. Gotowe projekty — galeria (`components/ReadyGallery.tsx`)
 
-**Biblioteka jeszcze nie istnieje** — i to jest cały problem projektowy tej sekcji.
-Zapowiedź („wkrótce") nie daje odwiedzającemu nic, więc ciężar niesie to, co jest
-dostępne dziś: **adaptacja**. W Polsce projekt z katalogu nie nadaje się do pozwolenia,
-dopóki architekt nie dopasuje go do działki i nie podpisze się pod nim jako projektant
-adaptujący. To jest realna usługa i to sprzedaje ta zakładka.
+Biblioteka projektów do adaptacji. **Zdjęć jeszcze nie ma** — sekcja jest rusztowaniem
+gotowym na wizualizacje.
 
-Brak biblioteki jest **oznaczony wprost** — wyróżniony blok z akcentującą krawędzią
-u góry, ten sam sygnał co na formularzu kontaktowym. Nieobecność pokazana świadomie
-czyta się jak plan, ukryta — jak niedokończona strona.
+**Płyty opisują TYPY budynków, nie zmyślone konkretne projekty.** To świadome: audyt
+zgłosił, że Realizacje podają sześć wymyślonych obiektów z metryczkami tak, jakby były
+prawdziwe. Tutaj sześć typów, które Aleksandra planuje wystawić, jest prawdą, a struktura
+danych i tak jest gotowa na podmianę.
 
-Układ: lewa kolumna (4fr) niesie lead, status biblioteki i przycisk; prawa (6fr) —
-pięć etapów adaptacji. Lead siedzi **w kolumnie, nie w nagłówku**: lewa strona miała
-sam status i przycisk, więc przy pięciu krokach po prawej wisiała w pustce, a sekcja
-urastała do 1,23 ekranu przy 1,00 każdej innej. Po przeniesieniu leada i oddaniu
-odstępom wysokości okna — 1,02.
+**Dodanie realnego projektu:** dopisz `foto` (ścieżka w `/public/img`) w `lib/config.ts`.
+Kadr sam przełączy się z siatki kreślarskiej na zdjęcie — żaden plik komponentu ani CSS
+nie wymaga wtedy zmiany.
 
-Etapy to `<ol>`, nie `<ul>`: dzieją się po kolei, więc numer niesie informację
-i numeracja jest tu zasłużona (w odróżnieniu od ozdobnej). Rozdziela je hairline,
-nie odstęp — mają się czytać jako jeden proces, a nie pięć osobnych kart.
+#### Dlaczego inaczej niż karuzela Realizacji
+
+| | Realizacje | Gotowe projekty |
+|---|---|---|
+| czynność | przeglądasz opowieść | **wybierasz z listy** |
+| forma | kafelki płyną, sąsiedzi w kadrze | **jeden duży kadr + spis obok** |
+| tekstura pustej płyty | skos | **siatka prostokątna** |
+| mechanika | natywny scroll + snap | stan Reacta |
+
+Karuzela ma sens tam, gdzie sąsiednie kafelki są kontekstem. Tu się wybiera, więc obraz
+bierze cały kadr, a reszta zwija się do ponumerowanego spisu — jak plansze w tece.
+
+#### Rzeczy, które wyszły z pomiaru
+
+- **Kadr potrzebuje `width: 100%` OBOK `max-height`.** Przy samym `aspect-ratio`
+  ograniczona wysokość **zwęża** element, żeby utrzymać proporcję — kadr zszedł z 833
+  na 718 px i zostawiał 115 px pustki w kolumnie. Definitywna szerokość sprawia, że
+  proporcja rządzi już tylko wysokością.
+- **`max-height: 36vh` na kadrze.** Bez sufitu 16:9 na szerokiej kolumnie wypychało
+  sekcję do 1,11 ekranu przy 1,00 każdej innej.
+- **CTA stoi przy opisie, nie w kolumnie bocznej.** W kolumnie bocznej wychodziła ona
+  wyższa od sceny i przycisk wypadał pod krawędź ekranu po skoku z menu (zmierzone: dół
+  na 911 px przy kadrze 900 px). Po przeniesieniu wszystko mieści się w kadrze, sekcja
+  ma 1,04 ekranu.
+- **Wejście kadru robi CSS, nie GSAP.** `gsap.fromTo` ustawia stan początkowy
+  natychmiast, a do końcowego dochodzi tickerem — przy zdławionym tickerze płyta zostaje
+  na `opacity: 0`, czyli główna treść sekcji jest niewidoczna. Animacja CSS nie zależy
+  od wątku głównego, a stanem bazowym elementu jest pełna widoczność.
+
+Wybór niesie kolor i waga, nie tło: pas jest biały, a plama tła zrobiłaby ze spisu sześć
+kafelków — dokładnie to, czego ten układ miał uniknąć. Strzałki góra/dół i lewo/prawo
+przechodzą po spisie.
 
 ### 5. Realizacje — karuzela (`components/ProjectRail.tsx`)
 
