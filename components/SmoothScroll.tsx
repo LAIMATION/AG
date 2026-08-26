@@ -95,14 +95,35 @@ export function SmoothScroll() {
       }
 
       /* Skok z menu to ruch ZAKOMENDEROWANY, nie gest — tu ustalony czas jest na
-         miejscu i `lerp` z konstruktora go nie dotyczy. Krzywa podana wprost, bo po
-         wyrzuceniu `easing` z konstruktora `scrollTo` brałby domyślną z biblioteki.
-         Wykładnicza, nie sześcienna: przy skoku przez pół strony mocniej wyhamowuje
-         na końcu, więc sekcja „dojeżdża", a nie „dobija". */
+         miejscu i `lerp` z konstruktora go nie dotyczy.
+
+         Czas MUSI zależeć od dystansu. Stałe 1,2 s dawało 750 px/s przy skoku do
+         sąsiedniej sekcji i 7800 px/s przy skoku przez całą stronę — dziesięciokrotna
+         różnica charakteru ruchu pod tym samym kliknięciem. Pierwiastek trzyma
+         długie skoki w ryzach, zamiast skalować czas wprost proporcjonalnie. */
+      const dystans = Math.abs(top - window.scrollY);
+      const czas = Math.min(1.6, Math.max(0.7, 0.45 + 0.011 * Math.sqrt(dystans)));
+
       if (lenis) {
         lenis.scrollTo(top, {
-          duration: 1.2,
-          easing: (t: number) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)),
+          duration: czas,
+          /* Rozbieg ORAZ wyhamowanie. Poprzednia krzywa (`expo.out`) startowała ze
+             szczytową prędkością — 6,9× średniej w pierwszej klatce — i nie miała
+             fazy rozbiegu w ogóle, a potem pełzła: ostatnie 10% drogi zajmowało jej
+             67% czasu. To czyta się jako zwłoka, nie jako hamowanie.
+
+             `smootherstep` rusza i kończy z prędkością ZERO i z zerowym
+             przyspieszeniem, więc ani start, ani ląd niczym nie szarpie. Skos
+             `t^0.85` przesuwa szczyt prędkości na t = 0,42: rozbieg dostaje 42%
+             czasu, wyhamowanie 58%. Szczyt to tylko 1,8× średniej zamiast 6,9×. */
+          easing: (t: number) => {
+            const w = Math.pow(t, 0.85);
+            return w * w * w * (w * (w * 6 - 15) + 10);
+          },
+          /* Zablokowane wejście na czas przelotu. Świadomy wyjątek od zasady
+             „nigdy nie odbieraj sterowania": to komenda z konkretnym celem, nie gest,
+             a przy 10,5 ekranu strony walka scrolla z animacją kończy się lądowaniem
+             w losowym miejscu. Górny limit 1,6 s trzyma tę blokadę w rozsądku. */
           lock: true,
         });
       } else window.scrollTo({ top });

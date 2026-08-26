@@ -400,8 +400,8 @@ sceny wideo. Zmierzone kliknięcia kółka do końca strony: `0,9` → 105, `0,8
 Gdyby dalej było ospale, kręcić `lerp` (0,16–0,18).
 
 Skok z menu (`scrollTo`) zostaje na **ustalonym czasie** — to ruch zakomenderowany, nie
-gest, i `lerp` go nie dotyczy. Krzywa jest tam podana wprost, bo po wyrzuceniu `easing`
-z konstruktora `scrollTo` brałby domyślną z biblioteki.
+gest, i `lerp` go nie dotyczy. Ma jednak własną krzywą i własne liczenie czasu, patrz
+„Lądowanie kotwic".
 
 
 Lenis zamontowany w `app/layout.tsx`. Bez niego jedno kliknięcie kółka to skok o ~100 px
@@ -427,8 +427,50 @@ const top = Math.max(sectionTop, headTop - scrollPaddingTop);
 ```
 
 `Math.max` pilnuje, żeby przy tym nigdy nie wjechał w kadr skrawek poprzedniej sekcji
-(gdyby `--section-y` było mniejsze od prześwitu). `lock: true` nie pozwala przypadkowemu
-ruchowi kółka zatrzymać widoku w pół drogi.
+(gdyby `--section-y` było mniejsze od prześwitu).
+
+#### Krzywa: rozbieg ORAZ wyhamowanie
+
+Było `expo.out`. Ta krzywa **startuje ze szczytową prędkością** — zmierzone 6,9× średniej
+w pierwszej klatce — i nie ma fazy rozbiegu w ogóle, a potem pełznie: ostatnie 10% drogi
+zajmowało jej **67% czasu**. Czyta się to jako zwłoka, nie jako hamowanie.
+
+Teraz `smootherstep` ze skosem czasu `t^0.85`:
+
+```js
+easing: (t) => { const w = Math.pow(t, 0.85); return w*w*w*(w*(w*6-15)+10); }
+```
+
+| | expo.out (było) | teraz |
+|---|---|---|
+| szczyt prędkości | t = 0,00 | t = 0,42 |
+| prędkość startowa | 6,86× średniej | **0** |
+| szczyt prędkości | 6,91× średniej | **1,81×** |
+| ostatnie 10% drogi | 67% czasu | 28% czasu |
+
+`smootherstep` rusza i kończy z prędkością **oraz** przyspieszeniem równym zero, więc ani
+start, ani lądowanie niczym nie szarpie. Skos `t^0.85` przesuwa szczyt przed połowę:
+rozbieg dostaje 42% czasu, wyhamowanie 58%.
+
+#### Czas zależny od dystansu
+
+`duration = clamp(0.7, 0.45 + 0.011 * sqrt(dystans), 1.6)`
+
+Stałe 1,2 s dawało ten sam czas skokowi o 2160 px i o 7052 px — czyli 1800 wobec
+5877 px/s pod tym samym kliknięciem. Pierwiastek trzyma długie skoki w ryzach, zamiast
+skalować czas wprost proporcjonalnie. Zmierzone cele na tej stronie:
+
+| Skok z góry do | Dystans | Czas |
+|---|---|---|
+| O mnie | 2160 px | 0,96 s |
+| Zakres | 2885 px | 1,04 s |
+| Realizacje | 5897 px | 1,29 s |
+| Kontakt | 6965 px | 1,37 s |
+| powrót `#top` z dołu | 7052 px | 1,37 s |
+
+`lock: true` zostaje — świadomy wyjątek od zasady „nigdy nie odbieraj sterowania". To
+komenda z konkretnym celem, nie gest, a przy 10,5 ekranu strony walka scrolla z animacją
+kończy się lądowaniem w losowym miejscu. Limit 1,6 s trzyma blokadę w rozsądku.
 
 `scroll-padding-top` = `--nav-h + --nav-offset + --s-5` → 84 px na desktopie
 (27 px prześwitu pod paskiem) i 32 px na mobile, gdzie pasek stoi u dołu.
