@@ -167,6 +167,27 @@ Zmierzone przy 1440 px: regał ma 1425 px i sięga od krawędzi do krawędzi. Po
 ~1560 px szerokości okna ogranicza go `--maxw` sekcji, co jest w porządku — to nadal
 1632 px pasa.
 
+#### Trzy błędy pierwszej wersji i ich przyczyny
+
+1. **Pionowe tytuły wychodziły poza płytę** — do 99 px ponad krawędź, cztery z sześciu
+   nachodziły na numer. Winny nie był tytuł, tylko **ukryty opis**: chowała go sama
+   przezroczystość, więc mimo niewidoczności nadal zajmował miejsce i wypychał tytuł
+   w górę. Teraz wiersz opisu zwija się do zera (`grid-template-rows: auto minmax(0, 0fr)`),
+   a tytuł zaczyna się 180 px poniżej krawędzi zamiast 99 px powyżej.
+2. **Obrót pion → poziom szarpał**, bo szedł przez `writing-mode`, który nie jest
+   animowalny — przeskok wypadał w połowie ruchu płyty. Teraz obraca TRANSFORM
+   (`rotate(-90deg)` → `rotate(0)`, punkt obrotu w lewym dolnym rogu, żeby tekst
+   wychodził z tego samego narożnika w obu stanach). Sprawdzone:
+   `matrix(0,-1,1,0,0,0)` → `matrix(1,0,0,1,0,0)`, interpolacja 0,62 s.
+   Przy okazji **jeden stopień pisma w obu stanach** — zmiana stopnia przy wyborze była
+   drugą, niezależną animacją w tym samym momencie.
+3. **Nie dało się zamknąć płyty.** Kliknięcie w otwartą zamyka ją teraz (`-1` = żadna
+   wybrana, wszystkie równe). Wymagało to **usunięcia wyboru na najechanie**: to się
+   wykluczało — zamknięta płyta natychmiast otwierała się z powrotem, bo kursor wciąż
+   nad nią stał. Najazd tylko podświetla tytuł, wybór jest kliknięciem.
+   Stan niesie `aria-expanded`, nie `aria-current` — to rozwijanie, nie wskazanie
+   pozycji w zbiorze.
+
 #### Rzeczy, które trzeba wiedzieć przy modyfikacji
 
 - **Rozsuwanie idzie po `flex-grow`, czyli po layoucie, nie po transformie.** To jedyny
@@ -176,11 +197,8 @@ Zmierzone przy 1440 px: regał ma 1425 px i sięga od krawędzi do krawędzi. Po
 - **Numer i treść są pozycjonowane absolutnie, nie flexem.** Opis jest w drzewie także
   na zwiniętej płycie (chowa go przezroczystość, nie `display`, żeby szerokość nie
   skakała w trakcie rozsuwania) — we flexie jego wysokość wypychałaby numer poza kadr.
-- **`writing-mode` nie jest animowalne**, więc obrót tytułu przy wyborze jest
-  natychmiastowy. Dzieje się w chwili, gdy płyta rusza się wszerz, i czyta się jako ten
-  sam gest.
-- **Na myszy wybór idzie za kursorem** (`hover: hover`), na dotyku rządzi klik —
-  `mouseenter` na dotyku odpala się dopiero przy dotknięciu i udawałby hover.
+- **Wybór jest wyłącznie kliknięciem**, na myszy i na dotyku tak samo. Najazd kursorem
+  podświetla tytuł, ale niczego nie wybiera — inaczej nie dałoby się zamknąć płyty.
 
 #### Na wąskim ekranie regał kładzie się na bok
 

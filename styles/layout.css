@@ -834,50 +834,72 @@
   color: var(--c-accent-ink);
 }
 
+/* Wiersz opisu ZWIJA SIĘ DO ZERA, gdy płyta jest zwinięta. Wcześniej chowała go sama
+   przezroczystość — i to był błąd: niewidoczny opis nadal zajmował miejsce i wypychał
+   pionowy tytuł w górę, poza płytę. Zmierzone: „Obora wolnostanowiskowa" wychodziła
+   99 px ponad krawędź, a cztery z sześciu tytułów nachodziły na numer.
+
+   `minmax(0, …)`, nie samo `0fr`: wiersz `fr` ma automatyczne minimum równe treści,
+   więc samo `0fr` nie zeruje wysokości. */
 .ag-shelf__body {
   position: absolute;
   left: var(--s-4);
   right: var(--s-4);
   bottom: var(--s-5);
   z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--s-3);
+  display: grid;
+  grid-template-rows: auto minmax(0, 0fr);
   text-align: left;
+  transition: grid-template-rows var(--dur-slow) var(--ease);
 }
 
-/* Tytuł czytany od dołu do góry — grzbiet teczki na półce. */
+.ag-shelf__plate[data-czynna] .ag-shelf__body {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+/* Tytuł czytany od dołu do góry — grzbiet teczki na półce.
+
+   Obrót robi TRANSFORM, nie `writing-mode`. `writing-mode` nie jest animowalne, więc
+   przejście pion → poziom było szarpnięciem w połowie ruchu płyty. Transform
+   interpoluje się płynnie i zostaje na kompozytorze.
+
+   Punkt obrotu w lewym dolnym rogu: tekst wychodzi z tego samego narożnika w obu
+   stanach, więc przy obrocie nic nie skacze. */
 .ag-shelf__title {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
   font-family: var(--f-display);
-  font-size: var(--fs-h3);
+  /* Jeden stopień w obu stanach. Zmiana stopnia przy wyborze to druga, niezależna
+     animacja w tym samym momencie — a wyróżnienie czynnej płyty niosą i tak jej
+     szerokość, poziomy tytuł, opis i akcent na numerze. */
+  font-size: clamp(1.125rem, 1.6vw, 1.5rem);
   font-weight: 500;
-  line-height: 1;
+  line-height: 1.1;
   letter-spacing: var(--ls-heading);
   color: var(--c-ink);
   white-space: nowrap;
+  transform-origin: 0 100%;
+  transform: rotate(-90deg);
+  transition: transform var(--dur-slow) var(--ease), color var(--dur) var(--ease);
 }
 
-/* Wybrana płyta obraca tytuł do poziomu — tak jak wyciągniętą teczkę odwraca się
-   przodem do siebie. `writing-mode` nie jest animowalne, więc obrót jest natychmiastowy;
-   dzieje się jednak w chwili, gdy płyta rusza się wszerz, i czyta się jako ten sam gest. */
 .ag-shelf__plate[data-czynna] .ag-shelf__title {
-  writing-mode: horizontal-tb;
-  transform: none;
-  font-size: var(--fs-h2);
-  white-space: normal;
-  text-wrap: balance;
+  transform: rotate(0deg);
 }
 
-/* Chowa je przezroczystość, nie `display` — inaczej szerokość płyty skakałaby
-   w trakcie rozsuwania. `overflow: hidden` na płycie przycina resztę. */
+/* Sam najazd kursorem tylko podświetla tytuł — NIE wybiera płyty. Wybór jest
+   kliknięciem, żeby dało się go też cofnąć; przy wyborze na najechanie zamknięcie
+   płyty byłoby natychmiast odwracane przez kursor, który wciąż nad nią stoi. */
+.ag-shelf__plate:hover .ag-shelf__title {
+  color: var(--c-accent-ink);
+}
+
 .ag-shelf__detail {
   display: flex;
   flex-direction: column;
   gap: var(--s-2);
   max-width: 46ch;
+  min-height: 0;
+  overflow: hidden;
+  padding-top: var(--s-3);
   opacity: 0;
   transition: opacity var(--dur) var(--ease);
 }
@@ -1299,33 +1321,9 @@ a.ag-contact__value:hover {
     border-bottom: 0;
   }
 
-  /* Wysokość rozwijają wiersze siatki (0fr → 1fr), NIE animowana wysokość wprost.
-     Animowanie wysokości to reflow na każdą klatkę u sześciu pól — na telefonie
-     najdroższy możliwy wybór. Wiersze siatki przeglądarki obsługują znacznie taniej,
-     a treść i tak dyktuje wysokość docelową. Przycięcie jest obowiązkowe: wiersz
-     o zerowej wysokości sam z siebie niczego nie schowa. */
+  /* Wysokość płyty dyktuje treść — wiersze siatki są już w regule bazowej. */
   .ag-shelf__body {
     position: static;
-    display: grid;
-    /* `minmax(0, …)`, nie samo `0fr`: wiersz `fr` ma automatyczne minimum równe
-       treści, więc samo `0fr` NIE zeruje wysokości — zmierzone 12 px zamiast 0,
-       a element rozpychał się do 138 px mimo przycięcia. Dopiero jawne minimum 0
-       pozwala wierszowi faktycznie się zamknąć. */
-    grid-template-rows: auto minmax(0, 0fr);
-    gap: 0;
-    transition: grid-template-rows var(--dur-slow) var(--ease);
-  }
-
-  .ag-shelf__plate[data-czynna] .ag-shelf__body {
-    grid-template-rows: auto minmax(0, 1fr);
-  }
-
-  /* `min-height: 0` z tego samego powodu, tylko po stronie elementu: bez tego jego
-     własne minimum treści wygrywa z wysokością wiersza i nic się nie chowa. */
-  .ag-shelf__detail {
-    min-height: 0;
-    overflow: hidden;
-    padding-top: var(--s-3);
   }
 
   /* Bezczynne, dopóki nie ma zdjęć: kadr z fotografią potrzebuje wysokości, sam tekst nie. */
@@ -1333,12 +1331,11 @@ a.ag-contact__value:hover {
     min-height: 18rem;
   }
 
-  /* Pionowy tytuł w wierszu wysokim na 72 px nie ma się jak zmieścić. */
+  /* Pionowy tytuł w wierszu wysokim na 72 px nie ma się jak zmieścić — na wąskim
+     ekranie płyty leżą, więc obrót w ogóle nie wchodzi. */
   .ag-shelf__title,
   .ag-shelf__plate[data-czynna] .ag-shelf__title {
-    writing-mode: horizontal-tb;
     transform: none;
-    font-size: var(--fs-h3);
     white-space: normal;
   }
 

@@ -28,11 +28,12 @@ export function ProjectShelf() {
   const [aktywna, setAktywna] = useState(0);
   const plyty = projects.items as readonly Realizacja[];
 
-  /* Na myszy wybór idzie za kursorem — regał ma reagować na sam ruch, nie żądać
-     kliknięcia. Na dotyku `hover` nie istnieje, a `mouseenter` odpala się dopiero
-     przy dotknięciu, więc tam rządzi zwykły klik. */
-  const najedz = useCallback((i: number) => {
-    if (window.matchMedia('(hover: hover)').matches) setAktywna(i);
+  /* Kliknięcie w otwartą płytę ją ZAMYKA (`-1` = żadna nie jest wybrana). Wcześniej
+     wybór szedł też za kursorem — i to się wykluczało z zamykaniem: zamknięta płyta
+     natychmiast otwierała się z powrotem, bo kursor wciąż nad nią stał. Najazd
+     kursorem tylko podświetla tytuł, wybór jest kliknięciem. */
+  const przelacz = useCallback((i: number) => {
+    setAktywna((n) => (n === i ? -1 : i));
   }, []);
 
   const klawisz = useCallback(
@@ -56,10 +57,8 @@ export function ProjectShelf() {
             className="ag-shelf__plate"
             data-czynna={czynna || undefined}
             data-pusta={p.foto ? undefined : 'true'}
-            aria-current={czynna ? 'true' : undefined}
-            onMouseEnter={() => najedz(i)}
-            onFocus={() => setAktywna(i)}
-            onClick={() => setAktywna(i)}
+            aria-expanded={czynna}
+            onClick={() => przelacz(i)}
             onKeyDown={klawisz}
           >
             {p.foto ? (
