@@ -4,7 +4,17 @@ import Image from 'next/image';
 import { ContactForm } from '@/components/ContactForm';
 import { ProjectRail } from '@/components/ProjectRail';
 import { ScrollVideoScene } from '@/components/ScrollVideoScene';
-import { about, contact, cta, hero, manifesto, projects, services, site } from '@/lib/config';
+import {
+  about,
+  contact,
+  cta,
+  gotowe,
+  hero,
+  manifesto,
+  projects,
+  services,
+  site,
+} from '@/lib/config';
 
 export function Hero() {
   return (
@@ -148,6 +158,58 @@ export function Projects() {
 
         <div className="ag-section__body">
           <ProjectRail />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* Biblioteki jeszcze nie ma, więc ciężar sekcji niesie to, co jest dostępne dziś:
+   adaptacja. Brak biblioteki jest oznaczony wprost, w wyróżnionym bloku — nieobecność
+   pokazana świadomie czyta się jak plan, a ukryta jak niedokończona strona. */
+export function Gotowe() {
+  return (
+    <section className="ag-section ag-section--alt" id="gotowe">
+      <div className="ag-section__wrap">
+        <div className="ag-section__head">
+          <p className="ag-eyebrow ag-rule">{gotowe.eyebrow}</p>
+          <h2 className="ag-h2">{gotowe.title}</h2>
+        </div>
+
+        {/* Lead siedzi w kolumnie, nie w nagłówku: lewa strona miała sam status
+            i przycisk, więc przy pięciu krokach po prawej wisiała w pustce, a sekcja
+            urastała ponad ekran. Tutaj równoważy kolumny i skraca całość. */}
+        <div className="ag-section__body ag-ready__grid">
+          <div className="ag-ready__aside">
+            <p className="ag-lead">{gotowe.lead}</p>
+
+            <div className="ag-ready__note">
+              <p className="ag-ready__note-label">{gotowe.bibliotekaLabel}</p>
+              <p className="ag-ready__note-text">{gotowe.biblioteka}</p>
+            </div>
+
+            <a className="ag-btn" href="#kontakt">
+              {gotowe.action}
+            </a>
+          </div>
+
+          <div className="ag-ready__steps">
+            <p className="ag-eyebrow">{gotowe.krokiLabel}</p>
+
+            {/* `ol`, nie `ul` — to etapy w kolejności, a nie zbiór równorzędnych
+                pozycji. Numer niesie informację, więc numeracja jest tu zasłużona. */}
+            <ol className="ag-steps">
+              {gotowe.kroki.map((krok) => (
+                <li className="ag-step" key={krok.no}>
+                  <span className="ag-step__no">{krok.no}</span>
+                  <div className="ag-step__body">
+                    <h3 className="ag-h3">{krok.title}</h3>
+                    <p className="ag-step__desc">{krok.desc}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
         </div>
       </div>
     </section>

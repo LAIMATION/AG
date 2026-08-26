@@ -17,10 +17,14 @@ export const site = {
   instagramHandle: '@architekt_gosk_aleksandra',
 } as const;
 
+/* Etykiety są krótkie, bo na mobile pasek dzieli szerokość ekranu po równo między
+   pozycje — „Gotowe projekty" w całości zdusiłoby pozostałe. Pełna nazwa stoi
+   w nagłówku sekcji. */
 export const nav = [
   { id: 'o-mnie', label: 'O mnie' },
   { id: 'uslugi', label: 'Zakres' },
   { id: 'realizacje', label: 'Realizacje' },
+  { id: 'gotowe', label: 'Gotowe' },
   { id: 'kontakt', label: 'Kontakt' },
 ] as const;
 
@@ -132,6 +136,51 @@ export const projects = {
       desc: 'Osiemdziesiąt metrów, w których nie ma ani jednego metra korytarza. Budżet był sztywny, więc metraż pracował na każdy złoty.',
     },
   ],
+} as const;
+
+/* Biblioteka jeszcze nie istnieje, więc sekcja NIE może być zapowiedzią — samo
+   „wkrótce" nie daje odwiedzającemu nic. Treścią jest to, co jest dostępne dziś:
+   adaptacja. W Polsce projekt z katalogu nie nadaje się do pozwolenia, dopóki
+   architekt nie dopasuje go do działki i nie podpisze się pod nim jako projektant
+   adaptujący — i to jest usługa, którą ta zakładka sprzedaje. Biblioteka dochodzi
+   jako zapowiedziany, uczciwie oznaczony brak. */
+export const gotowe = {
+  eyebrow: 'Gotowe projekty',
+  title: 'Gotowy projekt to punkt wyjścia, nie gotowy dom',
+  lead:
+    'Projekt z katalogu kosztuje mniej i skraca drogę do pozwolenia. Sam z siebie nie da się go jednak zbudować: zanim trafi do urzędu, ktoś musi dopasować go do Twojej działki i wziąć za niego odpowiedzialność. Tym się zajmuję.',
+  bibliotekaLabel: 'Biblioteka w przygotowaniu',
+  biblioteka:
+    'Składam własny zestaw projektów gotowych do adaptacji — domy jednorodzinne, budynki gospodarcze i hale. Zanim się tu pojawi, adaptuję projekt kupiony w dowolnej pracowni.',
+  krokiLabel: 'Co obejmuje adaptacja',
+  kroki: [
+    {
+      no: '01',
+      title: 'Sprawdzenie działki',
+      desc: 'Plan miejscowy albo warunki zabudowy, wjazd, media, kształt i orientacja terenu. Mówię Ci, czy dany projekt w ogóle się zmieści — zanim za niego zapłacisz.',
+    },
+    {
+      no: '02',
+      title: 'Projekt zagospodarowania terenu',
+      desc: 'Ustawienie budynku, dojazdu i przyłączy na Twojej działce. Tego nie ma w żadnym projekcie z katalogu — powstaje zawsze na miejscu.',
+    },
+    {
+      no: '03',
+      title: 'Dopasowanie konstrukcji',
+      desc: 'Strefa śniegowa i wiatrowa, warunki gruntowe, fundamenty, instalacje. Ten sam projekt pod Zambrowem i nad morzem to dwie różne konstrukcje.',
+    },
+    {
+      no: '04',
+      title: 'Zmiany, których chcesz',
+      desc: 'Układ ścian, okna, wysokości, elewacja, garaż. Zakres ustalamy przed startem, bo część zmian wymaga zgody autora projektu.',
+    },
+    {
+      no: '05',
+      title: 'Podpis i komplet do urzędu',
+      desc: 'Jako projektant adaptujący biorę odpowiedzialność za projekt i składam komplet dokumentacji do pozwolenia na budowę.',
+    },
+  ],
+  action: 'Zapytaj o adaptację',
 } as const;
 
 export const cta = {

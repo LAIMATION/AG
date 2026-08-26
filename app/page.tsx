@@ -3,6 +3,7 @@ import {
   CallToAction,
   Contact,
   Footer,
+  Gotowe,
   Hero,
   Manifesto,
   Projects,
@@ -18,6 +19,7 @@ export default function Page() {
         <Services />
         <Manifesto />
         <Projects />
+        <Gotowe />
         <CallToAction />
         <Contact />
       </main>

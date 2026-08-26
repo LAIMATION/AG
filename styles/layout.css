@@ -301,8 +301,19 @@
     gap: 0;
   }
 
+  /* `flex-grow: 1`, NIE `flex: 1`.
+
+     `flex: 1` to `flex: 1 1 0%` — baza zerowa, czyli wszystkie pozycje równe co do
+     piksela. Przy pięciu zakładkach na 375 px daje to slot 59 px, a „Realizacje" mają
+     73 px tekstu: etykieta wychodzi poza swoje pole. Zejście z krojem, które by to
+     uratowało, kończy się na 9 px — poniżej czytelności.
+
+     Sama baza `auto` z `flex-grow` daje każdej pozycji jej własną szerokość plus równy
+     udział w wolnym miejscu: pasek nadal wypełnia się w całości, ale żadna etykieta
+     się nie łamie. Nierówne pola są tu ceną za pięć czytelnych zakładek. */
   .ag-nav__links > li {
-    flex: 1;
+    flex-grow: 1;
+    min-width: 0;
   }
 
   /* Na mobile pasek stoi u dołu, a przycisk powrotu unosi się tuż nad nim — druga
@@ -311,11 +322,16 @@
     display: none;
   }
 
+  /* Pięć pozycji zamiast czterech. Zmierzone przy 375 px: przy 12 px i tracku .08em
+     etykiety zajmowały 387 px na 334 px dostępnych — padding był już wyzerowany, więc
+     dalej ściskać nie było czego. Stopień i track schodzą, żeby tekst zmieścił się
+     z zapasem; 11 px wersalików jest w systemie (etykiety faktów, pól kontaktu),
+     a cel dotykowy trzyma 44 px niezależnie od stopnia pisma. */
   .ag-nav__link {
     width: 100%;
-    padding-inline: var(--s-2);
-    font-size: 0.75rem;
-    letter-spacing: 0.08em;
+    padding-inline: var(--s-1);
+    font-size: 0.6875rem;
+    letter-spacing: 0.05em;
   }
 }
 
@@ -921,6 +937,100 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* --- Gotowe projekty -------------------------------------------------- */
+
+/* Lżejsza kolumna z lewej niesie stan i akcję, cięższa z prawej — etapy adaptacji.
+   `align-items: start`, bo kolumny mają różną długość i rozciąganie krótszej
+   zostawiłoby blok statusu zawieszony w pustce. */
+.ag-ready__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 4fr) minmax(0, 6fr);
+  gap: clamp(1.5rem, 3.5vw, 3.5rem);
+  align-items: start;
+}
+
+.ag-ready__aside {
+  display: grid;
+  gap: var(--s-5);
+  justify-items: start;
+  align-content: start;
+  min-width: 0;
+}
+
+/* Brak biblioteki jest WYRÓŻNIONY, nie schowany: akcentująca krawędź u góry mówi
+   „tu coś dojdzie" — ten sam sygnał, co na formularzu kontaktowym. Kremowy blok
+   na białym pasie, bo `--c-surface` byłby tym samym bielą co sekcja pod spodem. */
+.ag-ready__note {
+  display: grid;
+  gap: var(--s-2);
+  padding: clamp(1.25rem, 2.2vw, 1.75rem);
+  background: var(--c-bg);
+  border: var(--border);
+  border-top: 2px solid var(--c-accent);
+}
+
+.ag-ready__note-label {
+  font-size: var(--fs-eyebrow);
+  font-weight: 600;
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+  color: var(--c-accent-ink);
+}
+
+.ag-ready__note-text {
+  color: var(--c-ink-soft);
+  max-width: 44ch;
+}
+
+.ag-ready__steps {
+  display: grid;
+  gap: var(--s-4);
+  align-content: start;
+  min-width: 0;
+}
+
+/* Etapy rozdziela hairline, nie odstęp — lista ma się czytać jak następujące po
+   sobie pozycje jednego procesu, a nie jak pięć osobnych kart. */
+.ag-step {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--s-4);
+  /* odstęp oddaje wysokość, gdy ekran jest niski — pięć etapów ma się zmieścić
+     w kadrze razem z resztą sekcji, a luz odbieramy odstępom, nigdy tekstowi */
+  padding-block: clamp(0.75rem, 1.6vh, 1.125rem);
+  border-top: var(--border);
+}
+
+.ag-step:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.ag-step:last-child {
+  padding-bottom: 0;
+}
+
+.ag-step__no {
+  font-size: var(--fs-eyebrow);
+  font-weight: 600;
+  letter-spacing: var(--ls-eyebrow);
+  color: var(--c-accent-ink);
+  font-variant-numeric: tabular-nums;
+  /* numer siada na linii pisma nagłówka, nie na górnej krawędzi jego pudełka */
+  padding-top: 0.3em;
+}
+
+.ag-step__body {
+  display: grid;
+  gap: var(--s-2);
+  min-width: 0;
+}
+
+.ag-step__desc {
+  color: var(--c-ink-soft);
+  max-width: 54ch;
+}
+
 /* --- Pas CTA przed kontaktem ----------------------------------------- */
 
 /* Jedyny pas w akcentującym kolorze na całej stronie. Odcina sekcję kontaktu od
@@ -1127,6 +1237,10 @@ a.ag-contact__value:hover {
 
   .ag-contact__aside {
     justify-content: start;
+  }
+
+  .ag-ready__grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .ag-form {

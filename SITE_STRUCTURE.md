@@ -49,9 +49,10 @@ WEB/
 | 3 | Usługi | `uslugi` | `Services` | 4 pozycje w siatce 2×2 |
 | 4 | Manifest | — | `Manifesto` | **Wideo 2** jako tło, cytat |
 | 5 | Realizacje | `realizacje` | `Projects` | 6 mock-placeholderów |
-| 6 | Pas CTA | — | `CallToAction` | akcent `--c-accent-deep`, przycisk + telefon |
-| 7 | Kontakt | `kontakt` | `Contact` | formularz + telefon + e-mail + IG |
-| 8 | Stopka | — | `Footer` | copyright, obszar działania |
+| 6 | Gotowe projekty | `gotowe` | `Gotowe` | biblioteka w przygotowaniu + etapy adaptacji |
+| 7 | Pas CTA | — | `CallToAction` | akcent `--c-accent-deep`, przycisk + telefon |
+| 8 | Kontakt | `kontakt` | `Contact` | formularz + telefon + e-mail + IG |
+| 9 | Stopka | — | `Footer` | copyright, obszar działania |
 
 ### Rytm pasów
 
@@ -86,6 +87,28 @@ budowy, świadectwa energetyczne, konsultacje. Każda z numerem `01–04`.
 Druga scena wideo (`length={3}`, przyciemnienie `soft`) na **Wideo 2**: panel z cytatem
 i panel z krótką notą. Oddziela ofertę od portfolio i utrzymuje balans
 „architektka ↔ architektura".
+
+### 6. Gotowe projekty
+
+**Biblioteka jeszcze nie istnieje** — i to jest cały problem projektowy tej sekcji.
+Zapowiedź („wkrótce") nie daje odwiedzającemu nic, więc ciężar niesie to, co jest
+dostępne dziś: **adaptacja**. W Polsce projekt z katalogu nie nadaje się do pozwolenia,
+dopóki architekt nie dopasuje go do działki i nie podpisze się pod nim jako projektant
+adaptujący. To jest realna usługa i to sprzedaje ta zakładka.
+
+Brak biblioteki jest **oznaczony wprost** — wyróżniony blok z akcentującą krawędzią
+u góry, ten sam sygnał co na formularzu kontaktowym. Nieobecność pokazana świadomie
+czyta się jak plan, ukryta — jak niedokończona strona.
+
+Układ: lewa kolumna (4fr) niesie lead, status biblioteki i przycisk; prawa (6fr) —
+pięć etapów adaptacji. Lead siedzi **w kolumnie, nie w nagłówku**: lewa strona miała
+sam status i przycisk, więc przy pięciu krokach po prawej wisiała w pustce, a sekcja
+urastała do 1,23 ekranu przy 1,00 każdej innej. Po przeniesieniu leada i oddaniu
+odstępom wysokości okna — 1,02.
+
+Etapy to `<ol>`, nie `<ul>`: dzieją się po kolei, więc numer niesie informację
+i numeracja jest tu zasłużona (w odróżnieniu od ozdobnej). Rozdziela je hairline,
+nie odstęp — mają się czytać jako jeden proces, a nie pięć osobnych kart.
 
 ### 5. Realizacje — karuzela (`components/ProjectRail.tsx`)
 
@@ -171,6 +194,25 @@ Pas `--c-bg-alt`. Siatka 4/6: po lewej lead + telefon / e-mail / Instagram (klik
 Submit → `POST /api/kontakt` → nodemailer → Gmail SMTP.
 
 ## Nawigacja
+
+### Pięć zakładek na mobile: `flex-grow`, nie `flex: 1`
+
+`flex: 1` to `flex: 1 1 0%` — baza zerowa, czyli pozycje równe co do piksela. Działało
+przy czterech zakładkach. Piąta („Gotowe") to psuje: zmierzone przy 375 px, slot spada
+do 59 px, a „Realizacje" mają **73 px samego tekstu** — etykieta wychodzi poza swoje pole.
+Zejście z krojem, które by to uratowało, kończy się na ~9 px, poniżej czytelności.
+
+Dlatego `flex-grow: 1` z bazą `auto`: każda pozycja dostaje własną szerokość plus równy
+udział w wolnym miejscu. Pasek nadal wypełnia się w całości (335 px na 334 px dostępnych),
+ale nic się nie łamie — każda etykieta ma 5 px zapasu. Ceną są nierówne pola (55–86 px),
+proporcjonalne do długości etykiety.
+
+Stopień na mobile zszedł do `0.6875rem` z trackiem `.05em`. 11 px wersalików jest
+w systemie (etykiety faktów i pól kontaktu), a cel dotykowy trzyma 44 px niezależnie
+od stopnia pisma.
+
+Etykiety w `nav` są krótkie z tego samego powodu — pełna nazwa („Gotowe projekty")
+stoi w nagłówku sekcji.
 
 `components/Nav.tsx` (client). Pływający, wyśrodkowany kafelek na mlecznym szkle
 (`--radius-nav: 20px`, wysokość 43 px, `backdrop-filter: blur(28px) saturate(1.6)`,
