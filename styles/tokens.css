@@ -24,6 +24,10 @@
   --c-error: #b03a2e;
 
   --c-inverse: #1f2a35; /* głęboki granat — scrim, tekst na pomarańczu */
+  /* Ta sama barwa w składowych, do przyciemnień z kanałem alfa. Zapis
+     `rgb(var(--c-inverse-rgb) / .74)` trzyma scrim w systemie zamiast wklejać
+     kolejną dosłowną wartość obok tokena. */
+  --c-inverse-rgb: 31 42 53;
   --c-inverse-ink: #f2eee4;
   --c-inverse-muted: rgba(242, 238, 228, 0.82);
   --c-inverse-line: rgba(242, 238, 228, 0.3);

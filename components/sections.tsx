@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { ContactForm } from '@/components/ContactForm';
-import { ProjectRail } from '@/components/ProjectRail';
+import { ProjectShelf } from '@/components/ProjectShelf';
 import { ReadyGallery } from '@/components/ReadyGallery';
 import { ScrollVideoScene } from '@/components/ScrollVideoScene';
 import {
@@ -158,7 +158,7 @@ export function Projects() {
         </div>
 
         <div className="ag-section__body">
-          <ProjectRail />
+          <ProjectShelf />
         </div>
       </div>
     </section>

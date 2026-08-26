@@ -747,158 +747,146 @@
   color: var(--c-inverse-muted);
 }
 
-/* --- Realizacje ------------------------------------------------------ */
+/* --- Realizacje: regał plansz ---------------------------------------- */
 
-/* Karuzela: przewijaniem zajmuje się natywny scroll ze snapem, głębią GSAP.
-   Kafelek trafia na środek kadru, sąsiednie zostają widoczne po bokach. */
-/* `minmax(0, 1fr)` i `min-width: 0` w całym łańcuchu są obowiązkowe: tor ma
-   `width: max-content`, a domyślne `min-width: auto` przepuszcza tę szerokość
-   w górę drzewa i rozpycha całą sekcję zamiast włączyć przewijanie. */
-.ag-rail {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: clamp(1.5rem, 3vh, 2.5rem);
+/* Trzeci sposób prezentacji na stronie i celowo różny od dwóch pozostałych:
+   karuzela (poprzednia wersja) kazała przewijać, galeria „Gotowych projektów" ma jeden
+   duży kadr plus spis obok — tutaj widać WSZYSTKIE płyty naraz, a wybrana rozsuwa się
+   w miejscu. Metafora z warsztatu: grzbiety teczek stojących na półce.
+
+   Pełne rozlanie: ujemny margines wyprowadza regał poza margines sekcji, aż do krawędzi
+   kadru. Do ~1560 px szerokości okna daje to prawdziwe rozlanie od krawędzi do krawędzi;
+   wyżej ogranicza je `--maxw` sekcji. */
+.ag-shelf {
+  margin-inline: calc(var(--gutter) * -1);
+  display: flex;
+  height: min(56vh, 30rem);
+  border-block: var(--border);
+  overflow: hidden;
 }
 
-/* Kadr karuzeli razem z nakładką strzałek — to on wyznacza ich pionowy środek. */
-.ag-rail__stage {
+/* Płyty NIE mają tekstury. Karuzela miała skos, galeria biblioteki ma siatkę — trzeci
+   deseń zrobiłby z warsztatu jarmark. Regał niosą typografia i podział na pola, więc
+   bez zdjęć jest kompletny, a nie pusty. */
+.ag-shelf__plate {
   position: relative;
+  flex: 1 1 0;
   min-width: 0;
+  border: 0;
+  border-right: var(--border);
+  background: var(--c-bg);
+  overflow: hidden;
+  cursor: pointer;
+  /* Rozsuwanie zmienia layout, nie transform — to jedyny sposób, żeby sąsiednie płyty
+     realnie ustąpiły miejsca. Sześć pól to koszt, na który stać tę jedną interakcję. */
+  transition: flex-grow var(--dur-slow) var(--ease), background-color var(--dur) var(--ease);
 }
 
-/* Strzałki leżą NA kadrze, przy jego skrajach, wyśrodkowane w pionie. Wcześniej
-   siedziały pod opisem i przy niskim oknie schodziły poniżej krawędzi ekranu. */
-.ag-rail__nav {
+.ag-shelf__plate:last-child {
+  border-right: 0;
+}
+
+.ag-shelf__plate[data-czynna] {
+  flex-grow: 3.2;
+  background: var(--c-bg-alt);
+}
+
+.ag-shelf__foto {
+  object-fit: cover;
+}
+
+/* Przyciemnienie wchodzi dopiero, gdy w płycie jest zdjęcie — na pustej nie ma czego
+   przyciemniać. Reguła jest bezczynna, dopóki `foto` nie trafi do lib/config.ts. */
+.ag-shelf__plate:not([data-pusta])::after {
+  content: '';
   position: absolute;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-inline: var(--s-3);
-  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgb(var(--c-inverse-rgb) / 0) 35%,
+    rgb(var(--c-inverse-rgb) / 0.74) 100%
+  );
 }
 
-.ag-rail__nav .ag-rail__btn {
-  pointer-events: auto;
+.ag-shelf__plate:not([data-pusta]) .ag-shelf__title,
+.ag-shelf__plate:not([data-pusta]) .ag-shelf__meta,
+.ag-shelf__plate:not([data-pusta]) .ag-shelf__desc {
+  color: var(--c-inverse-ink);
 }
 
-.ag-rail__viewport {
-  /* MUSI być pozycjonowany: bez tego `offsetLeft` kafelków liczy się od
-     `.ag-section`, a JS porównuje je ze `scrollLeft` tego kadru — środek
-     wychodził przesunięty i aktywny kafelek nigdy nie dochodził do skali 1. */
-  position: relative;
-  min-width: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  overscroll-behavior-x: contain;
-  cursor: grab;
-  /* pasek przewijania byłby tu tylko szumem — sterowanie niosą przyciski i przeciąganie */
-  scrollbar-width: none;
-}
-
-.ag-rail__viewport::-webkit-scrollbar {
-  display: none;
-}
-
-.ag-rail__viewport[data-dragging] {
-  cursor: grabbing;
-  user-select: none;
-}
-
-/* padding boczny = połowa kadru minus połowa kafelka, żeby pierwszy i ostatni
-   też dały się ustawić centralnie.
-
-   `width: max-content` jest tu obowiązkowe: bez niego tor ma szerokość kadru,
-   kafelki wystają poza jego border-box, a padding z prawej ląduje POD nimi
-   zamiast za ostatnim. Efekt był taki, że ostatni kafelek nie dawał się
-   dosunąć do środka — przewijanie „zatrzymywało się" przed końcem listy. */
-.ag-rail__track {
-  --card-w: clamp(15rem, 34vw, 27rem);
-
-  display: flex;
-  width: max-content;
-  gap: clamp(0.75rem, 1.6vw, 1.5rem);
-  padding-inline: max(0px, calc(50% - var(--card-w) / 2));
-}
-
-/* Bez `will-change` — kafelków jest 18 (potrojona lista), a każdy promowany do
-   własnej warstwy kompozytora kosztuje pamięć i sam potrafi wywołać zacinanie.
-   Skalę i przezroczystość ustawia GSAP bezpośrednio. */
-.ag-rail__card {
-  flex: 0 0 var(--card-w);
-  scroll-snap-align: center;
-}
-
-.ag-rail__frame {
-  position: relative;
-  display: block;
-  width: 100%;
-  aspect-ratio: 3 / 2;
-  padding: 0;
-  border: 1px solid var(--c-line);
-  border-radius: var(--radius);
-  cursor: pointer;
-  background-color: var(--c-bg);
-  background-image: repeating-linear-gradient(48deg, var(--c-line) 0 1px, transparent 1px 34px),
-    repeating-linear-gradient(-42deg, var(--c-line) 0 1px, transparent 1px 46px);
-  transition: border-color var(--dur) var(--ease);
-}
-
-.ag-rail__card[data-active='true'] .ag-rail__frame {
-  border-color: var(--c-accent);
-}
-
-.ag-rail__no {
+/* Numer i treść pozycjonowane absolutnie, nie flexem: przy zwiniętej płycie opis
+   i tak jest w drzewie (chowa go przezroczystość), a we flexie jego wysokość
+   wypychałaby numer poza kadr. */
+.ag-shelf__no {
   position: absolute;
-  top: var(--s-4);
+  top: var(--s-5);
   left: var(--s-4);
+  z-index: 1;
   font-size: var(--fs-eyebrow);
   font-weight: 600;
   letter-spacing: var(--ls-eyebrow);
+  color: var(--c-muted);
+  font-variant-numeric: tabular-nums;
+  transition: color var(--dur) var(--ease);
+}
+
+.ag-shelf__plate[data-czynna] .ag-shelf__no {
   color: var(--c-accent-ink);
 }
 
-.ag-rail__label {
+.ag-shelf__body {
   position: absolute;
   left: var(--s-4);
-  bottom: var(--s-4);
-  padding: var(--s-2) var(--s-3);
-  background: var(--c-bg);
-  font-size: var(--fs-eyebrow);
-  font-weight: 600;
-  letter-spacing: var(--ls-eyebrow);
-  text-transform: uppercase;
-  color: var(--c-muted);
-}
-
-/* --- Opis aktywnej realizacji ---------------------------------------- */
-
-.ag-rail__detail {
+  right: var(--s-4);
+  bottom: var(--s-5);
+  z-index: 1;
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--s-5);
-  border-top: var(--border);
-  padding-top: var(--s-5);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--s-3);
+  text-align: left;
 }
 
-.ag-rail__text {
-  display: grid;
-  gap: var(--s-2);
-  max-width: 52ch;
-}
-
-.ag-rail__title {
+/* Tytuł czytany od dołu do góry — grzbiet teczki na półce. */
+.ag-shelf__title {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-family: var(--f-display);
   font-size: var(--fs-h3);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: var(--ls-heading);
+  color: var(--c-ink);
+  white-space: nowrap;
 }
 
-.ag-rail__desc {
-  color: var(--c-ink-soft);
+/* Wybrana płyta obraca tytuł do poziomu — tak jak wyciągniętą teczkę odwraca się
+   przodem do siebie. `writing-mode` nie jest animowalne, więc obrót jest natychmiastowy;
+   dzieje się jednak w chwili, gdy płyta rusza się wszerz, i czyta się jako ten sam gest. */
+.ag-shelf__plate[data-czynna] .ag-shelf__title {
+  writing-mode: horizontal-tb;
+  transform: none;
+  font-size: var(--fs-h2);
+  white-space: normal;
+  text-wrap: balance;
 }
 
-.ag-rail__meta {
+/* Chowa je przezroczystość, nie `display` — inaczej szerokość płyty skakałaby
+   w trakcie rozsuwania. `overflow: hidden` na płycie przycina resztę. */
+.ag-shelf__detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  max-width: 46ch;
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease);
+}
+
+.ag-shelf__plate[data-czynna] .ag-shelf__detail {
+  opacity: 1;
+}
+
+.ag-shelf__meta {
   font-size: var(--fs-eyebrow);
   font-weight: 600;
   letter-spacing: var(--ls-eyebrow);
@@ -906,35 +894,8 @@
   color: var(--c-muted);
 }
 
-/* pełne wypełnienie, nie przezroczyste — przycisk leży na teksturze rysunku
-   i musi się od niej odciąć */
-.ag-rail__btn {
-  width: 48px;
-  height: 48px;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--c-line);
-  border-radius: var(--radius);
-  background: var(--c-bg);
-  color: var(--c-ink);
-  font-size: 1.125rem;
-  cursor: pointer;
-  transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease),
-    color var(--dur) var(--ease);
-}
-
-.ag-rail__btn:hover {
-  background: var(--c-accent);
-  border-color: var(--c-accent);
-  color: var(--c-inverse);
-}
-
-.ag-rail__count {
-  font-size: var(--fs-eyebrow);
-  font-weight: 600;
-  letter-spacing: var(--ls-label);
-  color: var(--c-muted);
-  font-variant-numeric: tabular-nums;
+.ag-shelf__desc {
+  color: var(--c-ink-soft);
 }
 
 /* --- Gotowe projekty: galeria biblioteki ------------------------------ */
@@ -1314,23 +1275,75 @@ a.ag-contact__value:hover {
     padding: clamp(1.25rem, 4vw, 2rem);
   }
 
-  /* Na wąskim ekranie strzałki schodzą z kadru wprost pod karuzelę — nakładka
-     zabierałaby zbyt dużo z i tak małego kafelka. */
-  .ag-rail__nav {
-    position: static;
-    justify-content: center;
-    gap: var(--s-5);
-    padding-inline: 0;
-  }
-
-  .ag-rail__stage {
-    display: grid;
-    gap: var(--s-4);
-  }
-
-  .ag-rail__detail {
-    align-items: flex-start;
+  /* Regał kładzie się na bok: przy 375 px sześć pionowych płyt dałoby po ~55 px
+     szerokości, czyli nic. Płyty stają się wierszami, a wybrany rozwija się w dół. */
+  .ag-shelf {
     flex-direction: column;
+    height: auto;
+    margin-inline: calc(var(--gutter) * -1);
+  }
+
+  .ag-shelf__plate {
+    flex: none;
+    min-height: 4.5rem;
+    border-right: 0;
+    border-bottom: var(--border);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: var(--s-4);
+    transition: background-color var(--dur) var(--ease);
+  }
+
+  .ag-shelf__plate:last-child {
+    border-bottom: 0;
+  }
+
+  /* Wysokość rozwijają wiersze siatki (0fr → 1fr), NIE animowana wysokość wprost.
+     Animowanie wysokości to reflow na każdą klatkę u sześciu pól — na telefonie
+     najdroższy możliwy wybór. Wiersze siatki przeglądarki obsługują znacznie taniej,
+     a treść i tak dyktuje wysokość docelową. Przycięcie jest obowiązkowe: wiersz
+     o zerowej wysokości sam z siebie niczego nie schowa. */
+  .ag-shelf__body {
+    position: static;
+    display: grid;
+    /* `minmax(0, …)`, nie samo `0fr`: wiersz `fr` ma automatyczne minimum równe
+       treści, więc samo `0fr` NIE zeruje wysokości — zmierzone 12 px zamiast 0,
+       a element rozpychał się do 138 px mimo przycięcia. Dopiero jawne minimum 0
+       pozwala wierszowi faktycznie się zamknąć. */
+    grid-template-rows: auto minmax(0, 0fr);
+    gap: 0;
+    transition: grid-template-rows var(--dur-slow) var(--ease);
+  }
+
+  .ag-shelf__plate[data-czynna] .ag-shelf__body {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  /* `min-height: 0` z tego samego powodu, tylko po stronie elementu: bez tego jego
+     własne minimum treści wygrywa z wysokością wiersza i nic się nie chowa. */
+  .ag-shelf__detail {
+    min-height: 0;
+    overflow: hidden;
+    padding-top: var(--s-3);
+  }
+
+  /* Bezczynne, dopóki nie ma zdjęć: kadr z fotografią potrzebuje wysokości, sam tekst nie. */
+  .ag-shelf__plate:not([data-pusta])[data-czynna] {
+    min-height: 18rem;
+  }
+
+  /* Pionowy tytuł w wierszu wysokim na 72 px nie ma się jak zmieścić. */
+  .ag-shelf__title,
+  .ag-shelf__plate[data-czynna] .ag-shelf__title {
+    writing-mode: horizontal-tb;
+    transform: none;
+    font-size: var(--fs-h3);
+    white-space: normal;
+  }
+
+  .ag-shelf__no {
+    top: var(--s-4);
   }
 
   .ag-contact__grid {

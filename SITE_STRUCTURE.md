@@ -16,6 +16,7 @@ WEB/
 │   ├── Preloader.tsx           # 'use client' — ekran startowy, schodzi gdy hero ma czym grać
 │   ├── SmoothScroll.tsx        # 'use client' — Lenis spięty z ScrollTriggerem
 │   ├── ScrollVideoScene.tsx    # 'use client' — sticky wideo; tryb `loop` (aktywny) / `scrub` (zachowany)
+│   ├── ProjectShelf.tsx        # 'use client' — regał plansz w Realizacjach
 │   ├── ReadyGallery.tsx        # 'use client' — galeria biblioteki gotowych projektów
 │   ├── ContactForm.tsx         # 'use client' — formularz + stan wysyłki
 │   └── sections.tsx            # Hero, About, Services, Manifesto, Projects, Contact, Footer
@@ -136,71 +137,58 @@ Wybór niesie kolor i waga, nie tło: pas jest biały, a plama tła zrobiłaby z
 kafelków — dokładnie to, czego ten układ miał uniknąć. Strzałki góra/dół i lewo/prawo
 przechodzą po spisie.
 
-### 5. Realizacje — karuzela (`components/ProjectRail.tsx`)
+### 5. Realizacje — regał plansz (`components/ProjectShelf.tsx`)
 
-Kafelek środkowy jest aktywny, sąsiednie cofają się w tło, pod spodem pojawia się
-opis aktywnej realizacji. Sterowanie: przyciski, przeciąganie i klawiatura.
+Trzeci sposób prezentacji na stronie i **celowo różny od dwóch pozostałych**:
 
-Podział pracy — **natywny scroll robi mechanikę, GSAP robi głębię**:
+| | Realizacje (regał) | Gotowe projekty (galeria) | karuzela (usunięta) |
+|---|---|---|---|
+| co robisz | **widzisz wszystko naraz** | wybierasz ze spisu | przewijasz |
+| forma | sześć płyt, wybrana rozsuwa się w miejscu | jeden duży kadr + spis w kolumnie | kafelki płyną, sąsiedzi w kadrze |
+| tytuł | **pionowo, jak grzbiet teczki** | poziomo pod kadrem | poziomo pod kadrem |
+| pusta płyta | **bez tekstury** | siatka prostokątna | skos |
 
-| Zadanie | Kto |
-|---|---|
-| centrowanie kafelka | `scroll-snap-align: center` |
-| przeciąganie palcem, pęd, klawiatura, czytniki | natywny scroll |
-| przeciąganie myszą | ~20 linii `pointerdown/move/up` na `scrollLeft` |
-| skala + przezroczystość wg odległości od środka | `gsap.quickSetter` |
-| przenikanie opisu przy zmianie | `gsap.fromTo` |
+Metafora jest z warsztatu: sześć plansz stoi obok siebie jak grzbiety teczek na półce.
+Wybrana wysuwa się i **obraca tytuł do poziomu** — tak jak wyciągniętą teczkę odwraca
+się przodem do siebie.
 
-Nie przeniosłem karuzeli na `Flip` + `Observer` ze starego repo (230 linii, rotujące
-okno pięciu slotów, blokady `busy`, bezpiecznik `delayedCall` i udokumentowana pułapka
-z `overwrite`). Sześć realizacji to lista skończona — przyciski gasną na końcach,
-zamiast udawać nieskończoną pętlę.
+**Regał bez zdjęć jest kompletny, a nie pusty** — niosą go typografia i podział na pola.
+Dlatego jako jedyny z trzech układów nie dostał tekstury zastępczej: karuzela miała skos,
+galeria biblioteki ma siatkę, trzeci deseń zrobiłby z warsztatu jarmark.
 
-**Zapętlenie:** lista renderuje się trzy razy, start na środkowej kopii. Gdy aktywny
-kafelek wyjdzie poza nią, `scrollLeft` przeskakuje o szerokość jednej kopii — treść jest
-identyczna, więc skok jest niewidoczny. Przeskok idzie dopiero po 140 ms ciszy, żeby nie
-przerwać trwającej animacji `scrollBy`. Licznik pokazuje `indeks % 6`.
+**Dodanie zdjęcia:** dopisz `foto` przy realizacji w `lib/config.ts`. Zdjęcie wypełni
+płytę, przyciemnienie u dołu włączy się samo (`:not([data-pusta])`), a tekst przejdzie
+na kremowy. Żaden plik komponentu ani CSS nie wymaga wtedy zmiany.
 
-**Strzałki** leżą nakładką na kadrze (`.ag-rail__nav`, `position: absolute`), przy jego
-skrajach i wyśrodkowane w pionie — wcześniej siedziały pod opisem i przy niskim oknie
-schodziły poniżej krawędzi ekranu. Poniżej 900 px przechodzą pod karuzelę (`position: static`),
-bo nakładka zabierałaby zbyt dużo z i tak małego kafelka.
+#### Pełne rozlanie
 
-Cztery rzeczy, które trzeba wiedzieć przy modyfikacji:
+`margin-inline: calc(var(--gutter) * -1)` wyprowadza regał poza margines sekcji.
+Zmierzone przy 1440 px: regał ma 1425 px i sięga od krawędzi do krawędzi. Powyżej
+~1560 px szerokości okna ogranicza go `--maxw` sekcji, co jest w porządku — to nadal
+1632 px pasa.
 
-- **`.ag-rail__track` musi mieć `width: max-content`.** Bez tego tor ma szerokość kadru,
-  kafelki wystają poza jego border-box, a `padding-right` ląduje POD nimi zamiast za
-  ostatnim — ostatni kafelek nie daje się dosunąć do środka i przewijanie „zatrzymuje się"
-  przed końcem listy (zgłoszone jako „nie działa przejście z 5 na 6").
-- **Cały łańcuch potrzebuje `min-width: 0`** (`.ag-section__body`, `.ag-rail`
-  z `grid-template-columns: minmax(0, 1fr)`, `.ag-rail__stage`, `.ag-rail__viewport`).
-  Domyślne `min-width: auto` przepuszcza `max-content` toru w górę drzewa i rozpycha
-  sekcję na 8000 px zamiast włączyć przewijanie.
+#### Rzeczy, które trzeba wiedzieć przy modyfikacji
 
-- **`.ag-rail__viewport` musi mieć `position: relative`.** Bez tego `offsetLeft`
-  kafelków liczy się od `.ag-section` (ona jest pozycjonowana), a JS porównuje je
-  ze `scrollLeft` kadru — środek wychodzi przesunięty i aktywny kafelek nigdy nie
-  dochodzi do skali 1.
-- **Przeciąganie wyłącza `scroll-snap-type` na czas trzymania.** Przy `mandatory`
-  każda pozycja pośrednia jest natychmiast cofana do punktu snapu, więc `scrollLeft`
-  nie drgnie. Po puszczeniu snap wraca i dociąga do najbliższego kafelka.
+- **Rozsuwanie idzie po `flex-grow`, czyli po layoucie, nie po transformie.** To jedyny
+  sposób, żeby sąsiednie płyty realnie ustąpiły miejsca — transform by je nałożył.
+  Sześć pól reflow to koszt, na który stać tę jedną interakcję. Zmierzone: czynna
+  539 px wobec 177 px pozostałych, stosunek 3,05.
+- **Numer i treść są pozycjonowane absolutnie, nie flexem.** Opis jest w drzewie także
+  na zwiniętej płycie (chowa go przezroczystość, nie `display`, żeby szerokość nie
+  skakała w trakcie rozsuwania) — we flexie jego wysokość wypychałaby numer poza kadr.
+- **`writing-mode` nie jest animowalne**, więc obrót tytułu przy wyborze jest
+  natychmiastowy. Dzieje się w chwili, gdy płyta rusza się wszerz, i czyta się jako ten
+  sam gest.
+- **Na myszy wybór idzie za kursorem** (`hover: hover`), na dotyku rządzi klik —
+  `mouseenter` na dotyku odpala się dopiero przy dotknięciu i udawałby hover.
 
-**Kadr NIE ma `data-lenis-prevent` — i nie wolno go dodać z powrotem.** Ten atrybut
-jest dla elementów z własnym przewijaniem **w pionie**; karuzela ma `overflow-y: hidden`,
-więc oddawał tylko koło przeglądarce: strona przewijała się natywnie i skokowo, a Lenis
-animował dalej ze swojej nieaktualnej pozycji. Objaw — zacinanie scrolla, gdy kursor stał
-nad sekcją Realizacje. Test rozstrzygający: zdarzenie `wheel` nad kadrem musi mieć
-`defaultPrevented === true`, tak samo jak nad zwykłą sekcją.
+#### Na wąskim ekranie regał kładzie się na bok
 
-Kosztem jest poziome przewijanie gładzikiem nad karuzelą — Lenis przechwytuje całe
-zdarzenie `wheel`. Sterowanie niosą przyciski, przeciąganie i swipe.
+Sześć pionowych płyt przy 375 px dałoby po ~55 px szerokości, czyli nic. Poniżej 900 px
+płyty stają się wierszami (72 px), wybrany rozwija się w dół do 20 rem, a tytuły wracają
+do poziomu. Zmierzone: sekcja 1,24 ekranu, cele dotykowe ≥ 44 px, zero przewijania
+w poziomie.
 
-Dwie rzeczy zrobione pod płynność samej karuzeli:
-
-- **Bez `will-change` na kafelkach.** Jest ich 18 (potrojona lista), a każdy promowany
-  do własnej warstwy kompozytora kosztuje pamięć i sam potrafi wywołać zacinanie.
-- **Geometria kafelków czytana raz**, nie przy każdym zdarzeniu `scroll` — wcześniej
-  każde przewinięcie wymuszało 18 odczytów layoutu. Przeliczana ponownie na `resize`.
 
 ### 5a. Realizacje — dane
 Siatka 3 kolumn (1023 px → 2, 599 px → 1). Każdy kafel: ramka o proporcji `3/4` lub `4/3`

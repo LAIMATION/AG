@@ -26,6 +26,7 @@ używany oszczędnie i konsekwentnie.
 | `--c-accent-ink` | `#a85512` | **tekst** pisany akcentem |
 | `--c-accent-soft` | `#f3d3b0` | akcent na ciemnym tle |
 | `--c-inverse` | `#1f2a35` | głęboki granat — scrim, tekst na pomarańczu |
+| `--c-inverse-rgb` | `31 42 53` | ta sama barwa w składowych — do przyciemnień z alfą, `rgb(var(--c-inverse-rgb) / .74)` |
 | `--c-inverse-ink` | `#f2eee4` | tekst na zdjęciach i granacie |
 | `--c-error` | `#b03a2e` | stan błędu formularza — 5,4:1 na kremie, 6,0:1 na bieli |
 
