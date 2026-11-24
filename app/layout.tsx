@@ -28,11 +28,11 @@ const script = Playball({
 });
 
 export const metadata: Metadata = {
-  title: 'Aleksandra Niewińska — architekt | Białystok, Zambrów, Podlasie',
+  title: 'Aleksandra Niewińska, architekt | Białystok, Zambrów, Podlasie',
   description:
-    'Projektuję domy, budynki wielorodzinne, usługowe, hale, budynki gospodarcze i inwentarskie. Organizacja budowy, nadzór autorski, świadectwa energetyczne, konsultacje. ATRIUM STUDIO — Białystok, Zambrów, Podlasie.',
+    'Projektuję domy, budynki wielorodzinne, usługowe, hale, budynki gospodarcze i inwentarskie. Organizacja budowy, nadzór autorski, świadectwa energetyczne, konsultacje. ATRIUM STUDIO, Białystok, Zambrów, Podlasie.',
   openGraph: {
-    title: 'Aleksandra Niewińska — architekt',
+    title: 'Aleksandra Niewińska, architekt',
     description: 'Przestrzeń, która dojrzewa razem z Tobą. ATRIUM STUDIO, Białystok i Zambrów.',
     locale: 'pl_PL',
     type: 'website',
@@ -87,7 +87,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'ProfessionalService',
-              name: `${site.name} — ${site.role}`,
+              name: `${site.name}, ${site.role}`,
               telephone: site.phone,
               email: site.email,
               areaServed: 'Zambrów, Białystok, Polska',

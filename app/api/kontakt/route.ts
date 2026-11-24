@@ -64,11 +64,11 @@ export async function POST(req: Request) {
     // temat składa się z danych od użytkownika — nowa linia pozwoliłaby dopisać
     // własne nagłówki, więc łamania linii nie przepuszczamy
     replyTo: dane.email.replace(/[\r\n]/g, ''),
-    subject: `Zapytanie ze strony — ${dane.imie.replace(/[\r\n]/g, ' ')}`,
+    subject: `Zapytanie ze strony: ${dane.imie.replace(/[\r\n]/g, ' ')}`,
     text: [
       `Imię i nazwisko: ${dane.imie}`,
       `E-mail: ${dane.email}`,
-      `Telefon: ${dane.telefon || '—'}`,
+      `Telefon: ${dane.telefon || 'nie podano'}`,
       '',
       dane.wiadomosc,
     ].join('\n'),

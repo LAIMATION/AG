@@ -74,7 +74,7 @@ export function ProjectShelf() {
             {p.foto ? (
               <Image
                 src={p.foto}
-                alt={`${p.title} — ${p.meta}`}
+                alt={`${p.title}, ${p.meta}`}
                 fill
                 sizes="(max-width: 899px) 92vw, 45vw"
                 className="ag-shelf__foto"

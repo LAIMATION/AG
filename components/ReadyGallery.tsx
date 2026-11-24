@@ -97,7 +97,7 @@ function Kadr({ plyta, indeks }: { plyta: Plyta; indeks: number }) {
         {plyta.foto ? (
           <Image
             src={plyta.foto}
-            alt={`${plyta.nazwa} — wizualizacja`}
+            alt={`${plyta.nazwa}, wizualizacja`}
             fill
             sizes="(max-width: 899px) 92vw, 62vw"
           />

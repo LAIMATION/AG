@@ -44,7 +44,7 @@ export function ContactForm() {
       form.reset();
       setUzyte(0);
       setTone('ok');
-      setStatus('Dziękuję — wiadomość została wysłana.');
+      setStatus('Dziękuję, wiadomość została wysłana.');
     } catch {
       setTone('error');
       setStatus('Nie udało się wysłać. Spróbuj ponownie albo zadzwoń.');

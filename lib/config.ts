@@ -33,7 +33,7 @@ export const hero = {
   /* twarda spacja trzyma „z Tobą" razem — „Tobą" nie zostaje samo w drugim wierszu */
   script: 'Przestrzeń, która dojrzewa razem z Tobą',
   lead:
-    'Projektuję budynki dopasowane do ludzi, którzy w nich mieszkają i pracują — domy, budynki wielorodzinne, usługowe, hale, budynki gospodarcze i inwentarskie.',
+    'Projektuję budynki dopasowane do ludzi, którzy w nich mieszkają i pracują: domy, budynki wielorodzinne, usługowe, hale, budynki gospodarcze i inwentarskie.',
   cta: 'Napisz do mnie',
   scroll: 'Przewiń',
 } as const;
@@ -42,7 +42,7 @@ export const about = {
   eyebrow: 'O mnie',
   title: 'Zaczynamy od tego, jak chcesz żyć',
   paragraphs: [
-    'Nazywam się Aleksandra Niewińska i jestem architektem. Zanim cokolwiek narysuję, pytam, jak wygląda Twój zwykły dzień — bo z tego, a nie z ładnej wizualizacji, wychodzi dom, w którym da się wygodnie mieszkać przez lata.',
+    'Nazywam się Aleksandra Niewińska i jestem architektem. Zanim cokolwiek narysuję, pytam, jak wygląda Twój zwykły dzień, bo z tego, a nie z ładnej wizualizacji, wychodzi dom, w którym da się wygodnie mieszkać przez lata.',
     'Przeprowadzę Cię przez cały proces: od analizy działki, przez projekt i pozwolenie na budowę, po nadzór autorski na budowie. Masz jeden kontakt zamiast łańcucha pośredników i wiesz, na jakim etapie jesteś.',
     'W ATRIUM Studio pracujemy kameralnie, przy ograniczonej liczbie projektów naraz. Dzięki temu każdy dostaje tyle uwagi, ile faktycznie potrzebuje.',
   ],
@@ -51,7 +51,7 @@ export const about = {
     { value: 'Projekt i budowa', label: 'Pełen zakres prowadzenia' },
     { value: 'Kameralnie', label: 'Ograniczona liczba projektów' },
   ],
-  photoAlt: 'Aleksandra Niewińska — architekt',
+  photoAlt: 'Aleksandra Niewińska, architekt',
 } as const;
 
 export const services = {
@@ -66,7 +66,7 @@ export const services = {
     {
       no: '02',
       title: 'Rolnictwo i gospodarka',
-      desc: 'Obory, chlewnie, stodoły, wiaty, magazyny i budynki gospodarcze. Znam wymagania, jakie stawiają im przepisy — i to, że mają przede wszystkim działać, a nie ładnie wyglądać na wizualizacji.',
+      desc: 'Obory, chlewnie, stodoły, wiaty, magazyny i budynki gospodarcze. Znam wymagania, jakie stawiają im przepisy, i to, że mają przede wszystkim działać, a nie ładnie wyglądać na wizualizacji.',
     },
     {
       no: '03',
@@ -81,7 +81,7 @@ export const services = {
     {
       no: '05',
       title: 'Świadectwa energetyczne',
-      desc: 'Charakterystyka i świadectwa energetyczne budynków — do odbioru, sprzedaży lub wynajmu.',
+      desc: 'Charakterystyka i świadectwa energetyczne budynków do odbioru, sprzedaży lub wynajmu.',
     },
     {
       no: '06',
@@ -93,15 +93,15 @@ export const services = {
 
 export const manifesto = {
   script: 'Wygoda na lata',
-  quote: 'Dobry budynek nie zwraca na siebie uwagi. Po prostu działa — i ułatwia Twoje codzienne życie.',
+  quote: 'Dobry budynek nie zwraca na siebie uwagi. Po prostu działa i ułatwia Twoje codzienne życie.',
   attribution: 'Aleksandra Niewińska · ATRIUM STUDIO',
-  note: 'Projekt, pozwolenie, budowa — jeden proces i jedna osoba odpowiedzialna za jego przebieg.',
+  note: 'Projekt, pozwolenie, budowa: jeden proces i jedna osoba odpowiedzialna za jego przebieg.',
 } as const;
 
 export const projects = {
   eyebrow: 'Realizacje',
   title: 'Wybrane projekty',
-  lead: 'Galeria w przygotowaniu — poniżej układ, w którym pojawią się zdjęcia zrealizowanych obiektów.',
+  lead: 'Galeria w przygotowaniu. Poniżej układ, w którym pojawią się zdjęcia zrealizowanych obiektów.',
   items: [
     {
       title: 'Dom pod lasem',
@@ -148,7 +148,7 @@ export const katalog = {
   eyebrow: 'Gotowe projekty',
   title: 'Biblioteka projektów do adaptacji',
   lead:
-    'Składam zestaw własnych projektów gotowych — takich, które kupujesz od ręki i które adaptuję do Twojej działki. Poniżej typy, które się w nim znajdą. Do czasu, aż zapełnię tę półkę, adaptuję też projekt kupiony w dowolnej innej pracowni.',
+    'Składam zestaw własnych projektów gotowych, takich, które kupujesz od ręki i które adaptuję do Twojej działki. Poniżej typy, które się w nim znajdą. Do czasu, aż zapełnię tę półkę, adaptuję też projekt kupiony w dowolnej innej pracowni.',
   stanLabel: 'Karta w przygotowaniu',
   stanText:
     'Wizualizacje, rzuty i metraże pojawią się tutaj, gdy projekt trafi do biblioteki. Szukasz czegoś z tej półki już teraz? Napisz.',
@@ -157,7 +157,7 @@ export const katalog = {
   plyty: [
     {
       nazwa: 'Dom parterowy',
-      opis: 'Bez schodów, z całą funkcją na jednym poziomie. Wygodny na lata — także wtedy, gdy wchodzenie na piętro przestaje być obojętne.',
+      opis: 'Bez schodów, z całą funkcją na jednym poziomie. Wygodny na lata, także wtedy, gdy wchodzenie na piętro przestaje być obojętne.',
     },
     {
       nazwa: 'Dom z poddaszem',
@@ -193,7 +193,7 @@ export const contact = {
   eyebrow: 'Kontakt',
   title: 'Napisz, co chcesz zbudować',
   lead:
-    'Opisz działkę i etap, na jakim jesteś — nawet jeśli to dopiero pomysł. Odpowiadam zwykle w ciągu jednego dnia roboczego.',
+    'Opisz działkę i etap, na jakim jesteś, nawet jeśli to dopiero pomysł. Odpowiadam zwykle w ciągu jednego dnia roboczego.',
 } as const;
 
 /* Limity pól formularza. Jedno źródło dla klienta i serwera — `maxLength` w przeglądarce
