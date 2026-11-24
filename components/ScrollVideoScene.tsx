@@ -6,10 +6,12 @@
    Dwa tryby:
 
    `loop` (domyślny, aktywny) — wideo leci samo, w tle. Ping-pong (przód, potem tył)
-   jest WPISANY W PLIK: za materiałem właściwym idzie ten sam materiał odwrócony.
-   Pętlę domyka JS (przytrzymanie ostatniej klatki, potem powrót na 0), a krzywa
-   prędkości zmienia tylko `playbackRate` — bez seekowania w trakcie, więc pliki mogą
-   zostać zwykłym GOP-em zamiast all-intra. Pliki: 2K (2560×1440) H.264 CRF 23, ~15–20 MB
+   jest WPISANY W PLIK: za materiałem właściwym idzie ten sam materiał odwrócony,
+   lustro wypada dokładnie w połowie (sprawdzone SSIM klatek t i 16−t ≈ 0,996).
+   Stała prędkość 1× (natywne 30 kl./s, bez rwania), a JS dokłada dwa przytrzymania:
+   w połowie pliku (koniec nagrania, zanim ruch zawróci) i na końcu pliku (powrót
+   do pierwszej klatki, zanim ruszy od nowa). Bez seekowania w trakcie, więc pliki
+   mogą zostać zwykłym GOP-em zamiast all-intra. Pliki: 2K (2560×1440) H.264 CRF 23, ~15–20 MB
    na 16 s (4K ważyło 44–60 MB, a pod przyciemnieniem różnicy nie widać).
 
    `scrub` (zachowany, nieaktywny) — postęp scrolla mapowany na `currentTime` przez
@@ -29,12 +31,9 @@ export const SCENA_GOTOWA = 'ag:scena-gotowa';
    zanim ekran startowy zdąży się podpiąć pod zdarzenie. Ta flaga zamyka ten wyścig. */
 export const stanScen = { heroGotowe: false };
 
-/* Tryb pętli: zakres prędkości krzywej i przytrzymanie ostatniej klatki.
-   Dolna granica 0,7: plik ma 30 kl./s, a poniżej ~21 kl./s ruch zaczyna się rwać.
-   Średnia krzywej wychodzi ~1,05, więc pętla trwa tyle co przedtem. */
-const TEMPO_MIN = 0.7;
-const TEMPO_MAX = 1.25;
-const PAUZA_KONIEC_MS = 900;
+/* Tryb pętli: przytrzymanie klatki w punktach zwrotnych ping-ponga. */
+const PAUZA_ZWROT_MS = 1200; // koniec nagrania (połowa pliku), potem ruch wstecz
+const PAUZA_START_MS = 1200; // powrót do pierwszej klatki, potem od nowa
 
 type Props = {
   id?: string;
@@ -119,10 +118,12 @@ export function ScrollVideoScene({
       return rect.top < window.innerHeight && rect.bottom > 0;
     };
 
-    /* Koniec pliku: ostatnia klatka zostaje chwilę na ekranie, potem start od nowa.
-       Natywne `loop` skakałoby od razu, więc pętlę domykamy sami. */
+    /* Przytrzymania w punktach zwrotnych. Natywne `loop` skakałoby od razu, więc
+       pętlę domykamy sami: `trzyma` blokuje `rzadz`, żeby scroll ani dotyk nie
+       wznowiły odtwarzania w trakcie pauzy. */
     let trzyma = false;
     let trzymanie = 0;
+    let zawrocono = false; // czy pauza w połowie już była w tym obiegu
 
     const rzadz = () => {
       if (bezRuchu || !wKadrze()) {
@@ -133,32 +134,56 @@ export function ScrollVideoScene({
       if (video.paused) video.play().catch(() => {});
     };
 
-    const koniec = () => {
+    const trzymaj = (ms: number, potem: () => void) => {
       trzyma = true;
+      video.pause();
       trzymanie = window.setTimeout(() => {
         trzyma = false;
-        video.currentTime = 0;
+        potem();
         rzadz();
-      }, PAUZA_KONIEC_MS);
+      }, ms);
     };
 
-    /* Krzywa prędkości. Plik to ping-pong (tam, potem z powrotem), więc każda połowa
-       jest osobnym ruchem: rusza wolno, w środku przyspiesza, hamuje przed zawróceniem
-       i przed końcem. Sinus po połowie daje miękkie wejście i wyjście. Prędkość
-       zmieniamy co ~120 ms i tylko przy wyraźnej różnicy, bo każda zmiana
-       `playbackRate` to praca dla dekodera. */
-    let raf = 0;
-    let ostatnio = 0;
-    const krzywa = (teraz: number) => {
-      raf = requestAnimationFrame(krzywa);
-      if (teraz - ostatnio < 120 || video.paused || !video.duration) return;
-      ostatnio = teraz;
+    // koniec pliku = znów pierwsza klatka: chwila postoju i obieg od nowa
+    const koniec = () =>
+      trzymaj(PAUZA_START_MS, () => {
+        video.currentTime = 0;
+        zawrocono = false;
+      });
+
+    /* Połowa pliku = koniec nagrania. `requestVideoFrameCallback` odpala przy każdej
+       wyświetlonej klatce wideo (rAF potrafił spóźnić się o kilka klatek), a po
+       zatrzymaniu dosuwamy czas do ostatniej klatki ruchu „tam”, żeby postój wypadł
+       dokładnie w punkcie zwrotnym. Starsze przeglądarki: rAF jako zapas. */
+    const klatka = 1 / fps;
+    const sprawdzZwrot = () => {
+      if (zawrocono || video.paused || !video.duration) return;
       const pol = video.duration / 2;
-      const p = (video.currentTime % pol) / pol; // 0…1 w obrębie połowy
-      const tempo = TEMPO_MIN + (TEMPO_MAX - TEMPO_MIN) * Math.sin(Math.PI * p);
-      if (Math.abs(video.playbackRate - tempo) > 0.02) video.playbackRate = tempo;
+      if (video.currentTime >= pol - klatka) {
+        zawrocono = true;
+        trzymaj(PAUZA_ZWROT_MS, () => {});
+        video.currentTime = pol - klatka / 2;
+      }
     };
-    if (!bezRuchu) raf = requestAnimationFrame(krzywa);
+    type ZKlatka = HTMLVideoElement & {
+      requestVideoFrameCallback?: (cb: () => void) => number;
+      cancelVideoFrameCallback?: (id: number) => void;
+    };
+    const v = video as ZKlatka;
+    let raf = 0;
+    let vfc = 0;
+    const pilnujKlatek = () => {
+      sprawdzZwrot();
+      vfc = v.requestVideoFrameCallback!(pilnujKlatek);
+    };
+    const pilnujRaf = () => {
+      sprawdzZwrot();
+      raf = requestAnimationFrame(pilnujRaf);
+    };
+    if (!bezRuchu) {
+      if (v.requestVideoFrameCallback) vfc = v.requestVideoFrameCallback(pilnujKlatek);
+      else raf = requestAnimationFrame(pilnujRaf);
+    }
 
     const gotowe = () => {
       rzadz();
@@ -183,12 +208,13 @@ export function ScrollVideoScene({
       video.removeEventListener('loadeddata', rzadz);
       video.removeEventListener('ended', koniec);
       cancelAnimationFrame(raf);
+      if (vfc) v.cancelVideoFrameCallback?.(vfc);
       window.clearTimeout(trzymanie);
       window.removeEventListener('scroll', rzadz);
       window.removeEventListener('pointerdown', rzadz);
       window.removeEventListener('touchstart', rzadz);
     };
-  }, [mode, loading]);
+  }, [mode, loading, fps]);
 
   /* --- Tryb scrub (zachowany, nieaktywny) -------------------------------- */
 
