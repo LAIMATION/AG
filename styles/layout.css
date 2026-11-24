@@ -949,6 +949,28 @@
   color: var(--c-ink-soft);
 }
 
+/* Dopisek „przykład poglądowy” stoi przy dolnej krawędzi płyty. Opis płyty jest
+   rozciągnięty na pełną wysokość, a meta i dopisek dostają `margin-top: auto`: wolne
+   miejsce dzieli się na pół, więc meta z opisem zostają mniej więcej na środku,
+   a dopisek siada na dole. Na mobile (opis w rozwijanym wierszu) stoi zwyczajnie
+   pod opisem. */
+.ag-shelf__detail:has(.ag-shelf__note) {
+  align-self: stretch;
+}
+
+.ag-shelf__detail:has(.ag-shelf__note) .ag-shelf__meta,
+.ag-shelf__note {
+  margin-top: auto;
+}
+
+.ag-shelf__note {
+  padding-top: var(--s-3);
+  border-top: var(--border);
+  font-size: var(--fs-small);
+  line-height: 1.45;
+  color: var(--c-muted);
+}
+
 /* --- Gotowe projekty: galeria biblioteki ------------------------------ */
 
 /* Inny sposób oglądania niż karuzela Realizacji i celowo: tam kafelki płyną, a sąsiedzi
@@ -1399,6 +1421,14 @@ a.ag-contact__value:hover {
     grid-column: 2;
     grid-row: 2;
     padding-top: var(--s-3);
+  }
+
+  .ag-shelf__detail:has(.ag-shelf__note) .ag-shelf__meta {
+    margin-top: 0;
+  }
+
+  .ag-shelf__note {
+    margin-top: var(--s-2);
   }
 
   /* Bezczynne, dopóki nie ma zdjęć: kadr z fotografią potrzebuje wysokości, sam tekst nie. */

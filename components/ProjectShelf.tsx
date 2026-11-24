@@ -92,6 +92,8 @@ export function ProjectShelf() {
             <span className="ag-shelf__detail" aria-hidden={czynna ? undefined : 'true'}>
               <span className="ag-shelf__meta">{p.meta}</span>
               <span className="ag-shelf__desc">{p.desc}</span>
+              {/* treść przykładowa, dopóki płyta nie ma zdjęcia prawdziwej realizacji */}
+              {p.foto ? null : <span className="ag-shelf__note">{projects.disclaimer}</span>}
             </span>
           </button>
         );

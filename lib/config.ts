@@ -110,6 +110,10 @@ export const projects = {
   eyebrow: 'Realizacje',
   title: 'Wybrane projekty',
   lead: 'Galeria w przygotowaniu. Poniżej układ, w którym pojawią się zdjęcia zrealizowanych obiektów.',
+  /* dopisek na każdej płycie bez zdjęcia: przykładowe treści nie mogą udawać
+     prawdziwych realizacji. Znika sam, gdy płyta dostanie `foto`. */
+  disclaimer:
+    'Przykład poglądowy. Nazwa i opis pokazują układ galerii, nie dotyczą rzeczywistej realizacji.',
   items: [
     {
       title: 'Dom pod lasem',
