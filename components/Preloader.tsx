@@ -14,6 +14,7 @@
 import { useEffect, useState } from 'react';
 import { SCENA_GOTOWA, stanScen } from '@/components/ScrollVideoScene';
 import { site } from '@/lib/config';
+import { Logo } from '@/components/Logo';
 
 const MIN_MS = 700;
 const SUFIT_MS = 7000;
@@ -83,10 +84,9 @@ export function Preloader() {
       aria-hidden="true"
     >
       <div className="ag-boot__inner">
+        <Logo className="ag-logo ag-logo--boot" />
         <p className="ag-boot__name">{site.name}</p>
-        <p className="ag-boot__lockup">
-          {site.studio} · {site.region}
-        </p>
+        <p className="ag-boot__lockup">{site.region}</p>
         <span className="ag-boot__line" />
       </div>
     </div>

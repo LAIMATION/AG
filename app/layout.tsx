@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     'Projektuję domy, budynki wielorodzinne, usługowe, hale, budynki gospodarcze i inwentarskie. Organizacja budowy, nadzór autorski, świadectwa energetyczne, konsultacje. ATRIUM STUDIO, Białystok, Zambrów, Podlasie.',
   openGraph: {
     title: 'Aleksandra Niewińska, architekt',
-    description: 'Przestrzeń, która dojrzewa razem z Tobą. ATRIUM STUDIO, Białystok i Zambrów.',
+    description: 'Przestrzeń, która dojrzewa razem z Tobą. ATRIUM STUDIO, Białystok, Zambrów, Podlasie.',
     locale: 'pl_PL',
     type: 'website',
   },
@@ -90,7 +90,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               name: `${site.name}, ${site.role}`,
               telephone: site.phone,
               email: site.email,
-              areaServed: 'Zambrów, Białystok, Polska',
+              areaServed: 'Białystok, Zambrów, Podlasie, Polska',
               sameAs: [site.instagram],
             }),
           }}

@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { ContactForm } from '@/components/ContactForm';
+import { Logo } from '@/components/Logo';
 import { ProjectShelf } from '@/components/ProjectShelf';
 import { ReadyGallery } from '@/components/ReadyGallery';
 import { ScrollVideoScene } from '@/components/ScrollVideoScene';
@@ -25,10 +26,8 @@ export function Hero() {
       <div className="ag-scene__panel ag-scene__panel--bottom">
         <div className="ag-hero__mark">
           <div className="ag-shell">
-            <p className="ag-lockup">
-              <span className="ag-lockup__name">{site.studioMark.name}</span>
-              <span className="ag-lockup__sub">{site.studioMark.sub}</span>
-            </p>
+            {/* zawsze nad przyciemnionym wideo, więc w obu motywach wersja jasna */}
+            <Logo className="ag-logo ag-logo--hero" />
           </div>
         </div>
 
@@ -264,9 +263,13 @@ export function Footer() {
   return (
     <footer className="ag-footer">
       <div className="ag-shell ag-footer__inner">
-        {/* lockup w tonacji stopki z systemu: nazwisko na pierwszym planie, studio obok */}
-        <span className="ag-footer__lockup">
-          {site.name} · {site.studio} · {site.region}
+        {/* znak studia w kolorze tuszu motywu (granat na kremie, jasny na granacie),
+            obok nazwisko i obszar działania */}
+        <span className="ag-footer__brand">
+          <Logo className="ag-logo ag-logo--footer" />
+          <span className="ag-footer__lockup">
+            {site.name} · {site.region}
+          </span>
         </span>
         <span>
           © {new Date().getFullYear()} {site.role}

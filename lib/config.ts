@@ -5,10 +5,7 @@ export const site = {
   name: 'Aleksandra Niewińska',
   role: 'Architekt',
   studio: 'ATRIUM STUDIO',
-  /* Znak studia rozbity na dwie linie — w lockupie „STUDIO" jest osobnym,
-     pomniejszonym wierszem dosuniętym do prawej krawędzi „ATRIUM". */
-  studioMark: { name: 'ATRIUM', sub: 'STUDIO' },
-  region: 'Białystok · Zambrów',
+  region: 'Białystok · Zambrów · Podlasie',
   phone: '+48 660 970 375',
   phoneHref: '+48660970375',
   email: 'atriumkontakt@gmail.com',
@@ -46,7 +43,7 @@ export const about = {
     'W ATRIUM Studio pracujemy kameralnie, przy ograniczonej liczbie projektów naraz. Dzięki temu każdy dostaje tyle uwagi, ile faktycznie potrzebuje.',
   ],
   facts: [
-    { value: 'Białystok · Zambrów', label: 'Obszar działania' },
+    { value: 'Białystok · Zambrów · Podlasie', label: 'Obszar działania' },
     { value: 'Projekt i budowa', label: 'Pełen zakres prowadzenia' },
     { value: 'Kameralnie', label: 'Ograniczona liczba projektów' },
   ],
