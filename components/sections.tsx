@@ -66,10 +66,10 @@ export function About() {
         <div className="ag-section__body ag-about__grid">
           <div className="ag-about__portrait">
             <Image
-              src="/img/aleksandra-gosk.webp"
+              src="/img/aleksandra-niewinska.webp"
               alt={about.photoAlt}
-              width={900}
-              height={1373}
+              width={1000}
+              height={1250}
               sizes="(max-width: 899px) 90vw, 40vw"
               priority
             />

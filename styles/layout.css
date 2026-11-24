@@ -599,37 +599,18 @@
   align-items: center;
 }
 
-/* Portret to wycinek bez tła (WebP z kanałem alfa) — postać stoi wprost na tle
-   sekcji, bez ramki i bez prostokąta zdjęcia. Kadr trzyma portretową proporcję,
-   żeby wiersz siatki nie rósł ponad ekran. */
+/* Portret ze swoim tłem, bez ramki. Kadr trzyma portretową proporcję, żeby wiersz
+   siatki nie rósł ponad ekran. */
 .ag-about__portrait {
   position: relative;
   aspect-ratio: 4 / 5;
-  isolation: isolate;
-}
-
-/* Jasne, białe tło za sylwetką z winietą w kolorze sekcji: środek czysto biały,
-   brzegi schodzą dokładnie do `--c-bg`, więc pole nie ma żadnej krawędzi —
-   rozpływa się w rozdziale, w którym stoi (i w kremie, i w granacie blueprintu). */
-.ag-about__portrait::before {
-  content: '';
-  position: absolute;
-  inset: 0 -8%;
-  z-index: -1;
-  background: radial-gradient(
-    ellipse 50% 50% at 50% 45%,
-    #ffffff 0%,
-    #ffffff 34%,
-    color-mix(in srgb, #ffffff 50%, var(--c-bg)) 58%,
-    var(--c-bg) 84%
-  );
-  pointer-events: none;
 }
 
 /* absolutnie, bo inaczej własna wysokość zdjęcia dyktowałaby wysokość wiersza
-   siatki i sekcja przestawałaby mieścić się w ekranie. Wycinek jest smuklejszy niż
-   kadr, więc `cover` przycina wyłącznie dół — a ten i tak rozpływa się w tle
-   maską, żeby cięcie na wysokości bioder nie dawało twardej linii. */
+   siatki i sekcja przestawałaby mieścić się w ekranie.
+   Winieta to maska, nie nakładka: brzegi zdjęcia stają się przezroczyste i prześwituje
+   przez nie samo tło sekcji — więc winieta ma zawsze dokładnie kolor rozdziału,
+   w którym stoi (krem w jasnym motywie, granat w blueprincie), bez osobnego tokenu. */
 .ag-about__portrait img {
   position: absolute;
   inset: 0;
@@ -637,8 +618,17 @@
   height: 100%;
   object-fit: cover;
   object-position: center top;
-  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent 97%);
-  mask-image: linear-gradient(to bottom, #000 62%, transparent 97%);
+  /* tylko wąski, miękki pas przy samych krawędziach (boki ~9%, łokcie zaczynają się
+     dopiero od ~17% szerokości) — granica zdjęcia rozpływa się w tle, a postać
+     zostaje nietknięta */
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0%, #000 9%, #000 91%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 7%, #000 90%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent 0%, #000 9%, #000 91%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 7%, #000 90%, transparent 100%);
+  mask-composite: intersect;
 }
 
 .ag-about__body {

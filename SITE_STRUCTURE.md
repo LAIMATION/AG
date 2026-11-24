@@ -33,7 +33,7 @@ WEB/
 │   ├── video/wideo-2.mp4       # sekcja manifest — 4K/30fps, ping-pong 16 s, 59,9 MB
 │   ├── img/poster-1.jpg        # pierwsza klatka wideo-1 (plakat)
 │   ├── img/poster-2.jpg        # pierwsza klatka wideo-2 (plakat)
-│   └── img/aleksandra-gosk.webp # portret bez tła (alfa) do sekcji "O mnie"
+│   └── img/aleksandra-niewinska.webp # portret do sekcji "O mnie" (winieta maską w CSS)
 ├── .claude/launch.json
 ├── .env.example
 ├── next.config.mjs
