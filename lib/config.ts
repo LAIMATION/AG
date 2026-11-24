@@ -23,7 +23,6 @@ export const nav = [
   { id: 'o-mnie', label: 'O mnie' },
   { id: 'uslugi', label: 'Usługi' },
   { id: 'realizacje', label: 'Realizacje' },
-  { id: 'gotowe', label: 'Gotowe' },
   { id: 'kontakt', label: 'Kontakt' },
 ] as const;
 

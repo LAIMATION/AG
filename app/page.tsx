@@ -3,7 +3,6 @@ import {
   CallToAction,
   Contact,
   Footer,
-  Gotowe,
   Hero,
   Manifesto,
   Projects,
@@ -19,7 +18,8 @@ export default function Page() {
         <Services />
         <Manifesto />
         <Projects />
-        <Gotowe />
+        {/* Gotowe projekty: schowane do czasu, aż powstaną pierwsze projekty.
+            Przywrócenie: <Gotowe /> tutaj + pozycja "gotowe" w `nav` (lib/config.ts). */}
         <CallToAction />
         <Contact />
       </main>
