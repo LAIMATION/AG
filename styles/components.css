@@ -81,6 +81,9 @@
 .ag-field--grow {
   flex: 1;
   min-height: 0;
+  /* cały luz idzie do pola tekstowego; bez tego siatka dzieliła go po równo
+     i etykieta „Wiadomość” puchła do ~110 px, a podpowiedź lądowała w połowie */
+  grid-template-rows: auto 1fr;
 }
 
 @media (max-width: 599px) {

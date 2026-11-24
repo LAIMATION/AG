@@ -587,7 +587,12 @@
    siatki nie rósł ponad ekran. */
 .ag-about__portrait {
   position: relative;
-  aspect-ratio: 4 / 5;
+  /* Zdjęcie wypełnia całą wysokość, jaką sekcja ma pod nagłówkiem, zamiast trzymać
+     sztywne 4:5 ograniczone szerokością kolumny: przy 2560×1440 zostawiało to 180 px
+     pustki pod sekcją. Kadr przycina boki (`cover`), postać stoi w środku. Tekst obok
+     zostaje wyśrodkowany w pionie. Na mobile wraca stała proporcja (niżej). */
+  align-self: stretch;
+  min-height: min(60vh, 32rem);
 }
 
 /* absolutnie, bo inaczej własna wysokość zdjęcia dyktowałaby wysokość wiersza
@@ -668,6 +673,8 @@
 
   .ag-about__portrait {
     aspect-ratio: 3 / 4;
+    align-self: start;
+    min-height: 0;
     max-width: 22rem;
     /* węższy od kolumny — wyśrodkowany, nie przyklejony do lewej */
     width: 100%;
@@ -704,7 +711,11 @@
   padding: clamp(1.5rem, 2.4vw, 2.5rem);
   display: grid;
   gap: var(--s-3);
-  align-content: start;
+  /* Kafel rozciąga się do wysokości wiersza siatki, więc luz ma swoje miejsce:
+     numer u góry, tytuł z opisem dosunięte do dołu. Wcześniej tekst stał u góry,
+     a dolna połowa kafla była przypadkowo pusta. */
+  grid-template-rows: 1fr auto auto;
+  align-content: stretch;
   min-height: 0;
   transition: background-color var(--dur) var(--ease);
 }
@@ -775,10 +786,22 @@
    Pełne rozlanie: ujemny margines wyprowadza regał poza margines sekcji, aż do krawędzi
    kadru. Do ~1560 px szerokości okna daje to prawdziwe rozlanie od krawędzi do krawędzi;
    wyżej ogranicza je `--maxw` sekcji. */
+/* Regał wypełnia całą wysokość, jaką sekcja ma pod nagłówkiem (body jest kolumną
+   flex, regał bierze `flex: 1`). Sztywne `min(56vh, 30rem)` zostawiało na wyższych
+   ekranach pusty pas pod regałem: zmierzone 228 px przy 1920×1080. Dolna granica
+   pilnuje niskich okien, górna (75vh) — żeby na bardzo wysokich ekranach płyty nie
+   zamieniły się w puste słupy. */
+.ag-section__body:has(> .ag-shelf) {
+  display: flex;
+  flex-direction: column;
+}
+
 .ag-shelf {
   margin-inline: calc(var(--gutter) * -1);
   display: flex;
-  height: min(56vh, 30rem);
+  flex: 1;
+  min-height: min(56vh, 26rem);
+  max-height: 75vh;
   border-block: var(--border);
   overflow: hidden;
 }
@@ -1314,6 +1337,7 @@ a.ag-contact__value:hover {
   }
 
   .ag-service {
+    grid-template-rows: none;
     align-content: start;
     padding: clamp(1.25rem, 4vw, 2rem);
   }
@@ -1322,7 +1346,9 @@ a.ag-contact__value:hover {
      szerokości, czyli nic. Płyty stają się wierszami, a wybrany rozwija się w dół. */
   .ag-shelf {
     flex-direction: column;
-    height: auto;
+    flex: none;
+    min-height: 0;
+    max-height: none;
     margin-inline: calc(var(--gutter) * -1);
   }
 
