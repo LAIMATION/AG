@@ -6,10 +6,11 @@
    Dwa tryby:
 
    `loop` (domyślny, aktywny) — wideo leci samo, w tle. Ping-pong (przód, potem tył)
-   jest WPISANY W PLIK: za materiałem właściwym idzie ten sam materiał odwrócony,
-   więc natywne `loop` odtwarza w kółko tam i z powrotem. Zero JS na klatkach, zero
-   seekowania, zero szansy na zacięcie — i pliki mogą być zwykłym GOP-em zamiast
-   all-intra, co kupuje budżet na pełne 4K.
+   jest WPISANY W PLIK: za materiałem właściwym idzie ten sam materiał odwrócony.
+   Pętlę domyka JS (przytrzymanie ostatniej klatki, potem powrót na 0), a krzywa
+   prędkości zmienia tylko `playbackRate` — bez seekowania w trakcie, więc pliki mogą
+   zostać zwykłym GOP-em zamiast all-intra. Pliki: 2K (2560×1440) H.264 CRF 23, ~15–20 MB
+   na 16 s (4K ważyło 44–60 MB, a pod przyciemnieniem różnicy nie widać).
 
    `scrub` (zachowany, nieaktywny) — postęp scrolla mapowany na `currentTime` przez
    ScrollTrigger. Wymaga plików all-intra, inaczej seek wstecz kosztuje dekodowanie
@@ -27,6 +28,13 @@ export const SCENA_GOTOWA = 'ag:scena-gotowa';
 /* Efekty dzieci lecą przed efektami rodzica, więc hero potrafi zameldować gotowość,
    zanim ekran startowy zdąży się podpiąć pod zdarzenie. Ta flaga zamyka ten wyścig. */
 export const stanScen = { heroGotowe: false };
+
+/* Tryb pętli: zakres prędkości krzywej i przytrzymanie ostatniej klatki.
+   Dolna granica 0,7: plik ma 30 kl./s, a poniżej ~21 kl./s ruch zaczyna się rwać.
+   Średnia krzywej wychodzi ~1,05, więc pętla trwa tyle co przedtem. */
+const TEMPO_MIN = 0.7;
+const TEMPO_MAX = 1.25;
+const PAUZA_KONIEC_MS = 900;
 
 type Props = {
   id?: string;
@@ -111,13 +119,46 @@ export function ScrollVideoScene({
       return rect.top < window.innerHeight && rect.bottom > 0;
     };
 
+    /* Koniec pliku: ostatnia klatka zostaje chwilę na ekranie, potem start od nowa.
+       Natywne `loop` skakałoby od razu, więc pętlę domykamy sami. */
+    let trzyma = false;
+    let trzymanie = 0;
+
     const rzadz = () => {
       if (bezRuchu || !wKadrze()) {
         if (!video.paused) video.pause();
         return;
       }
+      if (trzyma) return;
       if (video.paused) video.play().catch(() => {});
     };
+
+    const koniec = () => {
+      trzyma = true;
+      trzymanie = window.setTimeout(() => {
+        trzyma = false;
+        video.currentTime = 0;
+        rzadz();
+      }, PAUZA_KONIEC_MS);
+    };
+
+    /* Krzywa prędkości. Plik to ping-pong (tam, potem z powrotem), więc każda połowa
+       jest osobnym ruchem: rusza wolno, w środku przyspiesza, hamuje przed zawróceniem
+       i przed końcem. Sinus po połowie daje miękkie wejście i wyjście. Prędkość
+       zmieniamy co ~120 ms i tylko przy wyraźnej różnicy, bo każda zmiana
+       `playbackRate` to praca dla dekodera. */
+    let raf = 0;
+    let ostatnio = 0;
+    const krzywa = (teraz: number) => {
+      raf = requestAnimationFrame(krzywa);
+      if (teraz - ostatnio < 120 || video.paused || !video.duration) return;
+      ostatnio = teraz;
+      const pol = video.duration / 2;
+      const p = (video.currentTime % pol) / pol; // 0…1 w obrębie połowy
+      const tempo = TEMPO_MIN + (TEMPO_MAX - TEMPO_MIN) * Math.sin(Math.PI * p);
+      if (Math.abs(video.playbackRate - tempo) > 0.02) video.playbackRate = tempo;
+    };
+    if (!bezRuchu) raf = requestAnimationFrame(krzywa);
 
     const gotowe = () => {
       rzadz();
@@ -130,6 +171,7 @@ export function ScrollVideoScene({
     video.addEventListener('canplay', gotowe);
     // `loadeddata` domyka przypadek, w którym odtwarzanie ruszyło przed wejściem efektu
     video.addEventListener('loadeddata', rzadz);
+    video.addEventListener('ended', koniec);
     window.addEventListener('scroll', rzadz, { passive: true });
     if (!bezRuchu) {
       window.addEventListener('pointerdown', rzadz, { passive: true });
@@ -139,6 +181,9 @@ export function ScrollVideoScene({
     return () => {
       video.removeEventListener('canplay', gotowe);
       video.removeEventListener('loadeddata', rzadz);
+      video.removeEventListener('ended', koniec);
+      cancelAnimationFrame(raf);
+      window.clearTimeout(trzymanie);
       window.removeEventListener('scroll', rzadz);
       window.removeEventListener('pointerdown', rzadz);
       window.removeEventListener('touchstart', rzadz);
@@ -324,7 +369,6 @@ export function ScrollVideoScene({
             poster={poster}
             muted
             playsInline
-            loop={mode === 'loop'}
             preload={loading === 'lazy' ? 'none' : 'auto'}
           />
           <div className="ag-scene__veil" data-veil={veil} />
