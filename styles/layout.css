@@ -685,6 +685,9 @@
   .ag-about__portrait {
     aspect-ratio: 3 / 4;
     max-width: 22rem;
+    /* węższy od kolumny — wyśrodkowany, nie przyklejony do lewej */
+    width: 100%;
+    justify-self: center;
   }
 
   .ag-about__body {

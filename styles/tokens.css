@@ -84,7 +84,8 @@
   --slide-pad: max(2rem, calc(var(--nav-h) + var(--nav-offset) * 2));
   /* margines zewnętrzny ~9–10% szerokości kadru, jak w materiale źródłowym */
   --gutter: clamp(1.25rem, 9vw, 6rem);
-  --maxw: 1440px;
+  /* w rem, żeby kolumna rosła razem ze skalą korzenia (1440 px przy 16 px) */
+  --maxw: 90rem;
   --maxw-text: 62ch;
 
   /* --- Detal --------------------------------------------------------- */

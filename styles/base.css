@@ -8,6 +8,12 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* Cała skala (tekst, odstępy, szerokość kolumny) stoi na rem, więc rośnie razem
+     z korzeniem. Do 1440 px szerokości 100%, potem liniowo do 125% przy 2560 px —
+     na monitorach 2K/4K strona nie zamienia się w drobny druk na środku pustego
+     ekranu. Procenty zamiast px: ustawienie wielkości czcionki w przeglądarce
+     nadal działa. */
+  font-size: clamp(100%, 67.86% + 0.357vw, 125%);
   /* płynność robi Lenis (components/SmoothScroll.tsx) — natywne `smooth` z nim koliduje */
   scroll-behavior: auto;
   /* prześwit pod pływającym paskiem — używany też przy lądowaniu kotwic z menu */
