@@ -83,7 +83,20 @@
   min-height: 0;
   /* cały luz idzie do pola tekstowego; bez tego siatka dzieliła go po równo
      i etykieta „Wiadomość” puchła do ~110 px, a podpowiedź lądowała w połowie */
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto 1fr auto; /* etykieta, pole, ewentualny komunikat */
+}
+
+/* Komunikat walidacji pod polem: czerwień stanu (5,4:1 na kremie, 6,5:1 na granacie),
+   a samo pole dostaje czerwone podkreślenie zamiast szarego. */
+.ag-field__error {
+  font-size: var(--fs-small);
+  line-height: 1.4;
+  color: var(--c-error);
+}
+
+.ag-input[aria-invalid='true'],
+.ag-textarea[aria-invalid='true'] {
+  border-bottom-color: var(--c-error);
 }
 
 @media (max-width: 599px) {
@@ -135,6 +148,17 @@
   resize: none;
   flex: 1;
   min-height: 2rem;
+}
+
+/* Na wąskim ekranie sekcja nie ma stałej wysokości, więc „zjadanie reszty karty”
+   nic nie daje i pole spadało do ~75 px: podpowiedź (4 linie przy 375 px) się
+   ucinała, a pisać było gdzie najwyżej dwie linijki. Stała wysokość + możliwość
+   rozciągnięcia w dół dla dłuższych wiadomości. */
+@media (max-width: 899px) {
+  .ag-textarea {
+    min-height: 10rem;
+    resize: vertical;
+  }
 }
 
 .ag-form__foot {

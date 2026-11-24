@@ -2,12 +2,15 @@
 
 /* Formularz kontaktowy — POST na /api/kontakt, wysyłka SMTP przez Gmail.
 
-   Limity znaków pochodzą z `formLimits` i są tu tylko afordancją: pole przestaje
-   przyjmować znaki, licznik pokazuje ile zostało. Właściwa walidacja siedzi na
-   serwerze, bo `maxLength` da się ominąć wysyłając żądanie z pominięciem formularza. */
+   Limity znaków pochodzą z `formLimits`: pole przestaje przyjmować znaki, licznik
+   pokazuje ile zostało. Reguły i komunikaty są w `lib/walidacja.ts`, wspólne z
+   serwerem: tutaj dają komunikat pod polem (po wyjściu z pola i przy wysyłce),
+   a serwer i tak sprawdza wszystko jeszcze raz. Natywne dymki przeglądarki są
+   wyłączone (`noValidate`), żeby komunikaty były po polsku i w stylu strony. */
 
 import { useEffect, useRef, useState } from 'react';
 import { formLimits } from '@/lib/config';
+import { KOMUNIKAT, sprawdz, sprawdzPole, type Pole } from '@/lib/walidacja';
 
 type Tone = 'idle' | 'ok' | 'error';
 
@@ -27,6 +30,7 @@ declare global {
 }
 
 const KOMUNIKATY: Record<string, string> = {
+  'invalid-fields': 'Popraw zaznaczone pola i wyślij ponownie.',
   'too-many-links': 'Wiadomość ma za dużo linków. Zostaw najwyżej dwa i wyślij ponownie.',
   captcha: 'Nie udało się potwierdzić, że piszesz Ty, a nie robot. Odśwież stronę i spróbuj ponownie.',
 };
@@ -36,6 +40,7 @@ export function ContactForm() {
   const [tone, setTone] = useState<Tone>('idle');
   const [sending, setSending] = useState(false);
   const [uzyte, setUzyte] = useState(0);
+  const [bledy, setBledy] = useState<Partial<Record<Pole, string>>>({});
   // pułapka czasowa: od kiedy formularz jest na ekranie
   const otwarty = useRef(0);
   const widget = useRef<HTMLDivElement>(null);
@@ -70,6 +75,23 @@ export function ContactForm() {
     e.preventDefault();
     const form = e.currentTarget;
     const data = new FormData(form);
+    const wartosc = (p: Pole) => String(data.get(p) ?? '');
+
+    const znalezione = sprawdz({
+      imie: wartosc('imie'),
+      email: wartosc('email'),
+      telefon: wartosc('telefon'),
+      wiadomosc: wartosc('wiadomosc'),
+    });
+    if (Object.keys(znalezione).length) {
+      setBledy(znalezione);
+      setTone('error');
+      setStatus('Popraw zaznaczone pola i wyślij ponownie.');
+      // fokus na pierwsze błędne pole: czytnik od razu przeczyta jego komunikat
+      const pierwsze = (['imie', 'email', 'telefon', 'wiadomosc'] as Pole[]).find((p) => znalezione[p]);
+      (form.elements.namedItem(pierwsze!) as HTMLElement | null)?.focus();
+      return;
+    }
 
     setSending(true);
     setTone('idle');
@@ -91,11 +113,20 @@ export function ContactForm() {
       });
 
       if (!res.ok) {
-        const { error } = (await res.json().catch(() => ({}))) as { error?: string };
+        const { error, pola } = (await res.json().catch(() => ({}))) as {
+          error?: string;
+          pola?: Pole[];
+        };
+        // serwer odrzucił pola: te same komunikaty co w przeglądarce, pod polami
+        if (error === 'invalid-fields' && pola?.length) {
+          setBledy(Object.fromEntries(pola.map((p) => [p, KOMUNIKAT[p]])));
+          throw new Error('invalid-fields');
+        }
         throw new Error(error ?? 'send-failed');
       }
 
       form.reset();
+      setBledy({});
       setUzyte(0);
       setTone('ok');
       setStatus('Dziękuję, wiadomość została wysłana.');
@@ -114,8 +145,40 @@ export function ContactForm() {
 
   const zostalo = formLimits.wiadomosc.max - uzyte;
 
+  /* Komunikat pojawia się po wyjściu z wypełnionego pola (puste przeskakiwane
+     Tabem nie krzyczą, to wyłapie wysyłka) i znika, gdy tylko wpis jest poprawny. */
+  const ustaw = (p: Pole, blad: string | null) =>
+    setBledy((b) => {
+      if ((b[p] ?? null) === blad) return b;
+      const n = { ...b };
+      if (blad) n[p] = blad;
+      else delete n[p];
+      return n;
+    });
+
+  const pole = (p: Pole) => ({
+    name: p,
+    'aria-invalid': bledy[p] ? true : undefined,
+    'aria-describedby': bledy[p] ? `blad-${p}` : undefined,
+    onBlur: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const v = e.currentTarget.value;
+      if (v.trim()) ustaw(p, sprawdzPole(p, v));
+    },
+    onInput: (e: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      if (bledy[p] && !sprawdzPole(p, e.currentTarget.value)) ustaw(p, null);
+    },
+  });
+
+  // komunikat jest opisem pola (aria-describedby), więc nie dublujemy go w drzewie dostępności
+  const blad = (p: Pole) =>
+    bledy[p] ? (
+      <span id={`blad-${p}`} className="ag-field__error" aria-hidden="true">
+        {bledy[p]}
+      </span>
+    ) : null;
+
   return (
-    <form className="ag-form" onSubmit={onSubmit} noValidate={false}>
+    <form className="ag-form" onSubmit={onSubmit} noValidate>
       <div className="ag-form__row">
         <label className="ag-field">
           <span className="ag-field__label">
@@ -123,7 +186,7 @@ export function ContactForm() {
           </span>
           <input
             className="ag-input"
-            name="imie"
+            {...pole('imie')}
             type="text"
             required
             minLength={formLimits.imie.min}
@@ -131,6 +194,7 @@ export function ContactForm() {
             autoComplete="name"
             placeholder="Jak się do Ciebie zwracać"
           />
+          {blad('imie')}
         </label>
 
         <label className="ag-field">
@@ -139,7 +203,7 @@ export function ContactForm() {
           </span>
           <input
             className="ag-input"
-            name="email"
+            {...pole('email')}
             type="email"
             required
             maxLength={formLimits.email.max}
@@ -147,6 +211,7 @@ export function ContactForm() {
             inputMode="email"
             placeholder="adres@poczta.pl"
           />
+          {blad('email')}
         </label>
       </div>
 
@@ -154,13 +219,14 @@ export function ContactForm() {
         <span className="ag-field__label">Telefon (opcjonalnie)</span>
         <input
           className="ag-input"
-          name="telefon"
+          {...pole('telefon')}
           type="tel"
           maxLength={formLimits.telefon.max}
           autoComplete="tel"
           inputMode="tel"
           placeholder="+48 …"
         />
+        {blad('telefon')}
       </label>
 
       <label className="ag-field ag-field--grow">
@@ -172,13 +238,14 @@ export function ContactForm() {
         </span>
         <textarea
           className="ag-textarea"
-          name="wiadomosc"
+          {...pole('wiadomosc')}
           required
           minLength={formLimits.wiadomosc.min}
           maxLength={formLimits.wiadomosc.max}
           onChange={(e) => setUzyte(e.currentTarget.value.length)}
           placeholder="Lokalizacja działki, rodzaj budynku, planowany metraż, etap przygotowań, terminy…"
         />
+        {blad('wiadomosc')}
       </label>
 
       {/* pułapka na boty — ukryta przed użytkownikiem */}

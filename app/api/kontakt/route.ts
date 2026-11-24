@@ -6,14 +6,13 @@
 
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
-import { formLimits } from '@/lib/config';
+import { sprawdz, type Pole } from '@/lib/walidacja';
 
 export const runtime = 'nodejs';
 
-/* Granica zaufania. `maxLength` i `type="email"` w przeglądarce to wygoda dla
-   użytkownika: żądanie da się wysłać z pominięciem formularza, więc te same
-   progi muszą obowiązywać tutaj. Bez tego w skrzynce ląduje, co kto chce. */
-const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+/* Granica zaufania. Walidacja w przeglądarce to wygoda dla użytkownika: żądanie
+   da się wysłać z pominięciem formularza, więc te same reguły (lib/walidacja.ts)
+   obowiązują tutaj. Bez tego w skrzynce ląduje, co kto chce. */
 
 /* Antyspam, warstwy od najtańszej:
    1. honeypot: ukryte pole „firma” wypełnia tylko bot,
@@ -29,19 +28,6 @@ const LINK = /https?:\/\/|www\./i;
 const LINKI = /https?:\/\/|www\./gi;
 /* ponytail: krótka lista fraz; rozszerzyć, gdy w skrzynce zacznie przechodzić konkretny spam */
 const SPAM = /\b(seo services?|backlinks?|crypto|bitcoin|casino|viagra|cialis|forex|loan offer|guest post)\b/i;
-
-function bledy(p: { imie: string; email: string; telefon: string; wiadomosc: string }) {
-  const e: string[] = [];
-  if (p.imie.length < formLimits.imie.min || p.imie.length > formLimits.imie.max) e.push('imie');
-  if (p.email.length > formLimits.email.max || !EMAIL.test(p.email)) e.push('email');
-  if (p.telefon.length > formLimits.telefon.max) e.push('telefon');
-  if (
-    p.wiadomosc.length < formLimits.wiadomosc.min ||
-    p.wiadomosc.length > formLimits.wiadomosc.max
-  )
-    e.push('wiadomosc');
-  return e;
-}
 
 async function turnstileOk(token: string, ip: string | null) {
   const secret = process.env.TURNSTILE_SECRET_KEY;
@@ -84,7 +70,7 @@ export async function POST(req: Request) {
   const czas = typeof b.czas === 'number' ? b.czas : -1;
   if (czas < MIN_CZAS_MS) return udajSukces();
 
-  const niepoprawne = bledy(dane);
+  const niepoprawne = Object.keys(sprawdz(dane)) as Pole[];
   if (niepoprawne.length) {
     return NextResponse.json({ error: 'invalid-fields', pola: niepoprawne }, { status: 400 });
   }

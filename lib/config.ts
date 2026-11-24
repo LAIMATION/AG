@@ -212,8 +212,8 @@ export const contact = {
    to wygoda, nie zabezpieczenie: żądanie da się wysłać z pominięciem formularza,
    więc te same progi obowiązują w `app/api/kontakt/route.ts`. */
 export const formLimits = {
-  imie: { min: 2, max: 80 },
-  email: { max: 254 }, // RFC 5321: maksymalna długość adresu
+  imie: { min: 2, max: 60 },
+  email: { max: 100 }, // RFC dopuszcza 254, realne adresy mieszczą się w 100 z zapasem
   telefon: { max: 24 },
   wiadomosc: { min: 10, max: 1500 },
 } as const;
