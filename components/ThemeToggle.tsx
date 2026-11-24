@@ -4,9 +4,10 @@
    po niej pozycję, matowe szkło, chowanie przy scrollu i wykrywanie tonacji tła —
    zero powielonej mechaniki.
 
-   Wybór trzyma `localStorage` i nakłada go skrypt w `app/layout.tsx`, wykonywany PRZED
-   pierwszym malowaniem. Gdyby motyw ustawiał dopiero React po hydratacji, użytkownik
-   trybu ciemnego dostawałby błysk jasnej strony przy każdym wejściu. */
+   Domyślny motyw wynika z pory dnia u odwiedzającego (skrypt w `app/layout.tsx`,
+   wykonywany PRZED pierwszym malowaniem, więc bez błysku złego motywu). Ręczny wybór
+   trzyma `sessionStorage`: obowiązuje do końca wizyty, także po odświeżeniu, a przy
+   następnym wejściu znów decyduje pora dnia. */
 
 import { useEffect, useState } from 'react';
 
@@ -47,7 +48,7 @@ function Ksiezyc() {
 
 export function ThemeToggle() {
   /* Start zawsze z `light`, a prawdziwy stan dociągamy po zamontowaniu. Serwer nie zna
-     `localStorage`, więc każde zgadywanie tutaj kończy się rozjazdem z HTML-em
+     ani zegara odwiedzającego, ani `sessionStorage`, więc każde zgadywanie tutaj kończy się rozjazdem z HTML-em
      wyrenderowanym po jego stronie. Sam motyw jest już na `<html>` przed malowaniem —
      ten stan steruje wyłącznie ikoną i etykietą. */
   const [motyw, setMotyw] = useState<Motyw>('light');
@@ -62,7 +63,7 @@ export function ThemeToggle() {
     document.documentElement.dataset.motyw = nowy;
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', TLO[nowy]);
     try {
-      localStorage.setItem(KLUCZ_MOTYWU, nowy);
+      sessionStorage.setItem(KLUCZ_MOTYWU, nowy);
     } catch {
       /* tryb prywatny albo zablokowane dane witryny — motyw działa, po prostu się nie zapamięta */
     }
