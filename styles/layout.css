@@ -606,18 +606,20 @@
   isolation: isolate;
 }
 
-/* Miękka poświata za sylwetką: odrywa czarny strój od tła (zwłaszcza na granacie
-   blueprintu) i zastępuje dawny prostokąt zdjęcia — bez żadnej krawędzi. */
+/* Jasne, białe tło za sylwetką z winietą w kolorze sekcji: środek czysto biały,
+   brzegi schodzą dokładnie do `--c-bg`, więc pole nie ma żadnej krawędzi —
+   rozpływa się w rozdziale, w którym stoi (i w kremie, i w granacie blueprintu). */
 .ag-about__portrait::before {
   content: '';
   position: absolute;
-  inset: 4% -6% 0;
+  inset: 0 -8%;
   z-index: -1;
   background: radial-gradient(
-    ellipse 55% 50% at 50% 42%,
-    var(--c-line-soft) 0%,
-    color-mix(in srgb, var(--c-line-soft) 45%, transparent) 55%,
-    transparent 100%
+    ellipse 50% 50% at 50% 45%,
+    #ffffff 0%,
+    #ffffff 34%,
+    color-mix(in srgb, #ffffff 50%, var(--c-bg)) 58%,
+    var(--c-bg) 84%
   );
   pointer-events: none;
 }
