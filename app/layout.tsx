@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Archivo, Playball } from 'next/font/google';
+import { Montserrat, Playball } from 'next/font/google';
 import { Nav } from '@/components/Nav';
 import { Preloader } from '@/components/Preloader';
 import { SmoothScroll } from '@/components/SmoothScroll';
@@ -12,9 +12,9 @@ import '@/styles/components.css';
 
 /* Jedna rodzina groteskowa w skrajnych wagach niesie cały system;
    krój skryptowy pojawia się wyłącznie jako pojedynczy akcent na fotografii. */
-/* Bez listy wag — Archivo jest krojem zmiennym, więc jeden plik obsługuje całą oś
-   400–900. Wyliczanie wag pobierało cztery osobne pliki statyczne. */
-const sans = Archivo({
+/* Montserrat: krój marki, którego klientka używa we wszystkich materiałach.
+   Bez listy wag, bo to krój zmienny: jeden plik obsługuje całą oś 400–900. */
+const sans = Montserrat({
   subsets: ['latin', 'latin-ext'],
   display: 'swap',
   variable: '--font-sans',
@@ -90,6 +90,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               name: `${site.name}, ${site.role}`,
               telephone: site.phone,
               email: site.email,
+              legalName: site.company.name,
+              taxID: site.company.nip,
+              address: {
+                '@type': 'PostalAddress',
+                streetAddress: site.company.street,
+                postalCode: site.company.postalCode,
+                addressLocality: site.company.city,
+                addressCountry: 'PL',
+              },
               areaServed: 'Białystok, Zambrów, Podlasie, Polska',
               sameAs: [site.instagram],
             }),

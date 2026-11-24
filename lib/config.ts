@@ -6,6 +6,15 @@ export const site = {
   role: 'Architekt',
   studio: 'ATRIUM STUDIO',
   region: 'Białystok · Zambrów · Podlasie',
+  /* dane rejestrowe: stopka i dane strukturalne dla Google */
+  company: {
+    name: 'ATRIUM Studio Aleksandra Niewińska',
+    street: 'ul. Młynowa 40/21',
+    postalCode: '15-404',
+    city: 'Białystok',
+    nip: '5381858922',
+    regon: '381399082',
+  },
   phone: '+48 660 970 375',
   phoneHref: '+48660970375',
   email: 'atriumkontakt@gmail.com',

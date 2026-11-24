@@ -14,11 +14,11 @@
      tekstu, a w tej roli chodzą 12 px wersaliki. Przyciemnione do 4,8:1. */
   --c-muted: #5c6b7d;
 
-  --c-accent: #e07b2c; /* pomarańcz sygnałowy — linie, wypełnienia CTA */
+  --c-accent: #ef800b; /* pomarańcz sygnałowy — linie, wypełnienia CTA */
   --c-accent-soft: #f3d3b0;
-  /* Sam `--c-accent` na kremie to 2,7:1, więc nie nadaje się na tekst.
+  /* Sam `--c-accent` na kremie to 2,4:1, więc nie nadaje się na tekst.
      Ta odmiana służy wyłącznie do pisania akcentem. */
-  --c-accent-ink: #a85512;
+  --c-accent-ink: #a35607;
 
   /* czerwień stanu błędu — 5,4:1 na kremie, 6,1:1 na bieli */
   --c-error: #b03a2e;
@@ -42,7 +42,7 @@
   /* --- Typografia ---------------------------------------------------- */
   /* Jedna rodzina groteskowa, skrajne wagi: 900 na hasła, 400/500 na resztę.
      Krój skryptowy wyłącznie jako pojedynczy akcent na fotografii. */
-  --f-sans: var(--font-sans), 'Archivo', 'Segoe UI', system-ui, sans-serif;
+  --f-sans: var(--font-sans), 'Montserrat', 'Segoe UI', system-ui, sans-serif;
   --f-display: var(--f-sans);
   --f-script: var(--font-script), 'Segoe Script', cursive;
 
@@ -112,10 +112,10 @@
      na jasnym granatowy potrzebuje gęstszej plamy, na ciemnym jasny — rzadszej. */
   --c-glass: rgba(245, 242, 234, 0.62);
   --c-glass-edge: var(--c-line);
-  --c-glass-active: rgba(224, 123, 44, 0.62);
+  --c-glass-active: rgba(239, 128, 11, 0.62);
   --c-glass-dark: rgba(31, 42, 53, 0.58);
   --c-glass-dark-edge: rgba(242, 238, 228, 0.28);
-  --c-glass-dark-active: rgba(224, 123, 44, 0.45);
+  --c-glass-dark-active: rgba(239, 128, 11, 0.45);
 
   --nav-h: 52px;
   --nav-offset: clamp(0.75rem, 2vh, 1.5rem);
@@ -170,7 +170,7 @@
   /* Pomarańcz wypełnień zostaje ten sam — to sygnatura marki i na granacie działa.
      Zmienia się odmiana tekstowa: na kremie musiała ciemnieć do brązu, tu może
      pojaśnieć i wychodzi 8,0:1 zamiast 4,8:1. */
-  --c-accent-ink: #f0a45a;
+  --c-accent-ink: #f5a54a;
 
   --c-error: #f0847a; /* 6,5:1 */
 }

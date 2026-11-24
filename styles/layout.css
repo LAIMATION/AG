@@ -1247,6 +1247,11 @@
   transition: color var(--dur-fast) var(--ease);
 }
 
+/* <address> domyślnie stawia kursywę */
+.ag-contact__address {
+  font-style: normal;
+}
+
 a.ag-contact__value:hover {
   color: var(--c-accent-ink);
 }

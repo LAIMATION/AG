@@ -239,6 +239,13 @@ export function Contact() {
               </div>
 
               <div className="ag-contact__item">
+                <span className="ag-contact__label">Adres</span>
+                <address className="ag-contact__value ag-contact__address">
+                  {site.company.street}, {site.company.postalCode} {site.company.city}
+                </address>
+              </div>
+
+              <div className="ag-contact__item">
                 <span className="ag-contact__label">Instagram</span>
                 <a
                   className="ag-contact__value"
@@ -271,8 +278,11 @@ export function Footer() {
             {site.name} · {site.region}
           </span>
         </span>
-        <span>
-          © {new Date().getFullYear()} {site.role}
+        {/* dane rejestrowe firmy */}
+        <span className="ag-footer__legal">
+          © {new Date().getFullYear()} {site.company.name} · {site.company.street},{' '}
+          {site.company.postalCode} {site.company.city} · NIP {site.company.nip} · REGON{' '}
+          {site.company.regon}
         </span>
       </div>
     </footer>
