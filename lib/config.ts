@@ -1,18 +1,17 @@
 /* Jedyne źródło treści i danych kontaktowych.
-   Narracja na „Ty". Na pierwszym planie Aleksandra Gosk, ATRIUM STUDIO w drugim. */
+   Narracja na „Ty". Na pierwszym planie Aleksandra Niewińska, ATRIUM STUDIO w drugim. */
 
 export const site = {
-  name: 'Aleksandra Gosk',
+  name: 'Aleksandra Niewińska',
   role: 'Architekt',
   studio: 'ATRIUM STUDIO',
   /* Znak studia rozbity na dwie linie — w lockupie „STUDIO" jest osobnym,
      pomniejszonym wierszem dosuniętym do prawej krawędzi „ATRIUM". */
   studioMark: { name: 'ATRIUM', sub: 'STUDIO' },
   region: 'Białystok · Zambrów',
-  // TODO: podmienić na prawdziwy numer telefonu
-  phone: '+48 000 000 000',
-  phoneHref: '+48000000000',
-  email: 'aleksandragosk.arch@gmail.com',
+  phone: '+48 660 970 375',
+  phoneHref: '+48660970375',
+  email: 'atriumkontakt@gmail.com',
   instagram: 'https://www.instagram.com/architekt_gosk_aleksandra/',
   instagramHandle: '@architekt_gosk_aleksandra',
 } as const;
@@ -22,18 +21,19 @@ export const site = {
    w nagłówku sekcji. */
 export const nav = [
   { id: 'o-mnie', label: 'O mnie' },
-  { id: 'uslugi', label: 'Zakres' },
+  { id: 'uslugi', label: 'Usługi' },
   { id: 'realizacje', label: 'Realizacje' },
   { id: 'gotowe', label: 'Gotowe' },
   { id: 'kontakt', label: 'Kontakt' },
 ] as const;
 
 export const hero = {
-  eyebrow: 'Architekt · Białystok, Zambrów',
-  title: 'Aleksandra Gosk',
-  script: 'Przestrzeń, która dojrzewa razem z Tobą',
+  eyebrow: 'Architekt · Białystok, Zambrów, Podlasie',
+  title: 'Aleksandra Niewińska',
+  /* twarda spacja trzyma „z Tobą" razem — „Tobą" nie zostaje samo w drugim wierszu */
+  script: 'Przestrzeń, która dojrzewa razem z Tobą',
   lead:
-    'Projektuję budynki dopasowane do ludzi, którzy w nich mieszkają i pracują — domy, budynki wielorodzinne, usługowe, hale, obory i budynki gospodarcze.',
+    'Projektuję budynki dopasowane do ludzi, którzy w nich mieszkają i pracują — domy, budynki wielorodzinne, usługowe, hale, budynki gospodarcze i inwentarskie.',
   cta: 'Napisz do mnie',
   scroll: 'Przewiń',
 } as const;
@@ -42,28 +42,26 @@ export const about = {
   eyebrow: 'O mnie',
   title: 'Zaczynamy od tego, jak chcesz żyć',
   paragraphs: [
-    'Nazywam się Aleksandra Gosk i projektuję budynki. Zanim cokolwiek narysuję, pytam, jak wygląda Twój zwykły dzień — bo z tego, a nie z modnego rzutu, wychodzi dom, w którym da się wygodnie mieszkać przez lata.',
-    'Prowadzę Cię przez cały proces: od oceny działki i warunków zabudowy, przez projekt i pozwolenie, po koordynację prac na budowie. Masz jeden kontakt zamiast łańcucha pośredników i wiesz, na jakim etapie jesteś.',
-    'Pracuję pod szyldem ATRIUM STUDIO, kameralnie, przy ograniczonej liczbie projektów naraz. Dzięki temu każdy dostaje tyle uwagi, ile faktycznie potrzebuje.',
+    'Nazywam się Aleksandra Niewińska i jestem architektem. Zanim cokolwiek narysuję, pytam, jak wygląda Twój zwykły dzień — bo z tego, a nie z ładnej wizualizacji, wychodzi dom, w którym da się wygodnie mieszkać przez lata.',
+    'Przeprowadzę Cię przez cały proces: od analizy działki, przez projekt i pozwolenie na budowę, po nadzór autorski na budowie. Masz jeden kontakt zamiast łańcucha pośredników i wiesz, na jakim etapie jesteś.',
+    'W ATRIUM Studio pracujemy kameralnie, przy ograniczonej liczbie projektów naraz. Dzięki temu każdy dostaje tyle uwagi, ile faktycznie potrzebuje.',
   ],
   facts: [
     { value: 'Białystok · Zambrów', label: 'Obszar działania' },
     { value: 'Projekt i budowa', label: 'Pełen zakres prowadzenia' },
     { value: 'Kameralnie', label: 'Ograniczona liczba projektów' },
   ],
-  photoAlt: 'Aleksandra Gosk — architekt',
+  photoAlt: 'Aleksandra Niewińska — architekt',
 } as const;
 
 export const services = {
-  eyebrow: 'Zakres',
-  title: 'Projektuję każdy rodzaj budynku',
-  lead:
-    'Dom jednorodzinny, blok, hala, obora czy budynek gospodarczy — proces jest ten sam, zmienia się tylko to, co budynek ma robić.',
+  eyebrow: 'Usługi',
+  title: 'W czym mogę Ci pomóc?',
   items: [
     {
       no: '01',
       title: 'Budynki mieszkalne',
-      desc: 'Domy jednorodzinne, bliźniaki, zabudowa szeregowa i budynki wielorodzinne. Od koncepcji, przez projekt budowlany i techniczny, po komplet dokumentacji do pozwolenia.',
+      desc: 'Domy jednorodzinne, bliźniaki, zabudowa szeregowa i budynki wielorodzinne. Od koncepcji, przez projekt budowlany i techniczny, po nadzór autorski na budowie.',
     },
     {
       no: '02',
@@ -83,7 +81,7 @@ export const services = {
     {
       no: '05',
       title: 'Świadectwa energetyczne',
-      desc: 'Charakterystyka i świadectwa energetyczne budynków — do odbioru, sprzedaży lub wynajmu, razem z wyjaśnieniem, co z wyniku realnie wynika.',
+      desc: 'Charakterystyka i świadectwa energetyczne budynków — do odbioru, sprzedaży lub wynajmu.',
     },
     {
       no: '06',
@@ -95,8 +93,8 @@ export const services = {
 
 export const manifesto = {
   script: 'Wygoda na lata',
-  quote: 'Dobry budynek nie zwraca na siebie uwagi. Po prostu działa — i za dziesięć lat nadal jest wygodny.',
-  attribution: 'Aleksandra Gosk · ATRIUM STUDIO',
+  quote: 'Dobry budynek nie zwraca na siebie uwagi. Po prostu działa — i ułatwia Twoje codzienne życie.',
+  attribution: 'Aleksandra Niewińska · ATRIUM STUDIO',
   note: 'Projekt, pozwolenie, budowa — jeden proces i jedna osoba odpowiedzialna za jego przebieg.',
 } as const;
 

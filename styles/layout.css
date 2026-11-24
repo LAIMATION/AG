@@ -560,7 +560,9 @@
 /* skryptowy akcent nad nazwiskiem — jedyne miejsce na stronie z tym krojem */
 .ag-hero__script {
   color: var(--c-accent-soft);
-  max-width: 24ch;
+  /* całe hasło w jednym wierszu tam, gdzie się mieści — przy 24ch „Tobą" spadało
+     samotnie do drugiej linii */
+  max-width: 42ch;
 }
 
 .ag-hero__row {

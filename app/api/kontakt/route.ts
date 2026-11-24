@@ -59,7 +59,7 @@ export async function POST(req: Request) {
   });
 
   await transporter.sendMail({
-    from: `Strona Aleksandra Gosk <${GMAIL_USER}>`,
+    from: `Strona Aleksandra Niewińska <${GMAIL_USER}>`,
     to: CONTACT_TO || GMAIL_USER,
     // temat składa się z danych od użytkownika — nowa linia pozwoliłaby dopisać
     // własne nagłówki, więc łamania linii nie przepuszczamy

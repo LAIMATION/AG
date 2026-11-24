@@ -28,11 +28,11 @@ const script = Playball({
 });
 
 export const metadata: Metadata = {
-  title: 'Aleksandra Gosk — architekt | Białystok, Zambrów',
+  title: 'Aleksandra Niewińska — architekt | Białystok, Zambrów, Podlasie',
   description:
-    'Projektuję każdy rodzaj budynku: domy, budynki wielorodzinne, hale, obory i budynki gospodarcze. Organizacja budowy, świadectwa energetyczne, konsultacje. ATRIUM STUDIO — Białystok, Zambrów.',
+    'Projektuję domy, budynki wielorodzinne, usługowe, hale, budynki gospodarcze i inwentarskie. Organizacja budowy, nadzór autorski, świadectwa energetyczne, konsultacje. ATRIUM STUDIO — Białystok, Zambrów, Podlasie.',
   openGraph: {
-    title: 'Aleksandra Gosk — architekt',
+    title: 'Aleksandra Niewińska — architekt',
     description: 'Przestrzeń, która dojrzewa razem z Tobą. ATRIUM STUDIO, Białystok i Zambrów.',
     locale: 'pl_PL',
     type: 'website',

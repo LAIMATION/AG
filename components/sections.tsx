@@ -104,7 +104,6 @@ export function Services() {
         <div className="ag-section__head">
           <p className="ag-eyebrow ag-rule">{services.eyebrow}</p>
           <h2 className="ag-h2">{services.title}</h2>
-          <p className="ag-lead">{services.lead}</p>
         </div>
 
         <ul className="ag-section__body ag-services__list">
