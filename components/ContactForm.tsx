@@ -6,16 +6,65 @@
    przyjmować znaki, licznik pokazuje ile zostało. Właściwa walidacja siedzi na
    serwerze, bo `maxLength` da się ominąć wysyłając żądanie z pominięciem formularza. */
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { formLimits } from '@/lib/config';
 
 type Tone = 'idle' | 'ok' | 'error';
+
+/* Cloudflare Turnstile: aktywny tylko, gdy w Vercel ustawiono klucz witryny.
+   Tryb `interaction-only`: widget jest niewidoczny, dopóki Cloudflare nie uzna,
+   że trzeba coś kliknąć. */
+const TURNSTILE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
+type Turnstile = {
+  render: (el: HTMLElement, opts: Record<string, unknown>) => string;
+  reset: (id?: string) => void;
+};
+declare global {
+  interface Window {
+    turnstile?: Turnstile;
+  }
+}
+
+const KOMUNIKATY: Record<string, string> = {
+  'too-many-links': 'Wiadomość ma za dużo linków. Zostaw najwyżej dwa i wyślij ponownie.',
+  captcha: 'Nie udało się potwierdzić, że piszesz Ty, a nie robot. Odśwież stronę i spróbuj ponownie.',
+};
 
 export function ContactForm() {
   const [status, setStatus] = useState('');
   const [tone, setTone] = useState<Tone>('idle');
   const [sending, setSending] = useState(false);
   const [uzyte, setUzyte] = useState(0);
+  // pułapka czasowa: od kiedy formularz jest na ekranie
+  const otwarty = useRef(0);
+  const widget = useRef<HTMLDivElement>(null);
+  const widgetId = useRef<string | undefined>(undefined);
+  const token = useRef('');
+
+  useEffect(() => {
+    otwarty.current = Date.now();
+    if (!TURNSTILE_KEY || !widget.current) return;
+
+    const pokaz = () => {
+      if (!window.turnstile || !widget.current || widgetId.current) return;
+      widgetId.current = window.turnstile.render(widget.current, {
+        sitekey: TURNSTILE_KEY,
+        appearance: 'interaction-only',
+        language: 'pl',
+        theme: 'auto',
+        callback: (t: string) => (token.current = t),
+        'expired-callback': () => (token.current = ''),
+      });
+    };
+
+    if (window.turnstile) return pokaz();
+    const s = document.createElement('script');
+    s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+    s.async = true;
+    s.onload = pokaz;
+    document.head.appendChild(s);
+  }, []);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -36,19 +85,29 @@ export function ContactForm() {
           telefon: data.get('telefon'),
           wiadomosc: data.get('wiadomosc'),
           firma: data.get('firma'), // honeypot
+          czas: Date.now() - otwarty.current,
+          turnstile: token.current,
         }),
       });
 
-      if (!res.ok) throw new Error('send-failed');
+      if (!res.ok) {
+        const { error } = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(error ?? 'send-failed');
+      }
 
       form.reset();
       setUzyte(0);
       setTone('ok');
       setStatus('Dziękuję, wiadomość została wysłana.');
-    } catch {
+    } catch (err) {
       setTone('error');
-      setStatus('Nie udało się wysłać. Spróbuj ponownie albo zadzwoń.');
+      setStatus(
+        KOMUNIKATY[(err as Error).message] ?? 'Nie udało się wysłać. Spróbuj ponownie albo zadzwoń.',
+      );
     } finally {
+      // token Turnstile jest jednorazowy
+      token.current = '';
+      if (widgetId.current) window.turnstile?.reset(widgetId.current);
       setSending(false);
     }
   };
@@ -129,6 +188,8 @@ export function ContactForm() {
           <input name="firma" type="text" tabIndex={-1} autoComplete="off" />
         </label>
       </div>
+
+      {TURNSTILE_KEY && <div className="ag-form__captcha" ref={widget} />}
 
       <div className="ag-form__foot">
         <button className="ag-btn" type="submit" disabled={sending}>

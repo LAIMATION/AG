@@ -76,7 +76,16 @@ export default function PolitykaPrywatnosci() {
             </p>
             <ul>
               <li>Vercel Inc.: hosting strony,</li>
-              <li>Google LLC: skrzynka e-mail (Gmail), na którą trafiają wiadomości z formularza.</li>
+              <li>Google LLC: skrzynka e-mail (Gmail), na którą trafiają wiadomości z formularza,</li>
+              {/* pozycja pojawia się sama, gdy w Vercel włączono Cloudflare Turnstile */}
+              {process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+                <li>
+                  Cloudflare, Inc.: ochrona formularza przed spamem (Turnstile). Przy wysyłce
+                  formularza Cloudflare sprawdza techniczne dane przeglądarki i adres IP, aby
+                  odróżnić człowieka od automatu. Podstawą jest prawnie uzasadniony interes
+                  administratora w ochronie przed spamem (art. 6 ust. 1 lit. f RODO).
+                </li>
+              )}
             </ul>
             <p>
               Ci dostawcy mogą przetwarzać dane w Stanach Zjednoczonych. Podstawą przekazania jest
