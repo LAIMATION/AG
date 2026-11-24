@@ -597,25 +597,44 @@
   align-items: center;
 }
 
-/* portret trzyma własną, portretową proporcję — rozciągany do wysokości kolumny
-   tekstu robił się prawie kwadratowy */
+/* Portret to wycinek bez tła (WebP z kanałem alfa) — postać stoi wprost na tle
+   sekcji, bez ramki i bez prostokąta zdjęcia. Kadr trzyma portretową proporcję,
+   żeby wiersz siatki nie rósł ponad ekran. */
 .ag-about__portrait {
   position: relative;
   aspect-ratio: 4 / 5;
-  background: var(--c-line-soft);
-  overflow: hidden;
-  border-radius: var(--radius-media);
+  isolation: isolate;
+}
+
+/* Miękka poświata za sylwetką: odrywa czarny strój od tła (zwłaszcza na granacie
+   blueprintu) i zastępuje dawny prostokąt zdjęcia — bez żadnej krawędzi. */
+.ag-about__portrait::before {
+  content: '';
+  position: absolute;
+  inset: 4% -6% 0;
+  z-index: -1;
+  background: radial-gradient(
+    ellipse 55% 50% at 50% 42%,
+    var(--c-line-soft) 0%,
+    color-mix(in srgb, var(--c-line-soft) 45%, transparent) 55%,
+    transparent 100%
+  );
+  pointer-events: none;
 }
 
 /* absolutnie, bo inaczej własna wysokość zdjęcia dyktowałaby wysokość wiersza
-   siatki i sekcja przestawałaby mieścić się w ekranie */
+   siatki i sekcja przestawałaby mieścić się w ekranie. Wycinek jest smuklejszy niż
+   kadr, więc `cover` przycina wyłącznie dół — a ten i tak rozpływa się w tle
+   maską, żeby cięcie na wysokości bioder nie dawało twardej linii. */
 .ag-about__portrait img {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 20%;
+  object-position: center top;
+  -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent 97%);
+  mask-image: linear-gradient(to bottom, #000 62%, transparent 97%);
 }
 
 .ag-about__body {
