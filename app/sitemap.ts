@@ -1,0 +1,15 @@
+import type { MetadataRoute } from 'next';
+import { site } from '@/lib/config';
+
+/* Strona główna + polityka prywatności. */
+export default function sitemap(): MetadataRoute.Sitemap {
+  return [
+    { url: site.url, lastModified: new Date(), changeFrequency: 'monthly', priority: 1 },
+    {
+      url: `${site.url}/polityka-prywatnosci`,
+      lastModified: new Date(),
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
+  ];
+}

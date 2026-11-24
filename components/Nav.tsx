@@ -10,6 +10,7 @@
    odpowiednika w menu, więc tam zaznaczenie po prostu gaśnie). */
 
 import { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { nav } from '@/lib/config';
 
@@ -72,6 +73,8 @@ function ArrowUp() {
 }
 
 export function Nav() {
+  /* na podstronach (np. polityka prywatności) kotwice sekcji prowadzą na stronę główną */
+  const base = usePathname() === '/' ? '' : '/';
   const [hidden, setHidden] = useState(false);
   const [active, setActive] = useState<string | null>(null);
   const [navDark, setNavDark] = useState(true);
@@ -157,7 +160,7 @@ export function Nav() {
         <nav className="ag-nav__bar ag-glass" aria-label="Menu główne">
           <ul className="ag-nav__links">
             <li className="ag-nav__home">
-              <a className="ag-nav__link ag-nav__link--icon" href="#top" aria-label="Początek strony">
+              <a className="ag-nav__link ag-nav__link--icon" href={base ? '/' : '#top'} aria-label="Początek strony">
                 <ArrowUp />
               </a>
             </li>
@@ -166,7 +169,7 @@ export function Nav() {
               <li key={item.id}>
                 <a
                   className="ag-nav__link"
-                  href={`#${item.id}`}
+                  href={`${base}#${item.id}`}
                   aria-current={active === item.id ? 'true' : undefined}
                 >
                   {item.label}

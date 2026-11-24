@@ -282,7 +282,7 @@ export function Footer() {
         <span className="ag-footer__legal">
           © {new Date().getFullYear()} {site.company.name} · {site.company.street},{' '}
           {site.company.postalCode} {site.company.city} · NIP {site.company.nip} · REGON{' '}
-          {site.company.regon}
+          {site.company.regon} · <a href="/polityka-prywatnosci">Polityka prywatności</a>
         </span>
       </div>
     </footer>

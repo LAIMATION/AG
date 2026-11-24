@@ -1417,3 +1417,42 @@ a.ag-contact__value:hover {
     resize: vertical;
   }
 }
+
+/* --- Polityka prywatności -------------------------------------------- */
+
+/* Tekst do czytania, nie slajd: wąska kolumna, zwykły rytm akapitów. */
+.ag-legal__wrap {
+  max-width: var(--maxw-text);
+  justify-content: start;
+  gap: var(--s-6);
+}
+
+.ag-legal section {
+  display: grid;
+  gap: var(--s-3);
+}
+
+.ag-legal h2 {
+  color: var(--c-ink);
+}
+
+.ag-legal ul {
+  display: grid;
+  list-style: disc;
+  gap: var(--s-2);
+  margin: 0;
+  padding-left: 1.25em;
+}
+
+.ag-legal a,
+.ag-form__note a,
+.ag-footer__legal a {
+  color: var(--c-accent-ink);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.ag-legal__date {
+  font-size: var(--fs-small);
+  color: var(--c-muted);
+}

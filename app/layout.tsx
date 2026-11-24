@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Montserrat, Playball } from 'next/font/google';
 import { Nav } from '@/components/Nav';
-import { Preloader } from '@/components/Preloader';
 import { SmoothScroll } from '@/components/SmoothScroll';
 import { site } from '@/lib/config';
 
@@ -28,6 +27,9 @@ const script = Playball({
 });
 
 export const metadata: Metadata = {
+  /* bazowy adres dla canonical i bezwzględnych linków do obrazka udostępniania */
+  metadataBase: new URL(site.url),
+  alternates: { canonical: '/' },
   title: 'Aleksandra Niewińska, architekt | Białystok, Zambrów, Podlasie',
   description:
     'Projektuję domy, budynki wielorodzinne, usługowe, hale, budynki gospodarcze i inwentarskie. Organizacja budowy, nadzór autorski, świadectwa energetyczne, konsultacje. ATRIUM STUDIO, Białystok, Zambrów, Podlasie.',
@@ -36,7 +38,10 @@ export const metadata: Metadata = {
     description: 'Przestrzeń, która dojrzewa razem z Tobą. ATRIUM STUDIO, Białystok, Zambrów, Podlasie.',
     locale: 'pl_PL',
     type: 'website',
+    url: '/',
+    siteName: 'ATRIUM Studio Aleksandra Niewińska',
   },
+  twitter: { card: 'summary_large_image' },
 };
 
 export const viewport: Viewport = {
@@ -74,7 +79,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <noscript>
           <style>{`.ag-boot { display: none !important; }`}</style>
         </noscript>
-        <Preloader />
         <a className="ag-skip" href="#tresc">
           Przejdź do treści
         </a>

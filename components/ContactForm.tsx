@@ -146,7 +146,12 @@ export function ContactForm() {
         </span>
       </div>
 
-      <p className="ag-form__note">Dane z formularza służą wyłącznie do odpowiedzi na zapytanie.</p>
+      {/* skrócona informacja z art. 13 RODO; pełna treść na podstronie */}
+      <p className="ag-form__note">
+        Administratorem danych jest ATRIUM Studio Aleksandra Niewińska. Dane z formularza przetwarzam
+        wyłącznie, by odpowiedzieć na zapytanie. Szczegóły i Twoje prawa:{' '}
+        <a href="/polityka-prywatnosci">polityka prywatności</a>.
+      </p>
     </form>
   );
 }

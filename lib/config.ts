@@ -2,6 +2,9 @@
    Narracja na „Ty". Na pierwszym planie Aleksandra Niewińska, ATRIUM STUDIO w drugim. */
 
 export const site = {
+  /* adres produkcyjny: canonical, sitemap, robots, obrazek do udostępniania.
+     Po zakupie domeny wystarczy ustawić NEXT_PUBLIC_SITE_URL w Vercel. */
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ag-chi-gold.vercel.app',
   name: 'Aleksandra Niewińska',
   role: 'Architekt',
   studio: 'ATRIUM STUDIO',

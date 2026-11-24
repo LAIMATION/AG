@@ -1,3 +1,4 @@
+import { Preloader } from '@/components/Preloader';
 import {
   About,
   CallToAction,
@@ -12,6 +13,8 @@ import {
 export default function Page() {
   return (
     <>
+      {/* zasłona czeka na wideo hero, więc żyje tylko na stronie głównej */}
+      <Preloader />
       <Hero />
       <main id="tresc">
         <About />
